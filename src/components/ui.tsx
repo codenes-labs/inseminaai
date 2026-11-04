@@ -14,25 +14,41 @@ export function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function LeafIcon({ className }: { className?: string }) {
+export function CowIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-    </svg>
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
+    <path d="M7 6.5C5.8 6 5 5 5 3.8c1.4.2 2.4.9 3 2z" />
+    <path d="M17 6.5c1.2-.5 2-1.5 2-2.7-1.4.2-2.4.9-3 2z" />
+    <path d="M7.5 8.5C5.5 8 3.2 8.8 2.5 10.3c1.2 1.3 3 1.8 5 1.4z" />
+    <path d="M16.5 8.5c2-.5 4.3.3 5 1.8-1.2 1.3-3 1.8-5 1.4z" />
+    <path d="M7.5 7.5c1.2-.8 3-1.2 4.5-1.2s3.3.4 4.5 1.2c.5 3 .2 5.5-1 7.5H8.5c-1.2-2-1.5-4.5-1-7.5z" />
+    <ellipse cx="12" cy="17.5" rx="4.5" ry="3.5" />
+</svg>
+ );
+}
+
+export function CalfIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+<path d="M7 6.5C5.8 6 5 5 5 3.8c1.4.2 2.4.9 3 2" />
+<path d="M17 6.5c1.2-.5 2-1.5 2-2.7-1.4.2-2.4.9-3 2" />
+<path d="M7.5 8.5C5.5 8 3.2 8.8 2.5 10.3c1.2 1.3 3 1.8 5 1.4" />
+<path d="M16.5 8.5c2-.5 4.3.3 5 1.8-1.2 1.3-3 1.8-5 1.4" />
+<path d="M7.5 7.5c1.2-.8 3-1.2 4.5-1.2s3.300.4 4.500 1.200c.5 3 .2 5.500-1 7.500" />
+<path d="M7.5 7.5c-.5 3-.2 5.500 1 7.500" />
+<ellipse cx="12" cy="17.500" rx="4.500" ry="3.500" />
+<path d="M10.500 17.500v.1M13.500 17.500v.1" />
+</svg>
   );
 }
 
-export function Logo({ claro = false }: { claro?: boolean }) {
+export function Logo({
+  claro = false,
+  icone = true,
+}: {
+  claro?: boolean;
+  icone?: boolean;
+}) {
   return (
     <span
       className={cx(
@@ -40,7 +56,7 @@ export function Logo({ claro = false }: { claro?: boolean }) {
         claro ? "text-primary-foreground" : "text-primary",
       )}
     >
-      <LeafIcon className="size-5" />
+      {icone && <CowIcon className="size-5" />}
       InseminaAI
     </span>
   );
@@ -182,29 +198,9 @@ export function AvatarLetra({
 export function Vazio({ titulo, texto }: { titulo: string; texto: string }) {
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
-      <svg
-        viewBox="0 0 120 80"
-        className="mb-4 h-20 w-32 text-brand"
-        fill="none"
-        aria-hidden
-      >
-        <path d="M0 70 Q30 55 60 65 T120 60 V80 H0Z" className="fill-brand-soft" />
-        <path
-          d="M60 62 V30"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M60 40 C45 38 40 26 42 18 C52 20 60 28 60 40Z"
-          fill="currentColor"
-          opacity=".8"
-        />
-        <path
-          d="M60 34 C72 30 78 20 76 12 C66 14 60 22 60 34Z"
-          fill="currentColor"
-        />
-      </svg>
+      <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+        <CowIcon className="size-8" />
+      </div>
       <p className="text-base font-semibold text-foreground">{titulo}</p>
       <p className="mt-1 text-sm text-muted-foreground">{texto}</p>
     </div>

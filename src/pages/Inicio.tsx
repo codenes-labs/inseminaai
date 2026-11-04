@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
-  Baby,
   CalendarClock,
   CircleX,
   Heart,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import {
   AppShell,
+  CalfIcon,
   Cartao,
   Logo,
   TituloSecao,
@@ -107,7 +107,7 @@ export function Inicio() {
           {proximosPartos.map((parto) => (
             <div key={parto.nome} className="flex items-center gap-3 px-4 py-3.5">
               <div className="flex size-10 items-center justify-center rounded-full bg-brand-soft text-brand">
-                <Baby className="size-5" strokeWidth={1.75} />
+                <CalfIcon className="size-6" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold">{parto.nome}</p>

@@ -4,7 +4,7 @@ import { Lock, Mail } from "lucide-react";
 import {
   Botao,
   Campo,
-  LeafIcon,
+  CowIcon,
   Logo,
   OndasOvelha,
   inputClass,
@@ -31,10 +31,10 @@ export function Login() {
     <div className="bg-login relative mx-auto flex min-h-screen w-full max-w-[480px] flex-col overflow-hidden px-6">
       <div className="animate-in fade-in slide-in-from-bottom-3 relative z-10 flex flex-1 flex-col pt-16 duration-500">
         <div className="mb-3 flex size-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-(--shadow-fab)">
-          <LeafIcon className="size-8" />
+          <CowIcon className="size-9" />
         </div>
         <div className="text-3xl">
-          <Logo />
+          <Logo icone={false} />
         </div>
         <p className="mt-2 text-base text-muted-foreground">
           Registre suas inseminações com segurança
