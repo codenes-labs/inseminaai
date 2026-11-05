@@ -1,0 +1,10 @@
+# Sprint 6 — Polimento e preparo para vender
+
+## Checklist
+
+- [ ] Revisão de segurança: RLS em todas as tabelas e teste de isolamento
+- [ ] Criação automática de cadastro no primeiro login (quando for comercializar)
+- [ ] Planos Free e Pro por limite (ex.: número de matrizes)
+- [ ] Termos de uso e política de privacidade (LGPD)
+- [ ] Conferir InseminaAI no INPI e domínio
+- [ ] Documentação e backlog
