@@ -60,7 +60,7 @@ export function Inicio() {
     <AppShell>
       <header className="rounded-b-[28px] bg-primary px-5 pb-16 pt-6 text-primary-foreground">
         <Logo claro />
-        <h1 className="mt-5 text-2xl font-semibold">Olá, {nome} 👋</h1>
+        <h1 className="mt-5 text-2xl font-semibold">Olá, {nome}</h1>
         <p className="mt-1 text-sm opacity-80">{data}</p>
       </header>
       <div className="-mt-10 px-4">
