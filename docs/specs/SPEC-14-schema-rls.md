@@ -11,4 +11,4 @@
 
 ## Estado atual
 
-Não implementado — sprint **P3**.
+**Implementado (P3):** migration com `users`, RLS por `app.cadastro_id` (`FORCE RLS`), `src/server/schema.ts`, `comCadastroId`, seed dev, auth via Postgres quando `DATABASE_URL` existe, exemplo `GET /api/matrizes`, teste `rls-isolation.integration.spec.ts` (com `DATABASE_URL`). Neon prod: manual.

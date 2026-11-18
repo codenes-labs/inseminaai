@@ -15,6 +15,14 @@ make env-example
 make docker-dev
 ```
 
+## Banco (dev)
+
+Com Postgres do compose no ar:
+
+```bash
+make db-setup
+```
+
 ## Login (dev)
 
 Em `/entrar`, com `JWT_SECRET` em `.docker/.env` (mín. 32 caracteres):

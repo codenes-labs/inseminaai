@@ -2,7 +2,7 @@ import type { AuthUser, Papel } from "./types";
 
 type SeedAccount = AuthUser & { password: string };
 
-/** IDs fixos até SPEC-14 persistir cadastros no Postgres. */
+/** IDs fixos alinhados ao seed Postgres (`src/server/db/seed.ts`). Fallback sem DATABASE_URL. */
 export const CADASTRO_ADMIN_ID = "00000000-0000-4000-8000-000000000001";
 export const CADASTRO_DEMO_ID = "00000000-0000-4000-8000-000000000002";
 

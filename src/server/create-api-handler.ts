@@ -1,4 +1,6 @@
 import { handleAuthRequest } from "./auth/handle-auth";
+import { handleDataRequest } from "./handle-data";
+import { pingBanco } from "./db/pool";
 
 export type ApiHandlerOptions = {
   databaseUrl?: string;
@@ -14,15 +16,27 @@ export function createApiHandler(
     const url = new URL(request.url);
 
     if (url.pathname === "/api/health" && request.method === "GET") {
+      let databaseOk = false;
+      if (databaseUrl) {
+        try {
+          databaseOk = await pingBanco(databaseUrl);
+        } catch {
+          databaseOk = false;
+        }
+      }
       return Response.json({
-        configured: Boolean(databaseUrl && jwtSecret),
+        configured: Boolean(databaseUrl && jwtSecret.length >= 32),
         database: Boolean(databaseUrl),
+        database_ok: databaseOk,
         jwt: Boolean(jwtSecret.length >= 32),
       });
     }
 
     if (jwtSecret.length >= 32) {
-      const auth = await handleAuthRequest(request, { jwtSecret });
+      const auth = await handleAuthRequest(request, {
+        jwtSecret,
+        databaseUrl,
+      });
       if (auth) {
         return auth;
       }
@@ -31,6 +45,16 @@ export function createApiHandler(
         { error: "Autenticação não configurada." },
         { status: 503 },
       );
+    }
+
+    if (databaseUrl && jwtSecret.length >= 32) {
+      const data = await handleDataRequest(request, {
+        databaseUrl,
+        jwtSecret,
+      });
+      if (data) {
+        return data;
+      }
     }
 
     return Response.json({ error: "Não encontrado." }, { status: 404 });

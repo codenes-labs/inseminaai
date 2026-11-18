@@ -32,3 +32,12 @@ build: ## tsc + vite build
 
 health: ## curl GET /api/health (BASE_URL)
 	curl -sS "$(BASE_URL)/api/health"
+
+db-migrate: ## Aplica migrations (.docker/db/migrations)
+	npm run db:migrate
+
+db-seed: ## Seed admin + demo no Postgres
+	npm run db:seed
+
+db-setup: ## Migrations + seed
+	npm run db:setup

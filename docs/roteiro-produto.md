@@ -11,7 +11,7 @@ Ordem de implementação do **app logado** (após plataforma mínima). Cada entr
 | Auth JWT + `/api/auth/*` | SPEC-13, P2 | SPEC-01 em diante |
 | Schema, RLS, repositórios | SPEC-14, P3 | SPEC-02 … 06 (dados reais) |
 
-P1 (SPEC-12 Docker/health) **concluída** na prática; seguir com P2/P3 em paralelo ao planejamento fino de cada SPEC de produto.
+P1 (SPEC-12) e **P3 (SPEC-14)** concluídas na prática; próximo **SPEC-02** (matrizes com API).
 
 ## Fila (uma spec por vez)
 

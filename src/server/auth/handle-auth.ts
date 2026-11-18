@@ -1,5 +1,9 @@
-import { autenticarSeed, usuarioPorId } from "./account-seed";
 import { emitirToken, verificarToken } from "./jwt";
+import {
+  autenticarCredenciais,
+  bearerToken,
+  usuarioDoToken,
+} from "./resolve-user";
 import {
   JWT_TTL_SECONDS,
   MENSAGEM_CREDENCIAIS_INVALIDAS,
@@ -8,30 +12,13 @@ import {
 
 export type AuthHandlerContext = {
   jwtSecret: string;
+  databaseUrl?: string;
 };
 
 type SignInBody = {
   email?: string;
   password?: string;
 };
-
-function usuarioDaSessao(payload: {
-  sub: string;
-  email: string;
-  nome: string;
-  cadastro_id: string;
-  papel: AuthUser["papel"];
-  demo: boolean;
-}): AuthUser {
-  return {
-    id: payload.sub,
-    email: payload.email,
-    nome: payload.nome,
-    cadastroId: payload.cadastro_id,
-    papel: payload.papel,
-    demo: payload.demo,
-  };
-}
 
 function respostaUsuario(usuario: AuthUser) {
   return {
@@ -78,7 +65,11 @@ export async function handleAuthRequest(
         { status: 401 },
       );
     }
-    const usuario = autenticarSeed(email, password);
+    const usuario = await autenticarCredenciais(
+      email,
+      password,
+      context.databaseUrl,
+    );
     if (!usuario) {
       return Response.json(
         { error: MENSAGEM_CREDENCIAIS_INVALIDAS },
@@ -95,21 +86,18 @@ export async function handleAuthRequest(
   }
 
   if (url.pathname === "/api/auth/session" && request.method === "GET") {
-    const authorization = request.headers.get("authorization") ?? "";
-    const prefix = "Bearer ";
-    if (!authorization.startsWith(prefix)) {
+    const token = bearerToken(request);
+    if (!token) {
       return Response.json({ error: "Não autorizado." }, { status: 401 });
     }
-    const token = authorization.slice(prefix.length).trim();
-    const payload = verificarToken(token, secret);
-    if (!payload) {
+    const usuario = await usuarioDoToken(token, secret, context.databaseUrl);
+    if (!usuario) {
       return Response.json({ error: "Não autorizado." }, { status: 401 });
     }
-    const seed = usuarioPorId(payload.sub);
-    const usuario = seed ?? usuarioDaSessao(payload);
+    const claims = verificarToken(token, secret);
     return Response.json({
       user: respostaUsuario(usuario),
-      expires_at: payload.exp,
+      expires_at: claims?.exp ?? 0,
     });
   }
 

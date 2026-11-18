@@ -9,10 +9,14 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:setup": "tsx scripts/db-setup.ts",
+    "db:migrate": "tsx scripts/db-setup.ts migrate",
+    "db:seed": "tsx scripts/db-setup.ts seed"
   },
   "dependencies": {
     "lucide-react": "^0.552.0",
+    "pg": "^8.23.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.5"
@@ -21,12 +25,14 @@
     "@eslint/js": "^9.39.1",
     "@tailwindcss/vite": "^4.1.16",
     "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.8",
     "eslint": "^9.39.1",
     "tailwindcss": "^4.1.16",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
     "vite": "^7.2.2",

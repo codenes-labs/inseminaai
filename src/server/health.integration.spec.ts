@@ -64,11 +64,13 @@ describe("GET /api/health", () => {
       const body = (await response.json()) as {
         configured: boolean;
         database: boolean;
+        database_ok: boolean;
         jwt: boolean;
       };
       expect(body).toEqual({
         configured: false,
         database: false,
+        database_ok: false,
         jwt: false,
       });
     });
@@ -86,13 +88,13 @@ describe("GET /api/health", () => {
         const body = (await response.json()) as {
           configured: boolean;
           database: boolean;
+          database_ok: boolean;
           jwt: boolean;
         };
-        expect(body).toEqual({
-          configured: true,
-          database: true,
-          jwt: true,
-        });
+        expect(body.configured).toBe(true);
+        expect(body.database).toBe(true);
+        expect(body.jwt).toBe(true);
+        expect(typeof body.database_ok).toBe("boolean");
       },
     );
   });

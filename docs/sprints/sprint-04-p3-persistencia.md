@@ -4,7 +4,7 @@
 
 ## Checklist
 
-- [ ] `src/server/schema.ts` + migrações aplicáveis
-- [ ] RLS `cadastro_id` + contexto na transação
-- [ ] Repositórios HTTP por feature
-- [ ] Teste de isolamento
+- [x] `src/server/schema.ts` + migrações aplicáveis (`npm run db:setup`)
+- [x] RLS `cadastro_id` + contexto na transação (`comCadastroId`)
+- [x] Repositórios HTTP por feature (padrão: `matrizes-repository` + `GET /api/matrizes`)
+- [x] Teste de isolamento (`DATABASE_URL` no Vitest)

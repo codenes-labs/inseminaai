@@ -1,6 +1,15 @@
--- Referência: schema inicial + RLS por cadastro_id (legado Supabase — ver SPEC-14)
+-- Schema Insemina aí (SPEC-14): users do servidor + RLS por app.cadastro_id
 
 create extension if not exists "pgcrypto";
+
+create table public.users (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  password_hash text not null,
+  nome text not null,
+  demo boolean not null default false,
+  created_at timestamptz not null default now()
+);
 
 create table public.cadastros (
   id uuid primary key default gen_random_uuid(),
@@ -13,8 +22,8 @@ create table public.cadastros (
 create table public.membros_cadastro (
   id uuid primary key default gen_random_uuid(),
   cadastro_id uuid not null references public.cadastros (id) on delete cascade,
-  user_id uuid not null references auth.users (id) on delete cascade,
-  papel text not null check (papel in ('dono', 'gerente', 'inseminador')),
+  user_id uuid not null references public.users (id) on delete cascade,
+  papel text not null check (papel in ('administrador', 'inseminador')),
   unique (user_id)
 );
 
@@ -74,6 +83,7 @@ create table public.inseminacoes (
   created_at timestamptz not null default now()
 );
 
+create index idx_users_email on public.users (email);
 create index idx_membros_cadastro_user on public.membros_cadastro (user_id);
 create index idx_membros_cadastro_cadastro on public.membros_cadastro (cadastro_id);
 create index idx_matrizes_cadastro on public.matrizes (cadastro_id);
@@ -87,17 +97,9 @@ create or replace function public.current_cadastro_id()
 returns uuid
 language sql
 stable
-security definer
-set search_path = public
 as $$
-  select m.cadastro_id
-  from public.membros_cadastro m
-  where m.user_id = auth.uid()
-  limit 1;
+  select nullif(current_setting('app.cadastro_id', true), '')::uuid;
 $$;
-
-revoke all on function public.current_cadastro_id() from public;
-grant execute on function public.current_cadastro_id() to authenticated;
 
 alter table public.cadastros enable row level security;
 alter table public.membros_cadastro enable row level security;
@@ -107,35 +109,64 @@ alter table public.inseminadores enable row level security;
 alter table public.lotes enable row level security;
 alter table public.inseminacoes enable row level security;
 
+alter table public.cadastros force row level security;
+alter table public.membros_cadastro force row level security;
+alter table public.matrizes force row level security;
+alter table public.reprodutores force row level security;
+alter table public.inseminadores force row level security;
+alter table public.lotes force row level security;
+alter table public.inseminacoes force row level security;
+
 create policy cadastros_select on public.cadastros
-  for select to authenticated
+  for select
   using (id = public.current_cadastro_id());
 
 create policy membros_select on public.membros_cadastro
-  for select to authenticated
-  using (user_id = auth.uid());
+  for select
+  using (cadastro_id = public.current_cadastro_id());
 
 create policy matrizes_all on public.matrizes
-  for all to authenticated
+  for all
   using (cadastro_id = public.current_cadastro_id())
   with check (cadastro_id = public.current_cadastro_id());
 
 create policy reprodutores_all on public.reprodutores
-  for all to authenticated
+  for all
   using (cadastro_id = public.current_cadastro_id())
   with check (cadastro_id = public.current_cadastro_id());
 
 create policy inseminadores_all on public.inseminadores
-  for all to authenticated
+  for all
   using (cadastro_id = public.current_cadastro_id())
   with check (cadastro_id = public.current_cadastro_id());
 
 create policy lotes_all on public.lotes
-  for all to authenticated
+  for all
   using (cadastro_id = public.current_cadastro_id())
   with check (cadastro_id = public.current_cadastro_id());
 
 create policy inseminacoes_all on public.inseminacoes
-  for all to authenticated
+  for all
   using (cadastro_id = public.current_cadastro_id())
   with check (cadastro_id = public.current_cadastro_id());
+
+-- Role de app sem BYPASSRLS (o usuário do compose é superuser em dev).
+do $$
+begin
+  if not exists (select 1 from pg_catalog.pg_roles where rolname = 'inseminaai_app') then
+    create role inseminaai_app with login password 'inseminaai_app' nosuperuser nobypassrls;
+  end if;
+end
+$$;
+
+grant usage on schema public to inseminaai_app;
+grant select, insert, update, delete on public.cadastros to inseminaai_app;
+grant select, insert, update, delete on public.membros_cadastro to inseminaai_app;
+grant select, insert, update, delete on public.matrizes to inseminaai_app;
+grant select, insert, update, delete on public.reprodutores to inseminaai_app;
+grant select, insert, update, delete on public.inseminadores to inseminaai_app;
+grant select, insert, update, delete on public.lotes to inseminaai_app;
+grant select, insert, update, delete on public.inseminacoes to inseminaai_app;
+grant select on public.users to inseminaai_app;
+grant execute on function public.current_cadastro_id() to inseminaai_app;
+grant inseminaai_app to inseminaai;

@@ -2,6 +2,10 @@
 
 SQL de referência do domínio **Insemina aí**. Em produção: **Neon**; em dev: Postgres no compose (serviço `db`).
 
-O arquivo `migrations/20251104200000_initial_schema.sql` é legado Supabase (`auth.users`, `auth.uid()`). A tradução para JWT + `users` do servidor entra na **SPEC-14**.
+Schema traduzido (SPEC-14): `users` do servidor, RLS com `current_setting('app.cadastro_id')`.
+
+```bash
+make db-setup   # migrations + seed admin/demo
+```
 
 Roteiro manual de isolamento: `migrations/rls_isolamento.sql`.
