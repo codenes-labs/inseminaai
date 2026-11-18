@@ -1,13 +1,14 @@
 name: Deploy
 
-# master: lint → coverage → build → validação de secrets → deploy Cloudflare
+# Único workflow de CI/CD: lint → coverage → build; deploy só em push na master.
 on:
   push:
     branches: [master]
+  pull_request:
 
 concurrency:
-  group: deploy-master
-  cancel-in-progress: false
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -80,6 +81,7 @@ jobs:
 
   cloudflare:
     name: Deploy Cloudflare
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     permissions:

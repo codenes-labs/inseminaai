@@ -10,4 +10,4 @@
 
 ## Estado atual
 
-**Implementado:** `deploy.yml` em `master` (lint, coverage, build, Wrangler). `ci.yml` em PRs. Secrets Neon/Turnstile/Cloudflare no GitHub.
+**Implementado:** só `deploy.yml` (PR: lint/coverage/build; `master`: deploy Cloudflare). Secrets Neon/Turnstile/Cloudflare no GitHub.
