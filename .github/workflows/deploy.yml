@@ -156,6 +156,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+          
+      - name: Rodar migrations (Prisma)
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
