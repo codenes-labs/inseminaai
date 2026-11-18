@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Lock, Mail } from "lucide-react";
 import {
@@ -9,7 +9,10 @@ import {
   OndasOvelha,
   inputClass,
 } from "../components/ui";
+import { TurnstileLogin } from "../components/TurnstileLogin";
 import { MENSAGEM_LOGIN_INVALIDO, entrarComSenha } from "../lib/auth";
+
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? "";
 
 export function Login() {
   const navigate = useNavigate();
@@ -17,13 +20,25 @@ export function Login() {
   const [carregando, setCarregando] = useState(false);
   const [identificador, setIdentificador] = useState("");
   const [senha, setSenha] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const onTurnstileToken = useCallback((token: string) => {
+    setTurnstileToken(token);
+  }, []);
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
     setErro("");
+    if (turnstileSiteKey && !turnstileToken) {
+      setErro("Confirme o captcha antes de entrar.");
+      return;
+    }
     setCarregando(true);
     try {
-      const resultado = await entrarComSenha(identificador, senha);
+      const resultado = await entrarComSenha(
+        identificador,
+        senha,
+        turnstileToken || undefined,
+      );
       if (!resultado.ok) {
         setErro(resultado.erro);
         return;
@@ -79,6 +94,9 @@ export function Login() {
               Esqueci minha senha
             </a>
           </div>
+          {turnstileSiteKey ? (
+            <TurnstileLogin siteKey={turnstileSiteKey} onToken={onTurnstileToken} />
+          ) : null}
           <Botao type="submit" disabled={carregando}>
             {carregando ? "Entrando…" : "Entrar"}
           </Botao>

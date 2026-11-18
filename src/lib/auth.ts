@@ -19,8 +19,12 @@ export function sair() {
   void apiSignOut();
 }
 
-export async function entrarComSenha(email: string, senha: string) {
-  const resultado = await apiSignIn(email, senha);
+export async function entrarComSenha(
+  email: string,
+  senha: string,
+  turnstileToken?: string,
+) {
+  const resultado = await apiSignIn(email, senha, turnstileToken);
   if (!resultado.ok) {
     return { ok: false as const, erro: resultado.error };
   }

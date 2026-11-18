@@ -15,14 +15,19 @@ export type SignInResponse = {
 export async function apiSignIn(
   email: string,
   password: string,
+  turnstileToken?: string,
 ): Promise<
   | { ok: true; data: SignInResponse }
   | { ok: false; error: string }
 > {
+  const payload: Record<string, string> = { email, password };
+  if (turnstileToken?.trim()) {
+    payload.turnstile_token = turnstileToken.trim();
+  }
   const response = await fetch("/api/auth/sign-in", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     try {

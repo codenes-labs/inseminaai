@@ -9,15 +9,18 @@ import {
   MENSAGEM_CREDENCIAIS_INVALIDAS,
   type AuthUser,
 } from "./types";
+import { verificarTurnstile } from "./turnstile";
 
 export type AuthHandlerContext = {
   jwtSecret: string;
   databaseUrl?: string;
+  turnstileSecretKey?: string;
 };
 
 type SignInBody = {
   email?: string;
   password?: string;
+  turnstile_token?: string;
 };
 
 function respostaUsuario(usuario: AuthUser) {
@@ -64,6 +67,20 @@ export async function handleAuthRequest(
         { error: MENSAGEM_CREDENCIAIS_INVALIDAS },
         { status: 401 },
       );
+    }
+    const turnstileSecret = context.turnstileSecretKey?.trim();
+    if (turnstileSecret) {
+      const tokenCaptcha = body.turnstile_token?.trim() ?? "";
+      if (!tokenCaptcha) {
+        return Response.json(
+          { error: "Confirme o captcha antes de entrar." },
+          { status: 400 },
+        );
+      }
+      const captchaOk = await verificarTurnstile(turnstileSecret, tokenCaptcha);
+      if (!captchaOk) {
+        return Response.json({ error: "Captcha inválido." }, { status: 403 });
+      }
     }
     const usuario = await autenticarCredenciais(
       email,
