@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   calcularCamposDiagnostico,
   ERRO_DATA_DIAGNOSTICO_ANTERIOR,
+  ERRO_RESULTADO_DIAGNOSTICO,
   validarRegistroDiagnostico,
 } from "./diagnostico";
+import { ERRO_DATA_FUTURA } from "./registrar";
 import { calcularPrevisaoParto } from "./calculos";
 
 describe("registro de diagnóstico (SPEC-05)", () => {
@@ -36,6 +38,36 @@ describe("registro de diagnóstico (SPEC-05)", () => {
         hoje: "2026-10-20",
       }),
     ).toBe(ERRO_DATA_DIAGNOSTICO_ANTERIOR);
+  });
+
+  it("rejeita data vazia e futura", () => {
+    expect(
+      validarRegistroDiagnostico({
+        dataInseminacao: "2026-10-01",
+        dataDiagnostico: "",
+        resultado: "prenhe",
+        hoje: "2026-10-15",
+      }),
+    ).toMatch(/Informe a data/);
+    expect(
+      validarRegistroDiagnostico({
+        dataInseminacao: "2026-10-01",
+        dataDiagnostico: "2026-12-01",
+        resultado: "prenhe",
+        hoje: "2026-10-15",
+      }),
+    ).toBe(ERRO_DATA_FUTURA);
+  });
+
+  it("rejeita resultado fora de prenhe/vazia", () => {
+    expect(
+      validarRegistroDiagnostico({
+        dataInseminacao: "2026-10-01",
+        dataDiagnostico: "2026-10-15",
+        resultado: "outro",
+        hoje: "2026-10-20",
+      }),
+    ).toBe(ERRO_RESULTADO_DIAGNOSTICO);
   });
 
   it("aceita data do diagnóstico no mesmo dia da inseminação", () => {

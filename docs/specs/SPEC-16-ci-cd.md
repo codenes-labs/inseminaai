@@ -10,4 +10,4 @@
 
 ## Estado atual
 
-Não implementado — sprint **P4**.
+**Implementado:** `deploy.yml` em `master` (lint, coverage, build, Wrangler). `ci.yml` em PRs. Secrets Neon/Turnstile/Cloudflare no GitHub.
