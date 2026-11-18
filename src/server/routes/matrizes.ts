@@ -132,7 +132,7 @@ export async function handleMatrizesRequest(
     }
   }
 
-  return Response.json({ error: "Não encontrado." }, { status: 404 });
+  return null;
 }
 
 function respostaErroMatriz(erro: unknown): Response {

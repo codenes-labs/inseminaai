@@ -3,6 +3,8 @@ import {
   ErroInseminacao,
   contextoMatrizInseminacao,
   criarInseminacao,
+  obterInseminacaoPendenteDaMatriz,
+  registrarDiagnostico,
   ultimoInseminadorId,
 } from "../repositories/inseminacoes-repository";
 import { bloqueiaDemo } from "./demo-guard";
@@ -19,7 +21,11 @@ function hojeLocalIso(): string {
 function respostaErro(erro: unknown): Response {
   if (erro instanceof ErroInseminacao) {
     const status =
-      erro.codigo === "matriz_invalida" ? 404 : 400;
+      erro.codigo === "matriz_invalida" || erro.codigo === "nao_encontrada"
+        ? 404
+        : erro.codigo === "sem_pendente"
+          ? 409
+          : 400;
     return Response.json({ error: erro.message }, { status });
   }
   throw erro;
@@ -48,6 +54,49 @@ export async function handleInseminacoesRequest(
       contextoMatriz[1],
     );
     return Response.json(ctx);
+  }
+
+  const pendenteMatriz = url.pathname.match(
+    /^\/api\/matrizes\/([^/]+)\/inseminacao-pendente$/,
+  );
+  if (pendenteMatriz && request.method === "GET") {
+    const inseminacao = await obterInseminacaoPendenteDaMatriz(
+      databaseUrl,
+      cadastroId,
+      pendenteMatriz[1],
+    );
+    return Response.json({ inseminacao });
+  }
+
+  const patchDiagnostico = url.pathname.match(
+    /^\/api\/inseminacoes\/([^/]+)\/diagnostico$/,
+  );
+  if (patchDiagnostico && request.method === "PATCH") {
+    const demo = bloqueiaDemo(usuario);
+    if (demo) return demo;
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return Response.json({ error: "Corpo inválido." }, { status: 400 });
+    }
+    try {
+      const registro = await registrarDiagnostico(
+        databaseUrl,
+        cadastroId,
+        patchDiagnostico[1],
+        {
+          resultado: String(body.resultado ?? ""),
+          data_diagnostico: String(body.data_diagnostico ?? ""),
+          observacoes:
+            body.observacoes == null ? null : String(body.observacoes),
+          hoje: hojeLocalIso(),
+        },
+      );
+      return Response.json({ diagnostico: registro });
+    } catch (erro) {
+      return respostaErro(erro);
+    }
   }
 
   if (url.pathname === "/api/inseminacoes" && request.method === "POST") {

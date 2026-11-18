@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, ChevronDown, Search, TriangleAlert } from "lucide-react";
 import {
   AppShell,
@@ -75,6 +75,9 @@ function SelectField({
 
 export function NovaInseminacao() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const matrizIdInicial =
+    (location.state as { matrizId?: string } | null)?.matrizId ?? null;
   const [tipo, setTipo] = useState<(typeof tipos)[number]>("IATF");
   const [buscaMatriz, setBuscaMatriz] = useState("");
   const [matrizId, setMatrizId] = useState<string | null>(null);
@@ -107,6 +110,14 @@ export function NovaInseminacao() {
         setInseminadores(i.length ? i : []);
         setLotes(l);
         setMatrizes(m);
+        if (matrizIdInicial) {
+          const alvo = m.find((x) => x.id === matrizIdInicial);
+          if (alvo) {
+            setMatrizId(alvo.id);
+            setMatrizNome(alvo.nome);
+            setBuscaMatriz(alvo.nome);
+          }
+        }
         if (r[0]) setReprodutorId((atual) => atual || r[0].id);
         const ultimo = await ultimoInseminadorIdApi();
         if (ultimo) {
@@ -142,7 +153,7 @@ export function NovaInseminacao() {
         );
       }
     })();
-  }, []);
+  }, [matrizIdInicial]);
 
   useEffect(() => {
     if (!matrizId) {

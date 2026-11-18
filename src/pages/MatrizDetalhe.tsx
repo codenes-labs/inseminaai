@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell, Botao, CabecalhoVoltar, Cartao, Etiqueta, Vazio } from "../components/ui";
 import { historicoDaMatriz } from "../data/mock";
+import { contextoMatrizInseminacaoApi } from "../features/inseminacoes/infrastructure/inseminacoes-api";
 import {
   atualizarMatrizApi,
   obterMatrizApi,
@@ -12,6 +13,7 @@ export function MatrizDetalhe() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [matriz, setMatriz] = useState<MatrizLista | null | undefined>(undefined);
+  const [temPendente, setTemPendente] = useState(false);
   const [desativando, setDesativando] = useState(false);
 
   useEffect(() => {
@@ -19,8 +21,14 @@ export function MatrizDetalhe() {
     let ativo = true;
     void (async () => {
       try {
-        const dados = await obterMatrizApi(id);
-        if (ativo) setMatriz(dados);
+        const [dados, ctx] = await Promise.all([
+          obterMatrizApi(id),
+          contextoMatrizInseminacaoApi(id),
+        ]);
+        if (ativo) {
+          setMatriz(dados);
+          setTemPendente(ctx.temPendente);
+        }
       } catch {
         if (ativo) setMatriz(null);
       }
@@ -61,7 +69,8 @@ export function MatrizDetalhe() {
     );
   }
 
-  const pendente = historico.find((h) => h.status === "pendente");
+  const pendenteMock = historico.find((h) => h.status === "pendente");
+  const mostrarDiagnostico = temPendente || Boolean(pendenteMock);
 
   return (
     <AppShell semBarra>
@@ -96,7 +105,7 @@ export function MatrizDetalhe() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
-          {pendente ? (
+          {mostrarDiagnostico ? (
             <Link to={`/matrizes/${matriz.id}/diagnostico`} className="contents">
               <Botao className="col-span-2">Registrar diagnóstico</Botao>
             </Link>

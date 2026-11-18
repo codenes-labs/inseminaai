@@ -6,6 +6,11 @@ import {
   type InseminacaoResumo,
 } from "../../features/inseminacoes/domain/calculos";
 import {
+  calcularCamposDiagnostico,
+  type ResultadoDiagnostico,
+  validarRegistroDiagnostico,
+} from "../../features/inseminacoes/domain/diagnostico";
+import {
   STATUS_INICIAL_INSEMINACAO,
   validarDataInseminacao,
 } from "../../features/inseminacoes/domain/registrar";
@@ -19,7 +24,8 @@ export class ErroInseminacao extends Error {
     readonly codigo:
       | "validacao"
       | "nao_encontrada"
-      | "matriz_invalida",
+      | "matriz_invalida"
+      | "sem_pendente",
   ) {
     super(message);
     this.name = "ErroInseminacao";
@@ -165,6 +171,143 @@ export async function criarInseminacao(
       numero_tentativa: numeroTentativa,
       status: STATUS_INICIAL_INSEMINACAO,
       data_diagnostico_prevista: dataDiagnosticoPrevista,
+    };
+  });
+}
+
+export type InseminacaoPendente = {
+  id: string;
+  matriz_id: string;
+  data: string;
+  numero_tentativa: number;
+  tipo: TipoInseminacaoDb;
+};
+
+export async function obterInseminacaoPendenteDaMatriz(
+  databaseUrl: string,
+  cadastroId: string,
+  matrizId: string,
+): Promise<InseminacaoPendente | null> {
+  return comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+    const resultado = await cliente.query<{
+      id: string;
+      matriz_id: string;
+      data: string;
+      numero_tentativa: number;
+      tipo: TipoInseminacaoDb;
+    }>(
+      `select id, matriz_id, data::text, numero_tentativa, tipo
+       from public.inseminacoes
+       where matriz_id = $1 and status = 'pendente'
+       order by created_at desc
+       limit 1`,
+      [matrizId],
+    );
+    const linha = resultado.rows[0];
+    if (!linha) return null;
+    return {
+      id: linha.id,
+      matriz_id: linha.matriz_id,
+      data: linha.data,
+      numero_tentativa: linha.numero_tentativa,
+      tipo: linha.tipo,
+    };
+  });
+}
+
+export type RegistrarDiagnosticoInput = {
+  resultado: string;
+  data_diagnostico: string;
+  observacoes?: string | null;
+  hoje: string;
+};
+
+export type DiagnosticoRegistrado = {
+  id: string;
+  matriz_id: string;
+  status: ResultadoDiagnostico;
+  data_diagnostico: string;
+  previsao_parto: string | null;
+};
+
+export async function registrarDiagnostico(
+  databaseUrl: string,
+  cadastroId: string,
+  inseminacaoId: string,
+  input: RegistrarDiagnosticoInput,
+): Promise<DiagnosticoRegistrado> {
+  const pendente = await comCadastroId(
+    databaseUrl,
+    cadastroId,
+    async (cliente) => {
+      const resultado = await cliente.query<{
+        id: string;
+        matriz_id: string;
+        data: string;
+        status: string;
+        observacoes: string | null;
+      }>(
+        `select id, matriz_id, data::text, status, observacoes
+         from public.inseminacoes
+         where id = $1`,
+        [inseminacaoId],
+      );
+      return resultado.rows[0] ?? null;
+    },
+  );
+
+  if (!pendente) {
+    throw new ErroInseminacao("Inseminação não encontrada.", "nao_encontrada");
+  }
+  if (pendente.status !== "pendente") {
+    throw new ErroInseminacao(
+      "Esta inseminação já tem diagnóstico registrado.",
+      "sem_pendente",
+    );
+  }
+
+  const erro = validarRegistroDiagnostico({
+    dataInseminacao: pendente.data,
+    dataDiagnostico: input.data_diagnostico,
+    resultado: input.resultado,
+    hoje: input.hoje,
+  });
+  if (erro) throw new ErroInseminacao(erro, "validacao");
+
+  const resultado = input.resultado as ResultadoDiagnostico;
+  const campos = calcularCamposDiagnostico(
+    pendente.data,
+    input.data_diagnostico,
+    resultado,
+  );
+  const observacoesNovas = input.observacoes?.trim();
+  const observacoes =
+    observacoesNovas != null && observacoesNovas !== ""
+      ? observacoesNovas
+      : pendente.observacoes;
+
+  return comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+    await cliente.query(
+      `update public.inseminacoes
+       set status = $2,
+           data_diagnostico = $3::date,
+           previsao_parto = $4::date,
+           observacoes = $5
+       where id = $1`,
+      [
+        inseminacaoId,
+        campos.status,
+        campos.data_diagnostico,
+        campos.previsao_parto,
+        observacoes,
+      ],
+    );
+    return {
+      id: inseminacaoId,
+      matriz_id: pendente.matriz_id,
+      status: campos.status,
+      data_diagnostico: campos.data_diagnostico,
+      previsao_parto: campos.previsao_parto,
     };
   });
 }

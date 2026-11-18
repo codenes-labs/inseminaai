@@ -32,6 +32,62 @@ export async function ultimoInseminadorIdApi(): Promise<string | null> {
   return body.inseminador_id;
 }
 
+export type InseminacaoPendente = {
+  id: string;
+  matriz_id: string;
+  data: string;
+  numero_tentativa: number;
+  tipo: string;
+};
+
+export type DiagnosticoRegistrado = {
+  id: string;
+  matriz_id: string;
+  status: "prenhe" | "vazia";
+  data_diagnostico: string;
+  previsao_parto: string | null;
+};
+
+export async function inseminacaoPendenteDaMatrizApi(
+  matrizId: string,
+): Promise<InseminacaoPendente | null> {
+  const response = await apiFetch(
+    `/api/matrizes/${encodeURIComponent(matrizId)}/inseminacao-pendente`,
+  );
+  if (!response.ok) {
+    throw new Error("Não foi possível carregar a inseminação pendente.");
+  }
+  const body = (await response.json()) as {
+    inseminacao: InseminacaoPendente | null;
+  };
+  return body.inseminacao;
+}
+
+export async function registrarDiagnosticoApi(
+  inseminacaoId: string,
+  dados: {
+    resultado: "prenhe" | "vazia";
+    data_diagnostico: string;
+    observacoes?: string;
+  },
+): Promise<DiagnosticoRegistrado> {
+  const response = await apiFetch(
+    `/api/inseminacoes/${encodeURIComponent(inseminacaoId)}/diagnostico`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(dados),
+    },
+  );
+  const body = (await response.json()) as {
+    diagnostico: DiagnosticoRegistrado;
+    error?: string;
+  };
+  if (!response.ok) {
+    throw new Error(body.error ?? "Não foi possível salvar o diagnóstico.");
+  }
+  return body.diagnostico;
+}
+
 export async function criarInseminacaoApi(dados: {
   matriz_id: string;
   reprodutor_id: string;

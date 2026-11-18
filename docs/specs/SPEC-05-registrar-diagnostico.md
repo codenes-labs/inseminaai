@@ -17,4 +17,4 @@
 
 ## Estado atual
 
-Tela visual pronta. Salvar ainda não persiste.
+**Implementado:** `PATCH /api/inseminacoes/:id/diagnostico`, consulta da IA pendente por matriz, tela ligada ao Postgres; repetição abre nova inseminação com matriz pré-selecionada. Conta demo não grava.
