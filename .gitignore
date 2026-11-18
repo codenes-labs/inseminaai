@@ -6,3 +6,5 @@ dist
 .env
 .docker/.env
 
+core.*
+coverage/
