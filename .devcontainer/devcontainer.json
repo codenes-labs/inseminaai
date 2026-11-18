@@ -1,0 +1,25 @@
+{
+  "name": "Insemina aí",
+  "dockerComposeFile": ["${localWorkspaceFolder}/.docker/docker-compose.dev.yaml"],
+  "service": "app",
+  "workspaceFolder": "/app",
+  "remoteUser": "node",
+  "overrideCommand": true,
+  "postCreateCommand": "npm ci",
+  "postStartCommand": "bash .devcontainer/start-dev-server.sh",
+  "postAttachCommand": "bash .devcontainer/start-dev-server.sh",
+  "forwardPorts": [5173, 5434],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "peacock.color": "#14532D",
+        "peacock.affectTitleBar": true,
+        "peacock.affectStatusBar": true
+      }
+    }
+  }
+}

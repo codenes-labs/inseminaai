@@ -20,8 +20,8 @@ Liga cada usuário do login ao seu cadastro.
 | --- | --- | --- |
 | id | uuid | chave primária |
 | cadastro_id | uuid | referência a cadastros |
-| user_id | uuid | referência ao usuário do Supabase Auth |
-| papel | text | dono, gerente ou inseminador |
+| user_id | uuid | referência a `users` (auth do servidor — SPEC-14) |
+| papel | text | MVP: administrador ou inseminador (legado SQL cita dono/gerente) |
 
 ## matrizes
 
@@ -97,5 +97,5 @@ Cada inseminação (inclusive repetição) é uma linha.
 ## Segurança
 
 - RLS em todas as tabelas, filtrando por `cadastro_id`
-- Nunca usar a chave de serviço do Supabase no front-end
-- Mudança de banco entra sempre como migration em `supabase/migrations`
+- Contexto `cadastro_id` setado apenas no servidor na transação
+- Mudanças de schema em `.docker/db/migrations/` e, após SPEC-14, no pipeline do servidor

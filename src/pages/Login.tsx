@@ -9,22 +9,31 @@ import {
   OndasOvelha,
   inputClass,
 } from "../components/ui";
-import { credenciaisOk, gravarSessao } from "../lib/auth";
+import { MENSAGEM_LOGIN_INVALIDO, entrarComSenha } from "../lib/auth";
 
 export function Login() {
   const navigate = useNavigate();
   const [erro, setErro] = useState("");
-  const [identificador, setIdentificador] = useState("vitor@fazenda.com.br");
-  const [senha, setSenha] = useState("12345678");
+  const [carregando, setCarregando] = useState(false);
+  const [identificador, setIdentificador] = useState("");
+  const [senha, setSenha] = useState("");
 
-  function enviar(e: FormEvent) {
+  async function enviar(e: FormEvent) {
     e.preventDefault();
-    if (!credenciaisOk(identificador, senha)) {
-      setErro("Não foi possível entrar. Confira os dados e tente de novo.");
-      return;
+    setErro("");
+    setCarregando(true);
+    try {
+      const resultado = await entrarComSenha(identificador, senha);
+      if (!resultado.ok) {
+        setErro(resultado.erro);
+        return;
+      }
+      navigate("/inicio");
+    } catch {
+      setErro(MENSAGEM_LOGIN_INVALIDO);
+    } finally {
+      setCarregando(false);
     }
-    gravarSessao(identificador);
-    navigate("/inicio");
   }
 
   return (
@@ -42,12 +51,13 @@ export function Login() {
         <form className="mt-10 space-y-4" onSubmit={enviar}>
           <Campo rotulo="E-mail" icone={<Mail className="size-5" strokeWidth={1.75} />}>
             <input
-              type="text"
+              type="email"
               autoComplete="username"
               placeholder="seu@email.com"
               className={inputClass}
               value={identificador}
               onChange={(e) => setIdentificador(e.target.value)}
+              disabled={carregando}
             />
           </Campo>
           <Campo rotulo="Senha" icone={<Lock className="size-5" strokeWidth={1.75} />}>
@@ -58,6 +68,7 @@ export function Login() {
               className={inputClass}
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
+              disabled={carregando}
             />
           </Campo>
           {erro && (
@@ -68,14 +79,18 @@ export function Login() {
               Esqueci minha senha
             </a>
           </div>
-          <Botao type="submit">Entrar</Botao>
+          <Botao type="submit" disabled={carregando}>
+            {carregando ? "Entrando…" : "Entrar"}
+          </Botao>
           <p className="pt-2 text-center text-sm text-muted-foreground">
-            Ainda não tem conta?{" "}
-            <Link to="/inicio" className="font-semibold text-brand" onClick={() => gravarSessao("vitor@fazenda.com.br")}>
-              Criar conta
-            </Link>
+            Novos acessos são liberados pelo administrador.
           </p>
         </form>
+        <p className="mt-6 text-center text-sm">
+          <Link to="/" className="font-medium text-brand">
+            Voltar ao site
+          </Link>
+        </p>
       </div>
       <OndasOvelha />
     </div>

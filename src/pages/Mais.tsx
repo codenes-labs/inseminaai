@@ -9,7 +9,7 @@ export function Mais() {
 
   function encerrar() {
     sair();
-    navigate("/");
+    navigate("/entrar");
   }
 
   return (

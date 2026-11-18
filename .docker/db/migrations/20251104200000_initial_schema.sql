@@ -1,4 +1,4 @@
--- InseminaAI: schema inicial + RLS por cadastro_id
+-- Referência: schema inicial + RLS por cadastro_id (legado Supabase — ver SPEC-14)
 
 create extension if not exists "pgcrypto";
 

@@ -1,4 +1,7 @@
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import type { ReactElement } from "react";
+import { Route, Routes } from "react-router-dom";
+import { RotaEntrar } from "./components/rota-entrar";
+import { RotaProtegida } from "./components/rota-protegida";
 import { Diagnostico } from "./pages/Diagnostico";
 import { Inicio } from "./pages/Inicio";
 import { Login } from "./pages/Login";
@@ -7,27 +10,46 @@ import { MatrizDetalhe } from "./pages/MatrizDetalhe";
 import { Matrizes } from "./pages/Matrizes";
 import { NovaInseminacao } from "./pages/NovaInseminacao";
 import { Relatorios } from "./pages/Relatorios";
-import { lerSessao } from "./lib/auth";
+import { LandingPage } from "./pages/landing-page";
+import {
+  DocsOverviewPage,
+  PrivacyPage,
+  TermsPage,
+} from "./pages/public-stub-pages";
 
-function Protegido() {
-  if (!lerSessao()) return <Navigate to="/" replace />;
-  return <Outlet />;
+function comProtecao(element: ReactElement) {
+  return <RotaProtegida>{element}</RotaProtegida>;
 }
 
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route element={<Protegido />}>
-        <Route path="/inicio" element={<Inicio />} />
-        <Route path="/matrizes" element={<Matrizes />} />
-        <Route path="/matrizes/:id" element={<MatrizDetalhe />} />
-        <Route path="/matrizes/:id/diagnostico" element={<Diagnostico />} />
-        <Route path="/nova-inseminacao" element={<NovaInseminacao />} />
-        <Route path="/relatorios" element={<Relatorios />} />
-        <Route path="/mais" element={<Mais />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route
+        path="/entrar"
+        element={
+          <RotaEntrar>
+            <Login />
+          </RotaEntrar>
+        }
+      />
+      <Route path="/termos" element={<TermsPage />} />
+      <Route path="/privacidade" element={<PrivacyPage />} />
+      <Route path="/docs" element={<DocsOverviewPage />} />
+      <Route path="/inicio" element={comProtecao(<Inicio />)} />
+      <Route path="/matrizes" element={comProtecao(<Matrizes />)} />
+      <Route path="/matrizes/:id" element={comProtecao(<MatrizDetalhe />)} />
+      <Route
+        path="/matrizes/:id/diagnostico"
+        element={comProtecao(<Diagnostico />)}
+      />
+      <Route
+        path="/nova-inseminacao"
+        element={comProtecao(<NovaInseminacao />)}
+      />
+      <Route path="/relatorios" element={comProtecao(<Relatorios />)} />
+      <Route path="/mais" element={comProtecao(<Mais />)} />
+      <Route path="*" element={<LandingPage />} />
     </Routes>
   );
 }

@@ -57,7 +57,7 @@ export function Logo({
       )}
     >
       {icone && <CowIcon className="size-5" />}
-      InseminaAI
+      Insemina aí
     </span>
   );
 }

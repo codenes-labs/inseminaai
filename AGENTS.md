@@ -1,4 +1,4 @@
-# InseminaAI
+# Insemina aí
 
 Leia `CLAUDE.md` e `docs/principios.md` antes de qualquer tarefa.
 

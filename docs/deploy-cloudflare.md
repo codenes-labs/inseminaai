@@ -1,19 +1,9 @@
-# Deploy Cloudflare Pages
+# Deploy Cloudflare Worker
 
 Build: `npm run build` → pasta `dist/`.
 
-## GitHub (recomendado)
+Deploy efetivo e secrets (`DATABASE_URL`, `JWT_SECRET`, Neon) entram na **sprint P4** (SPEC-15, SPEC-16).
 
-1. Repositório conectado em Cloudflare Pages.
-2. Build command: `npm run build`
-3. Output directory: `dist`
-4. Node 24
-5. Variáveis de ambiente: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+Domínio alvo: `inseminaai.codenes.com.br`.
 
-Domínio customizado: `inseminaai.codenes.com.br`.
-
-## Wrangler (opcional)
-
-`npx wrangler pages deploy dist --project-name=inseminaai`
-
-Requer login `wrangler login` e projeto Pages criado no painel.
+O documento antigo de **Cloudflare Pages** + variáveis `VITE_SUPABASE_*` foi descontinuado (decisão plataforma B).

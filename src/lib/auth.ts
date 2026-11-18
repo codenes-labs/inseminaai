@@ -1,51 +1,33 @@
-const KEY = "inseminaai.session";
+import { apiSignIn, apiSignOut } from "./auth-api";
+import { MENSAGEM_LOGIN_INVALIDO } from "./auth-types";
+import {
+  gravarSessaoApi,
+  lerSessao,
+  limparSessao,
+  obterCadastroId,
+  sessaoValida,
+  tocarSessao,
+} from "./auth-session";
 
-export type Session = {
-  identificador: string;
-  nome: string;
-};
+export type { Session } from "./auth-types";
+export { MENSAGEM_LOGIN_INVALIDO, obterCadastroId, sessaoValida, tocarSessao };
 
-function capitalizar(texto: string) {
-  const limpo = texto.trim();
-  if (!limpo) return "Vitor";
-  return limpo.charAt(0).toUpperCase() + limpo.slice(1);
-}
-
-export function nomeDeIdentificador(identificador: string) {
-  const bruto = identificador.trim();
-  const local = bruto.includes("@") ? bruto.split("@")[0] : bruto;
-  const primeiro = local.split(/[.\s_-]+/)[0] || local;
-  const mapa: Record<string, string> = {
-    vitor: "Vitor",
-    vito: "Vitor",
-    admin: "Admin",
-  };
-  return mapa[primeiro.toLowerCase()] ?? capitalizar(primeiro);
-}
-
-export function lerSessao(): Session | null {
-  try {
-    const raw = sessionStorage.getItem(KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as Session;
-  } catch {
-    return null;
-  }
-}
-
-export function gravarSessao(identificador: string) {
-  const sessao: Session = {
-    identificador: identificador.trim(),
-    nome: nomeDeIdentificador(identificador),
-  };
-  sessionStorage.setItem(KEY, JSON.stringify(sessao));
-  return sessao;
-}
+export { lerSessao };
 
 export function sair() {
-  sessionStorage.removeItem(KEY);
+  limparSessao();
+  void apiSignOut();
 }
 
-export function credenciaisOk(identificador: string, senha: string) {
-  return identificador.trim().length > 0 && senha.trim().length > 0;
+export async function entrarComSenha(email: string, senha: string) {
+  const resultado = await apiSignIn(email, senha);
+  if (!resultado.ok) {
+    return { ok: false as const, erro: resultado.error };
+  }
+  gravarSessaoApi(
+    resultado.data.token,
+    resultado.data.user,
+    resultado.data.expires_at,
+  );
+  return { ok: true as const };
 }

@@ -17,4 +17,4 @@
 
 ## Estado atual
 
-Login visual pronto. Auth ainda é mock (qualquer identificador e senha não vazios).
+**Implementado (P2):** login em `/entrar` via `POST /api/auth/sign-in`, sessão JWT no `sessionStorage`, idle **2 h**, token **12 h**, guarda `RotaProtegida` nas rotas do app. Contas seed: admin e demo (SPEC-13). `cadastro_id` exposto na sessão do cliente; persistência no banco entra na P3.

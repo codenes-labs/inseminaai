@@ -1,27 +1,33 @@
 # Arquitetura
 
-App web responsivo (PWA) para registro de inseminações no celular. Front-end no Cloudflare (subdomínio de codenes.com.br). Dados no Supabase.
+App web responsivo (PWA) para registro de inseminações no celular. Front-end e API no **Cloudflare Worker** (`inseminaai.codenes.com.br`). Dados em **PostgreSQL** (Neon em produção).
 
 ## O que já existe
 
-O visual e as telas já foram feitos em **React + Vite + TypeScript + Tailwind**, mobile-first, identidade verde (`#2E9E5B`, `#14532D`, `#F7FAF5`). Esse design não se reescreve.
+O visual e as telas do app logado já foram feitos em **React + Vite + TypeScript + Tailwind**, mobile-first, identidade verde (`#2E9E5B`, `#14532D`, `#F7FAF5`). Esse design não se reescreve.
 
-A spec original sugeria Angular. **Não vamos trocar a stack.** O complemento abaixo entra em cima do app atual: banco, auth real, regras, testes e as telas que ainda são mock.
+**Sprint 1 (2026-11-17):** rota pública `/` é **landing**. **P2 (2026-11-17):** telas do MVP roteadas com `RotaProtegida`; dados ainda mock até P3.
 
 ## Stack
 
 - **Front-end:** React (Vite), TypeScript estrito, Tailwind, PWA
-- **Banco, login e segurança:** Supabase (Postgres, Auth, RLS)
-- **Node 24 LTS** para ferramentas
-- **Hospedagem:** Cloudflare Pages
+- **API e auth:** JWT, rotas `/api/*` (padrão In House Bank)
+- **Banco:** PostgreSQL + RLS por `cadastro_id` (contexto setado no servidor)
+- **Node 22**
+- **Hospedagem:** Cloudflare Worker
 
-## Telas (design atual)
-
-Barra inferior: Início, Matrizes, Nova (centro), Relatórios. Cadastros no menu Mais.
+## Rotas públicas (atual)
 
 | Rota | Tela |
 | --- | --- |
-| `/` | Login |
+| `/` | Landing |
+| `/entrar` | Login (JWT) |
+| `/termos`, `/privacidade`, `/docs` | Stubs (conteúdo em SPEC-17) |
+
+## Telas do app (design pronto — rotas ativas após login)
+
+| Rota | Tela |
+| --- | --- |
 | `/inicio` | Dashboard |
 | `/matrizes` | Lista |
 | `/matrizes/:id` | Detalhe |
@@ -30,14 +36,14 @@ Barra inferior: Início, Matrizes, Nova (centro), Relatórios. Cadastros no menu
 | `/relatorios` | Relatórios |
 | `/mais` | Configurações |
 
-Hoje os dados vêm de `src/data/mock.ts` e o login é local (`src/lib/auth.ts`). Substituir mock por Supabase é trabalho das specs, sem mudar o visual.
+Dados de demonstração em `src/data/mock.ts`; auth JWT em `src/lib/auth.ts` + `src/server/auth/`; persistência real na P3.
 
 ## Camadas por feature
 
 ```
 src/
-  core/          cadastro_id, sessão
-  shared/        UI compartilhada (já em src/components)
+  core/          cadastro_id, sessão (futuro)
+  shared/        UI compartilhada (src/components)
   features/
     matrizes/{domain,application,infrastructure,presentation}
     inseminacoes/
@@ -45,13 +51,11 @@ src/
     lotes/
 ```
 
-Presentation = páginas atuais. Domain = funções puras de cálculo.
-
 ## Testes
 
 | Tipo | Ferramenta | O que cobre |
 | --- | --- | --- |
-| Unitário | Vitest | Domínio e casos de uso, repositórios falsos |
-| Componente | Testing Library | Telas e formulários |
-| Segurança | SQL no Supabase | RLS entre cadastros |
-| Ponta a ponta | Playwright | Login, nova inseminação, diagnóstico |
+| Unitário | Vitest | Domínio e casos de uso |
+| Componente | Testing Library | Telas (quando solicitado) |
+| Segurança | SQL + app | RLS entre cadastros |
+| Ponta a ponta | Playwright | Fluxos críticos (futuro) |

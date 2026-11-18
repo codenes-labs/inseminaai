@@ -15,8 +15,8 @@ O desenvolvimento segue **SDD (Spec-Driven Development)**: nenhuma funcionalidad
 - **Clean Code:** nomes que revelam intenção, funções pequenas com uma responsabilidade, sem comentários que explicam código confuso, sem números mágicos
 - **SOLID:** responsabilidade única, dependência de abstrações, interfaces pequenas
 - **DRY e KISS:** não repetir regra de negócio; a solução mais simples que atende a spec
-- **TypeScript estrito:** strict ligado, sem `any`, tipos gerados a partir do esquema do Supabase quando o banco existir
-- **Regras de negócio puras:** cálculo de tentativa, data de diagnóstico e previsão de parto ficam em funções puras, sem depender de React nem de Supabase
+- **TypeScript estrito:** strict ligado, sem `any`; tipos alinhados ao schema do servidor (SPEC-14)
+- **Regras de negócio puras:** cálculo de tentativa, data de diagnóstico e previsão de parto ficam em funções puras, sem depender de React nem de I/O
 
 ## Camadas
 
@@ -24,10 +24,10 @@ O desenvolvimento segue **SDD (Spec-Driven Development)**: nenhuma funcionalidad
 | --- | --- | --- |
 | domain | Entidades, tipos e regras de negócio puras | nada |
 | application | Casos de uso | domain |
-| infrastructure | Acesso ao Supabase, implementa repositórios | application, domain |
+| infrastructure | Postgres via API/repositórios HTTP | application, domain |
 | presentation | Componentes, páginas e formulários | application |
 
-A regra de dependência aponta para dentro: o domínio não conhece ninguém. Trocar o Supabase no futuro afeta apenas infrastructure.
+A regra de dependência aponta para dentro: o domínio não conhece ninguém. Trocar o banco ou o transporte afeta apenas infrastructure.
 
 ## Definition of Done
 
@@ -35,6 +35,7 @@ Uma tarefa só está pronta quando: a spec existe e está atualizada, os testes 
 
 ## Interface
 
+- **Mobile primeiro:** layouts e interações seguem o que já foi desenhado para celular (uma mão, botões grandes, poucos campos). Desktop/web é adaptação **depois**, sem redesenhar o mobile.
 - Celular primeiro, uso com uma mão
 - Botões grandes, poucos campos por tela
 - Identidade verde já definida no app
