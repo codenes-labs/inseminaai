@@ -14,9 +14,10 @@ export function LandingPage() {
             Inseminações no bolso, sem planilha solta
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            O Insemina aí ajuda produtores e inseminadores a registrar matrizes, tentativas,
-            diagnósticos, repetições e lotes — com previsões de data e relatórios claros. É um
-            PWA pensado para o celular, uma mão só, no curral ou na estrada.
+            O Insemina aí é para o inseminador autônomo que registra matrizes, tentativas,
+            diagnósticos e repetições no celular — uma mão só,
+            no curral ou na estrada. Previsões de data, relatórios e exportação em CSV, sem planilha
+            solta.
           </p>
         </div>
         <Cartao className="flex min-h-48 flex-col items-center justify-center gap-3 p-6 text-center">
@@ -24,8 +25,8 @@ export function LandingPage() {
             <CowIcon className="size-9" />
           </div>
           <p className="text-sm text-muted-foreground">
-            Identidade verde já definida no produto. O app logado entra nas próximas sprints de
-            plataforma e MVP.
+            PWA no celular: o mesmo registro que você faz no serviço, guardado com segurança no
+            seu cadastro.
           </p>
         </Cartao>
       </section>
@@ -46,15 +47,17 @@ export function LandingPage() {
         <Cartao className="p-4">
           <h2 className="font-semibold">3. Ver o rebanho</h2>
           <p className="mt-2 text-muted-foreground">
-            Lista de matrizes, dashboard do lote e relatórios — sempre filtrado ao seu cadastro.
+            Lista das matrizes que você acompanha, resumo do trabalho e relatórios — só o seu
+            cadastro.
           </p>
         </Cartao>
       </section>
       <Cartao className="mt-6 p-4">
         <h2 className="text-xl font-semibold">Para quem é</h2>
         <p className="mt-2 text-muted-foreground">
-          Fazendas, cooperativas e inseminadores que hoje anotam em caderno ou planilha e precisam de
-          um lugar único, seguro e offline quando não há sinal.
+          Inseminadores autônomos que hoje anotam em caderno ou planilha e querem um lugar único,
+          seguro e que funciona offline quando não há sinal. Também serve a quem atende várias
+          propriedades no mesmo cadastro.
         </p>
         <Link
           to="/entrar"

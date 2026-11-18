@@ -4,5 +4,5 @@
 
 ## Checklist
 
-- [ ] SPEC-10: exportar para Excel e taxas de prenhez
+- [ ] SPEC-10: exportar inseminações em **CSV** e taxas de prenhez
 - [ ] SPEC-11: PWA instalável, fila offline e sincronização

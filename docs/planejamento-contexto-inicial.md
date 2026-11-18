@@ -23,6 +23,8 @@
 | 2026-11-17 | **Cadastro público:** **off** em produção — sem rota pública de auto-cadastro; novos acessos só via **administrador geral**. | aguardando confirmação |
 | 2026-11-17 | **Offline / PWA (MVP):** **obrigatório** no MVP — uso **sem internet** (SPEC-11). | aguardando confirmação |
 | 2026-11-17 | **Marca (UI e docs):** **Insemina aí** (grafia com espaço). Identificadores técnicos permanecem **`inseminaai`** (npm, domínio); pasta local pode ser `inseminai`. | aguardando confirmação |
+| 2026-11-17 | **Importação / exportação de dados:** **somente CSV** (SPEC-07 entrada, SPEC-10 saída); sem `.xlsx` no MVP. | aguardando confirmação |
+| 2026-11-17 | **Público-alvo principal:** **inseminador autônomo** no curral/estrada (celular, uma mão). Produtor, fazenda e cooperativa continuam como **cadastro** possível; não é o foco do primeiro uso. | aguardando confirmação |
 
 **Sprint 1 (2026-11-17):** Supabase removido; landing pública (`SPEC-19`); arquivos `SPEC-12` … `SPEC-18` criados; specs de produto SPEC-01 … 11 intactas.
 
@@ -241,6 +243,7 @@ Responder **uma por vez**. Itens **resolvidos** estão na seção 6.1.
 | **10** | Cadastro público (`/cadastro`)? | **Off** em produção; sem auto-cadastro. Quem concede acesso é o **administrador geral** (2026-11-17). |
 | **14** | SPEC-11 offline/PWA no MVP? | **Obrigatório no MVP** — deve funcionar **sem internet** (2026-11-17). |
 | **15** | Marca na UI e docs? | **Insemina aí** (2026-11-17; corrigido em relação ao rascunho “InseminaAI”). |
+| **11** | Planilha SPEC-07 — formato? | **Somente CSV** (import e export); sem xlsx no MVP (2026-11-17). |
 
 ### 6.1.1 Registrado — decisão adiada (continua pendente)
 
@@ -257,7 +260,7 @@ Responder **uma por vez**. Itens **resolvidos** estão na seção 6.1.
 
 | # | Pergunta | Status |
 | --- | --- | --- |
-| **11** | Planilha SPEC-07: está no repositório ou só local? Formato (xlsx/csv)? | **Pendente de revisão** — local/formato aguardando confirmação (2026-11-17; **sem resposta ainda**) |
+| **11** | Planilha SPEC-07: está no repositório ou só local? Formato? | **Resolvido:** somente **CSV**; fixture anonimizada em `docs/fixtures/` **quando** o arquivo for liberado para o repo (caminho/nome do arquivo real ainda a conferir) |
 | **12** | “Cadastro automático no primeiro login” (sprint 6): MVP ou só comercialização? | **Pendente** — ver §6.1.1 (adiado) |
 | **13** | Limites Free/Pro (ex.: máximo de matrizes): valores e UX ao exceder? | **Pendente** — ver §6.1.1 |
 
@@ -269,7 +272,7 @@ Responder **uma por vez**. Itens **resolvidos** estão na seção 6.1.
 
 | Métrica | Valor |
 | --- | --- |
-| Perguntas numeradas **#1–#15** | **12 respondidas**, **3 pendentes** |
+| Perguntas numeradas **#1–#15** | **13 respondidas** (#11 formato CSV), **2 pendentes** (#12, #13) |
 | Bloco infra **6.2** (#1–#9) | Encerrado (todas respondidas) |
 | Itens sem número em **6.1** (caminho A/B, Supabase, Worker) | Resolvidos |
 
@@ -277,7 +280,7 @@ Responder **uma por vez**. Itens **resolvidos** estão na seção 6.1.
 
 | # | Tema |
 | --- | --- |
-| **11** | Planilha SPEC-07 (local/formato) |
+| **11** | ~~Planilha~~ — formato CSV fechado; falta só **arquivo** no `docs/fixtures/` |
 | **12** | Cadastro automático no primeiro login |
 | **13** | Limites Free/Pro e UX ao exceder |
 

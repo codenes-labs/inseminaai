@@ -1,6 +1,6 @@
 # Banco
 
-Todas as tabelas de dados carregam **cadastro_id**. Cada cadastro é um cliente: produtor, cooperativa, inseminador autônomo ou empresa. Toda consulta e toda regra de segurança filtra por `cadastro_id`, descobrindo o cadastro do usuário logado pela tabela `membros_cadastro`.
+Todas as tabelas de dados carregam **cadastro_id**. Cada cadastro é um cliente (em geral **inseminador autônomo** no MVP; também produtor, cooperativa ou empresa). Toda consulta e toda regra de segurança filtra por `cadastro_id`, descobrindo o cadastro do usuário logado pela tabela `membros_cadastro`.
 
 ## cadastros
 

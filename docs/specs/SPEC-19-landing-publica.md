@@ -4,7 +4,7 @@
 
 ## Critérios de aceite
 
-- `/` explica o produto em português do Brasil, identidade verde existente
+- `/` explica o produto em português do Brasil, identidade verde existente; copy com foco em **inseminador autônomo** (mobile, curral/estrada)
 - Cabeçalho: alternar tema claro/escuro (ícones Sun/Moon do lucide) e link **Entrar** → `/entrar`
 - Rodapé: **Termos de uso**, **Privacidade**, **Documentação** (mesma estrutura do In House Bank)
 - Padrão visual: layout tipo IHB (chrome público, botões `min-h-12`, `press`, `Cartao`) — **sem** alterar ícones do produto (`CowIcon`, etc.)

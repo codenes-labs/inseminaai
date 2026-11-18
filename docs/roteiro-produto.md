@@ -23,10 +23,10 @@ P1 (SPEC-12) e **P3 (SPEC-14)** concluídas na prática; próximo **SPEC-02** (m
 | 4 | **SPEC-04** Registrar inseminação | Form visual; não grava | Persistir tentativa + regras de domínio |
 | 5 | **SPEC-05** Diagnóstico | Tela visual | Gravar diagnóstico, previsão, repetição |
 | 6 | **SPEC-06** Lista/detalhe matrizes | Mock | Dados reais, timeline |
-| 7 | **SPEC-07** Importação planilha | Não feito | Idempotência; planilha **aguardando confirmação** (§6.3) |
+| 7 | **SPEC-07** Importação CSV | Não feito | Idempotência; fixture em `docs/fixtures/` quando liberar arquivo |
 | 8 | **SPEC-08** Dashboard | Números mock | Métricas do cadastro |
 | 9 | **SPEC-09** Lançamento em lote | Sem tela | Fluxo lote (mobile) |
-| 10 | **SPEC-10** Exportação/relatórios | Resumo parcial | Excel/CSV + taxas |
+| 10 | **SPEC-10** Exportação/relatórios | Resumo parcial | **Export CSV** + taxas |
 | 11 | **SPEC-11** Offline PWA | Só manifest | Fila offline obrigatória no MVP |
 
 ## Sprints de arquivo (mapeamento)
