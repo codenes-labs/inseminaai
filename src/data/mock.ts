@@ -5,6 +5,7 @@ export type Matriz = {
   nome: string;
   brinco: string;
   raca?: string;
+  observacoes?: string;
   ultimaInseminacao: string | null;
   situacao: Situacao;
 };
@@ -25,18 +26,54 @@ export type Inseminacao = {
 };
 
 export const matrizes: Matriz[] = [
-  { id: "1", nome: "Madame", brinco: "0142", raca: "Nelore", ultimaInseminacao: "02/10/2026", situacao: "prenhe" },
+  {
+    id: "1",
+    nome: "Madame",
+    brinco: "0142",
+    raca: "Nelore",
+    observacoes: "Matriz experiente, boa receptividade em IATF.",
+    ultimaInseminacao: "02/10/2026",
+    situacao: "prenhe",
+  },
   { id: "2", nome: "Fumaça", brinco: "0157", ultimaInseminacao: "18/10/2026", situacao: "pendente" },
   { id: "3", nome: "Amazona", brinco: "0163", ultimaInseminacao: "05/09/2026", situacao: "prenhe" },
   { id: "4", nome: "Bordada", brinco: "0171", ultimaInseminacao: "22/10/2026", situacao: "pendente" },
-  { id: "5", nome: "Boneca", brinco: "0188", ultimaInseminacao: "11/08/2026", situacao: "vazia" },
-  { id: "6", nome: "Jurema", brinco: "0194", ultimaInseminacao: null, situacao: "sem" },
+  {
+    id: "5",
+    nome: "Boneca",
+    brinco: "0188",
+    observacoes: "Duas tentativas vazias; acompanhar escore corporal.",
+    ultimaInseminacao: "11/08/2026",
+    situacao: "vazia",
+  },
+  {
+    id: "6",
+    nome: "Jurema",
+    brinco: "0194",
+    observacoes: "Sem IA registrada nesta estação.",
+    ultimaInseminacao: null,
+    situacao: "sem",
+  },
   { id: "7", nome: "Grauna", brinco: "0203", ultimaInseminacao: "27/10/2026", situacao: "pendente" },
-  { id: "8", nome: "Chatinha", brinco: "0215", ultimaInseminacao: "14/10/2026", situacao: "pendente" },
+  {
+    id: "8",
+    nome: "Chatinha",
+    brinco: "0215",
+    observacoes: "Protocolo com sincronização; lote Novilhas.",
+    ultimaInseminacao: "14/10/2026",
+    situacao: "pendente",
+  },
   { id: "9", nome: "Cabrinha", brinco: "0228", ultimaInseminacao: "30/08/2026", situacao: "prenhe" },
   { id: "10", nome: "Cafe", brinco: "0231", ultimaInseminacao: "09/09/2026", situacao: "vazia" },
   { id: "11", nome: "Espada", brinco: "0246", ultimaInseminacao: "15/07/2026", situacao: "prenhe" },
-  { id: "12", nome: "Saia Branca", brinco: "0252", ultimaInseminacao: null, situacao: "sem" },
+  {
+    id: "12",
+    nome: "Saia Branca",
+    brinco: "0252",
+    observacoes: "Novilha reserva; ainda sem inseminação.",
+    ultimaInseminacao: null,
+    situacao: "sem",
+  },
   { id: "13", nome: "Mimosa", brinco: "0267", ultimaInseminacao: "29/10/2026", situacao: "pendente" },
 ];
 
@@ -62,7 +99,20 @@ export const ultimasInseminacoes = [
 
 export const reprodutores = ["Netuno FIV", "Barão TE", "Trovão", "Imperador"];
 export const inseminadores = ["Vitor Almeida", "Carlos Souza", "Ana Ribeiro"];
-export const lotes = ["Lote 1 – Maternidade", "Lote 2 – Novilhas", "Lote 3 – Pasto Alto"];
+export const lotesNomes = [
+  "Lote 1 – Maternidade",
+  "Lote 2 – Novilhas",
+  "Lote 3 – Pasto Alto",
+] as const;
+
+export const lotesComObs = [
+  { nome: lotesNomes[0], observacoes: "Matrizes em lactação no piquete da maternidade." },
+  { nome: lotesNomes[1], observacoes: "Primeira IATF da estação." },
+  { nome: lotesNomes[2], observacoes: "Pasto alto; animais com boa condição." },
+] as const;
+
+/** Nomes para seleções simples (compatível com histórico mock). */
+export const lotes = [...lotesNomes];
 
 export const historicoPorMatriz: Record<string, Inseminacao[]> = {
   "1": [
