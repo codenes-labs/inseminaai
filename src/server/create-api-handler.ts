@@ -5,6 +5,7 @@ import { pingBanco } from "./db/pool";
 export type ApiHandlerOptions = {
   databaseUrl?: string;
   jwtSecret?: string;
+  turnstileSecretKey?: string;
 };
 
 export function createApiHandler(
@@ -36,6 +37,7 @@ export function createApiHandler(
       const auth = await handleAuthRequest(request, {
         jwtSecret,
         databaseUrl,
+        turnstileSecretKey: options.turnstileSecretKey,
       });
       if (auth) {
         return auth;

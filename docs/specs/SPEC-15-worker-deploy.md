@@ -10,4 +10,4 @@
 
 ## Estado atual
 
-Não implementado — sprint **P4**.
+**Implementado:** `worker/index.ts`, `wrangler.toml` (assets + SPA fallback + `nodejs_compat`), deploy via `deploy.yml`.
