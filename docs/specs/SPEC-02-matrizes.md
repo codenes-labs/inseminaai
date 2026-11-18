@@ -17,4 +17,4 @@
 
 ## Estado atual
 
-Lista e detalhe visuais prontos, com dados mock. Não há tela de criar/editar/desativar ainda.
+**Implementado:** CRUD via `/api/matrizes`, lista/detalhe/formulário mobile ligados ao Postgres; situacao/histórico ainda mock até SPEC-04/06. Conta **demo** não grava (403).

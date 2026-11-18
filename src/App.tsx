@@ -7,6 +7,7 @@ import { Inicio } from "./pages/Inicio";
 import { Login } from "./pages/Login";
 import { Mais } from "./pages/Mais";
 import { MatrizDetalhe } from "./pages/MatrizDetalhe";
+import { MatrizForm } from "./pages/MatrizForm";
 import { Matrizes } from "./pages/Matrizes";
 import { NovaInseminacao } from "./pages/NovaInseminacao";
 import { Relatorios } from "./pages/Relatorios";
@@ -38,6 +39,8 @@ export function App() {
       <Route path="/docs" element={<DocsOverviewPage />} />
       <Route path="/inicio" element={comProtecao(<Inicio />)} />
       <Route path="/matrizes" element={comProtecao(<Matrizes />)} />
+      <Route path="/matrizes/nova" element={comProtecao(<MatrizForm />)} />
+      <Route path="/matrizes/:id/editar" element={comProtecao(<MatrizForm />)} />
       <Route path="/matrizes/:id" element={comProtecao(<MatrizDetalhe />)} />
       <Route
         path="/matrizes/:id/diagnostico"

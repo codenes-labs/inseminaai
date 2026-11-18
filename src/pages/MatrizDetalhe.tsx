@@ -1,11 +1,56 @@
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell, Botao, CabecalhoVoltar, Cartao, Etiqueta, Vazio } from "../components/ui";
-import { historicoDaMatriz, matrizes } from "../data/mock";
+import { historicoDaMatriz } from "../data/mock";
+import {
+  atualizarMatrizApi,
+  obterMatrizApi,
+  type MatrizLista,
+} from "../features/matrizes/infrastructure/matrizes-api";
 
 export function MatrizDetalhe() {
   const { id } = useParams();
-  const matriz = matrizes.find((m) => m.id === id);
+  const navigate = useNavigate();
+  const [matriz, setMatriz] = useState<MatrizLista | null | undefined>(undefined);
+  const [desativando, setDesativando] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    let ativo = true;
+    void (async () => {
+      try {
+        const dados = await obterMatrizApi(id);
+        if (ativo) setMatriz(dados);
+      } catch {
+        if (ativo) setMatriz(null);
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, [id]);
+
   const historico = id ? historicoDaMatriz(id) : [];
+
+  async function desativar() {
+    if (!id || !matriz) return;
+    setDesativando(true);
+    try {
+      await atualizarMatrizApi(id, { ativa: false });
+      navigate("/matrizes");
+    } catch {
+      setDesativando(false);
+    }
+  }
+
+  if (matriz === undefined) {
+    return (
+      <AppShell semBarra>
+        <CabecalhoVoltar titulo="Matriz" voltar="/matrizes" />
+        <p className="px-4 py-6 text-sm text-muted-foreground">Carregando…</p>
+      </AppShell>
+    );
+  }
 
   if (!matriz) {
     return (
@@ -26,7 +71,9 @@ export function MatrizDetalhe() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xl font-semibold">{matriz.nome}</p>
-              <p className="text-sm text-muted-foreground">Brinco #{matriz.brinco}</p>
+              {matriz.brinco && (
+                <p className="text-sm text-muted-foreground">Brinco #{matriz.brinco}</p>
+              )}
               {matriz.raca && (
                 <p className="mt-1 text-sm text-muted-foreground">{matriz.raca}</p>
               )}
@@ -35,64 +82,30 @@ export function MatrizDetalhe() {
           </div>
         </Cartao>
 
+        <div className="mt-4 flex flex-col gap-2">
+          <Link to={`/matrizes/${matriz.id}/editar`}>
+            <Botao variante="suave">Editar cadastro</Botao>
+          </Link>
+          <Botao
+            variante="suave"
+            disabled={desativando}
+            onClick={() => void desativar()}
+          >
+            {desativando ? "Desativando…" : "Desativar matriz"}
+          </Botao>
+        </div>
+
         <div className="mt-4 grid grid-cols-2 gap-3">
           {pendente ? (
             <Link to={`/matrizes/${matriz.id}/diagnostico`} className="contents">
-              <Botao className="min-h-12 text-sm">Registrar diagnóstico</Botao>
+              <Botao className="col-span-2">Registrar diagnóstico</Botao>
             </Link>
           ) : (
-            <div />
+            <Link to="/nova-inseminacao" className="col-span-2">
+              <Botao className="w-full">Nova inseminação</Botao>
+            </Link>
           )}
-          <Link to="/nova-inseminacao" className="contents">
-            <Botao variante="suave" className="min-h-12 text-sm">
-              Nova inseminação
-            </Botao>
-          </Link>
         </div>
-        {!pendente && (
-          <Link to="/nova-inseminacao" className="mt-3 block">
-            <Botao className="min-h-12 text-sm">Nova inseminação</Botao>
-          </Link>
-        )}
-
-        <h2 className="mb-3 mt-6 text-base font-semibold">Linha do tempo</h2>
-        {historico.length === 0 ? (
-          <Vazio titulo="Sem registro" texto="Ainda não há inseminações para esta matriz." />
-        ) : (
-          <Cartao className="divide-y divide-border p-0">
-            {historico.map((item) => (
-              <div key={item.id} className="px-4 py-3.5">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold">
-                    Tentativa {item.numeroTentativa} · {item.tipo}
-                  </p>
-                  <Etiqueta
-                    situacao={
-                      item.status === "pendente"
-                        ? "pendente"
-                        : item.status === "prenhe"
-                          ? "prenhe"
-                          : "vazia"
-                    }
-                  />
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {item.data} · {item.reprodutor} · {item.inseminador}
-                </p>
-                {item.previsaoParto && item.previsaoParto !== "não calculada" && (
-                  <p className="mt-1 text-xs font-medium text-primary">
-                    Parto previsto {item.previsaoParto}
-                  </p>
-                )}
-                {item.dataDiagnosticoPrevista && (
-                  <p className="mt-1 text-xs text-status-pendente">
-                    Diagnóstico previsto {item.dataDiagnosticoPrevista}
-                  </p>
-                )}
-              </div>
-            ))}
-          </Cartao>
-        )}
       </div>
     </AppShell>
   );

@@ -1,5 +1,5 @@
 import { bearerToken, usuarioDoToken } from "./auth/resolve-user";
-import { listarMatrizes } from "./repositories/matrizes-repository";
+import { handleMatrizesRequest } from "./routes/matrizes";
 
 export type DataHandlerContext = {
   databaseUrl: string;
@@ -31,12 +31,12 @@ export async function handleDataRequest(
     return Response.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  if (url.pathname === "/api/matrizes" && request.method === "GET") {
-    const matrizes = await listarMatrizes(
-      context.databaseUrl,
-      usuario.cadastroId,
-    );
-    return Response.json({ matrizes });
+  const matrizes = await handleMatrizesRequest(request, {
+    databaseUrl: context.databaseUrl,
+    usuario,
+  });
+  if (matrizes) {
+    return matrizes;
   }
 
   return Response.json({ error: "Não encontrado." }, { status: 404 });
