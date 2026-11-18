@@ -19,7 +19,7 @@ P1 (SPEC-12) e **P3 (SPEC-14)** concluídas na prática; próximo **SPEC-02** (m
 | --- | --- | --- | --- |
 | 1 | **SPEC-01** Autenticação | JWT, sessão, rotas protegidas | Revisão mobile; vínculo Postgres na P3 |
 | 2 | **SPEC-02** Matrizes | CRUD + API | Histórico real; situacao via inseminações (SPEC-06) |
-| 3 | **SPEC-03** Cadastros auxiliares | Listas mock no formulário | CRUD reprodutores, inseminadores, lotes |
+| 3 | **SPEC-03** Cadastros auxiliares | CRUD + filtros ativos | — |
 | 4 | **SPEC-04** Registrar inseminação | Form visual; não grava | Persistir tentativa + regras de domínio |
 | 5 | **SPEC-05** Diagnóstico | Tela visual | Gravar diagnóstico, previsão, repetição |
 | 6 | **SPEC-06** Lista/detalhe matrizes | Mock | Dados reais, timeline |

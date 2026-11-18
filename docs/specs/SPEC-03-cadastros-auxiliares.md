@@ -15,4 +15,4 @@
 
 ## Estado atual
 
-Nova inseminação já lista reprodutores, inseminadores e lotes mock. Menu Mais mostra os nomes. Não há CRUD.
+**Implementado:** API e CRUD mobile em **Mais →** reprodutores, inseminadores, lotes; inativos ocultos em **Nova inseminação** (`?somente_ativos=true`). Conta demo não grava.

@@ -1,7 +1,13 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import { AppShell, Botao, Cartao } from "../components/ui";
 import { lerSessao, sair } from "../lib/auth";
-import { inseminadores, lotes, reprodutores } from "../data/mock";
+
+const linksCadastro = [
+  { to: "/mais/reprodutores", rotulo: "Reprodutores" },
+  { to: "/mais/inseminadores", rotulo: "Inseminadores" },
+  { to: "/mais/lotes", rotulo: "Lotes" },
+] as const;
 
 export function Mais() {
   const navigate = useNavigate();
@@ -20,18 +26,21 @@ export function Mais() {
       <div className="space-y-3 px-4 py-4">
         <Cartao className="p-4">
           <p className="text-sm text-muted-foreground">Conectado como</p>
-          <p className="text-lg font-semibold">{sessao?.nome ?? "Vitor"}</p>
+          <p className="text-lg font-semibold">{sessao?.nome ?? "—"}</p>
           <p className="text-sm text-muted-foreground">{sessao?.identificador}</p>
         </Cartao>
-        <Cartao className="p-4">
-          <p className="font-semibold">Cadastros</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Reprodutores: {reprodutores.join(", ")}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Inseminadores: {inseminadores.join(", ")}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">Lotes: {lotes.join(", ")}</p>
+        <Cartao className="divide-y divide-border p-0">
+          <p className="px-4 pb-2 pt-4 font-semibold">Cadastros auxiliares</p>
+          {linksCadastro.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="press flex min-h-12 items-center justify-between px-4 text-foreground"
+            >
+              <span className="font-medium">{link.rotulo}</span>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </Link>
+          ))}
         </Cartao>
         <Botao variante="suave" onClick={encerrar}>
           Sair

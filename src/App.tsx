@@ -5,6 +5,8 @@ import { RotaProtegida } from "./components/rota-protegida";
 import { Diagnostico } from "./pages/Diagnostico";
 import { Inicio } from "./pages/Inicio";
 import { Login } from "./pages/Login";
+import { CadastroAuxiliarForm } from "./pages/CadastroAuxiliarForm";
+import { CadastroAuxiliarLista } from "./pages/CadastroAuxiliarLista";
 import { Mais } from "./pages/Mais";
 import { MatrizDetalhe } from "./pages/MatrizDetalhe";
 import { MatrizForm } from "./pages/MatrizForm";
@@ -51,6 +53,18 @@ export function App() {
         element={comProtecao(<NovaInseminacao />)}
       />
       <Route path="/relatorios" element={comProtecao(<Relatorios />)} />
+      <Route
+        path="/mais/:tipo/nova"
+        element={comProtecao(<CadastroAuxiliarForm />)}
+      />
+      <Route
+        path="/mais/:tipo/:id/editar"
+        element={comProtecao(<CadastroAuxiliarForm />)}
+      />
+      <Route
+        path="/mais/:tipo"
+        element={comProtecao(<CadastroAuxiliarLista />)}
+      />
       <Route path="/mais" element={comProtecao(<Mais />)} />
       <Route path="*" element={<LandingPage />} />
     </Routes>

@@ -1,4 +1,5 @@
 import { bearerToken, usuarioDoToken } from "./auth/resolve-user";
+import { handleCadastrosAuxiliaresRequest } from "./routes/cadastros-auxiliares";
 import { handleMatrizesRequest } from "./routes/matrizes";
 
 export type DataHandlerContext = {
@@ -31,13 +32,21 @@ export async function handleDataRequest(
     return Response.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const matrizes = await handleMatrizesRequest(request, {
-    databaseUrl: context.databaseUrl,
-    usuario,
-  });
-  if (matrizes) {
-    return matrizes;
-  }
+    const matrizes = await handleMatrizesRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (matrizes) {
+      return matrizes;
+    }
 
-  return Response.json({ error: "Não encontrado." }, { status: 404 });
+    const cadastros = await handleCadastrosAuxiliaresRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (cadastros) {
+      return cadastros;
+    }
+
+    return Response.json({ error: "Não encontrado." }, { status: 404 });
 }

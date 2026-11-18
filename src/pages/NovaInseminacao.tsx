@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, ChevronDown, Search, TriangleAlert } from "lucide-react";
 import {
@@ -10,7 +10,12 @@ import {
   cx,
   inputClass,
 } from "../components/ui";
-import { inseminadores, lotes, matrizes, reprodutores } from "../data/mock";
+import { inseminadores as inseminadoresMock, lotes as lotesMock, matrizes, reprodutores as reprodutoresMock } from "../data/mock";
+import {
+  listarInseminadoresApi,
+  listarLotesApi,
+  listarReprodutoresApi,
+} from "../features/cadastros-auxiliares/infrastructure/cadastros-auxiliares-api";
 
 const tipos = ["CN", "IATF", "Protocolo"] as const;
 
@@ -57,6 +62,34 @@ export function NovaInseminacao() {
   const [reprodutor, setReprodutor] = useState("");
   const [inseminador, setInseminador] = useState("Vitor Almeida");
   const [lote, setLote] = useState("");
+  const [reprodutores, setReprodutores] = useState<string[]>(reprodutoresMock);
+  const [inseminadores, setInseminadores] = useState<string[]>(inseminadoresMock);
+  const [lotes, setLotes] = useState<string[]>(lotesMock);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [r, i, l] = await Promise.all([
+          listarReprodutoresApi(true),
+          listarInseminadoresApi(true),
+          listarLotesApi(true),
+        ]);
+        if (r.length > 0) {
+          setReprodutores(r.map((x) => x.nome));
+          setReprodutor((atual) => atual || r[0]?.nome || "");
+        }
+        if (i.length > 0) {
+          setInseminadores(i.map((x) => x.nome));
+          setInseminador((atual) => atual || i[0]?.nome || "");
+        }
+        if (l.length > 0) {
+          setLotes(l.map((x) => x.nome));
+        }
+      } catch {
+        /* mock como fallback */
+      }
+    })();
+  }, []);
 
   const encontradas = useMemo(
     () =>

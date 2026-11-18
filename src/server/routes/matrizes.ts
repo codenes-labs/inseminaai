@@ -38,18 +38,7 @@ function paraApi(matriz: {
   };
 }
 
-function bloqueiaDemo(usuario: AuthUser): Response | null {
-  if (usuario.demo) {
-    return Response.json(
-      {
-        error:
-          "Conta demo não grava no banco. Use o administrador para cadastrar.",
-      },
-      { status: 403 },
-    );
-  }
-  return null;
-}
+import { bloqueiaDemo } from "./demo-guard";
 
 export async function handleMatrizesRequest(
   request: Request,
