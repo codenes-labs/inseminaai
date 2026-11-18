@@ -1,5 +1,6 @@
 import { bearerToken, usuarioDoToken } from "./auth/resolve-user";
 import { handleCadastrosAuxiliaresRequest } from "./routes/cadastros-auxiliares";
+import { handleInseminacoesRequest } from "./routes/inseminacoes";
 import { handleMatrizesRequest } from "./routes/matrizes";
 
 export type DataHandlerContext = {
@@ -46,6 +47,14 @@ export async function handleDataRequest(
     });
     if (cadastros) {
       return cadastros;
+    }
+
+    const inseminacoes = await handleInseminacoesRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (inseminacoes) {
+      return inseminacoes;
     }
 
     return Response.json({ error: "Não encontrado." }, { status: 404 });

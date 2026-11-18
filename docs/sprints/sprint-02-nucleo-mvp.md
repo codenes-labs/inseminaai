@@ -6,7 +6,7 @@
 
 ## Checklist
 
-- [ ] SPEC-04: gravar nova inseminação (tentativa e data de diagnóstico calculadas)
+- [x] SPEC-04: gravar nova inseminação (tentativa e data de diagnóstico calculadas)
 - [ ] SPEC-05: gravar diagnóstico, previsão de parto e fluxo de repetição
 - [ ] SPEC-06: lista e detalhe ligados ao banco (etiquetas e linha do tempo já desenhadas)
 - [ ] Teste em celular real

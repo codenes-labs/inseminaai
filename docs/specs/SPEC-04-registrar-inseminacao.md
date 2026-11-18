@@ -25,4 +25,4 @@
 
 ## Estado atual
 
-Formulário visual pronto. Salvar só navega de volta, sem gravar.
+**Implementado:** `POST /api/inseminacoes`, contexto da matriz (pendente + próxima tentativa), último inseminador; formulário grava no Postgres com regras em `domain/calculos.ts`. Conta demo não grava.
