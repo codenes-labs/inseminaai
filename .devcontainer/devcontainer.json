@@ -12,8 +12,11 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "oxc.oxc-vscode",
         "bradlc.vscode-tailwindcss",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "GitHub.vscode-pull-request-github",
+        "johnpapa.vscode-peacock"
       ],
       "settings": {
         "peacock.color": "#14532D",
