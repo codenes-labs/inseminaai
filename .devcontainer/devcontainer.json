@@ -5,9 +5,9 @@
   "workspaceFolder": "/app",
   "remoteUser": "node",
   "overrideCommand": true,
-  "postCreateCommand": "npm ci",
-  "postStartCommand": "bash .devcontainer/start-dev-server.sh",
-  "postAttachCommand": "bash .devcontainer/start-dev-server.sh",
+  "postCreateCommand": "bash .devcontainer/ensure-git-https-remote.sh && npm ci",
+  "postStartCommand": "bash .devcontainer/ensure-git-https-remote.sh && bash .devcontainer/start-dev-server.sh",
+  "postAttachCommand": "bash .devcontainer/ensure-git-https-remote.sh && bash .devcontainer/start-dev-server.sh",
   "forwardPorts": [5173, 5434],
   "customizations": {
     "vscode": {
@@ -21,7 +21,8 @@
       "settings": {
         "peacock.color": "#14532D",
         "peacock.affectTitleBar": true,
-        "peacock.affectStatusBar": true
+        "peacock.affectStatusBar": true,
+        "git.useIntegratedAskPass": true
       }
     }
   }
