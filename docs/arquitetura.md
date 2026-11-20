@@ -6,7 +6,7 @@ App web responsivo (PWA) para registro de inseminações no celular. Front-end e
 
 O visual e as telas do app logado já foram feitos em **React + Vite + TypeScript + Tailwind**, mobile-first, identidade verde (`#2E9E5B`, `#14532D`, `#F7FAF5`). Esse design não se reescreve.
 
-**Sprint 1 (2026-11-17):** rota pública `/` é **landing**. **P2 (2026-11-17):** telas do MVP roteadas com `RotaProtegida`; dados ainda mock até P3.
+**Sprint 1 (2026-11-17):** rota pública `/` é **landing**. App logado com persistência Postgres, API Worker e PWA offline (2026-11).
 
 ## Stack
 
@@ -22,7 +22,7 @@ O visual e as telas do app logado já foram feitos em **React + Vite + TypeScrip
 | --- | --- |
 | `/` | Landing |
 | `/entrar` | Login (JWT) |
-| `/termos`, `/privacidade`, `/docs` | Stubs (conteúdo em SPEC-17) |
+| `/termos`, `/privacidade`, `/docs` | Termos, privacidade (LGPD), índice técnico (SPEC-17) |
 
 ## Telas do app (design pronto — rotas ativas após login)
 
@@ -36,7 +36,7 @@ O visual e as telas do app logado já foram feitos em **React + Vite + TypeScrip
 | `/relatorios` | Relatórios |
 | `/mais` | Configurações |
 
-Dados de demonstração em `src/data/mock.ts`; auth JWT em `src/lib/auth.ts` + `src/server/auth/`; persistência real na P3.
+Auth JWT em `src/lib/auth.ts` + `src/server/`; persistência via repositórios e `/api/*`. Fase **web** e gestão de usuários: SPEC-20.
 
 ## Camadas por feature
 

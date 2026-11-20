@@ -10,4 +10,4 @@
 
 ## Estado atual
 
-Parcial — sprint 1 removeu Supabase; fechamento em **P5**.
+**Atualizado (2026-11-20):** `docs/estado-atual.md` criado; `docs/arquitetura.md` sem referência a stubs públicos; rotas legais implementadas (SPEC-17). Revisão contínua de referências legadas (Supabase/Pages) nos docs históricos permanece no polimento.

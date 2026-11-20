@@ -177,14 +177,15 @@ Itens **substitutos** (entram em P1–P4):
 
 | Spec | Tema | Arquivo |
 | --- | --- | --- |
-| SPEC-19 | Landing pública | `docs/specs/SPEC-19-landing-publica.md` (fechada sprint 1) |
+| SPEC-19 | Landing pública | `docs/specs/SPEC-19-landing-publica.md` (**concluída** 2026-11-20) |
 | SPEC-12 | Docker, health | `docs/specs/SPEC-12-plataforma-docker.md` |
 | SPEC-13 | Auth JWT | `docs/specs/SPEC-13-auth-jwt.md` |
 | SPEC-14 | Schema + RLS | `docs/specs/SPEC-14-schema-rls.md` |
 | SPEC-15 | Worker | `docs/specs/SPEC-15-worker-deploy.md` |
 | SPEC-16 | CI/CD | `docs/specs/SPEC-16-ci-cd.md` |
-| SPEC-17 | Docs/termos | `docs/specs/SPEC-17-docs-publicas.md` |
+| SPEC-17 | Docs/termos | `docs/specs/SPEC-17-docs-publicas.md` (**concluída** 2026-11-20) |
 | SPEC-18 | Governança | `docs/specs/SPEC-18-governanca.md` |
+| SPEC-20 | Painel web + usuários | `docs/specs/SPEC-20-painel-web-usuarios.md` (fase 2, planejada) |
 
 Critérios detalhados de implementação entram ao abrir cada sprint P1–P5.
 

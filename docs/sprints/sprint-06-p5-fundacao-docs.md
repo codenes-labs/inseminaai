@@ -4,6 +4,6 @@
 
 ## Checklist
 
-- [ ] `docs/arquitetura.md` e `docs/banco.md` alinhados à plataforma B
-- [ ] `docs/estado-atual.md`
-- [ ] Revisão final sem Supabase/Pages no caminho crítico
+- [x] `docs/arquitetura.md` e `docs/banco.md` alinhados à plataforma B (revisão 2026-11-20)
+- [x] `docs/estado-atual.md`
+- [ ] Revisão final sem Supabase/Pages no caminho crítico (só histórico em planejamento)

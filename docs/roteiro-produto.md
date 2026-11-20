@@ -29,6 +29,14 @@ P1 (SPEC-12) e **P3 (SPEC-14)** concluídas na prática; próximo **SPEC-02** (m
 | 10 | **SPEC-10** Exportação/relatórios | Resumo parcial | **Export CSV** + taxas |
 | 11 | **SPEC-11** Offline PWA | Só manifest | Fila offline obrigatória no MVP |
 
+## Depois do MVP mobile (fase 2)
+
+| Spec | Foco |
+| --- | --- |
+| **SPEC-20** | Painel web + criar usuários no mesmo `cadastro_id` (permissões finas depois) |
+
+Validação **E2E** (pode ser mockada) antes de abrir SPEC-20.
+
 ## Sprints de arquivo (mapeamento)
 
 | Arquivo sprint | Specs |
