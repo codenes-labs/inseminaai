@@ -1,11 +1,15 @@
 import type { AuthUser } from "../auth/types";
+import type { SituacaoMatriz } from "../../features/matrizes/domain/resumo-reprodutivo";
 import {
   ErroMatrizDomain,
   atualizarMatriz,
   criarMatriz,
+  listarHistoricoMatriz,
   listarMatrizesAtivas,
-  obterMatriz,
+  obterMatrizComSituacao,
+  type MatrizResumoComSituacao,
 } from "../repositories/matrizes-repository";
+import { bloqueiaDemo } from "./demo-guard";
 
 export type MatrizApiItem = {
   id: string;
@@ -13,32 +17,25 @@ export type MatrizApiItem = {
   brinco: string;
   raca: string | null;
   observacoes: string | null;
-  situacao: "sem";
-  ultimaInseminacao: null;
+  situacao: SituacaoMatriz;
+  ultimaInseminacao: string | null;
   ativa: boolean;
 };
 
-function paraApi(matriz: {
-  id: string;
-  nome: string;
-  brinco: string | null;
-  raca: string | null;
-  observacoes?: string | null;
-  ativa: boolean;
-}): MatrizApiItem {
+function paraApi(
+  matriz: MatrizResumoComSituacao & { observacoes?: string | null },
+): MatrizApiItem {
   return {
     id: matriz.id,
     nome: matriz.nome,
     brinco: matriz.brinco ?? "",
     raca: matriz.raca,
     observacoes: matriz.observacoes ?? null,
-    situacao: "sem",
-    ultimaInseminacao: null,
+    situacao: matriz.situacao,
+    ultimaInseminacao: matriz.ultimaInseminacao,
     ativa: matriz.ativa,
   };
 }
-
-import { bloqueiaDemo } from "./demo-guard";
 
 export async function handleMatrizesRequest(
   request: Request,
@@ -55,18 +52,36 @@ export async function handleMatrizesRequest(
 
   if (partes.length === 2 && request.method === "GET") {
     const consulta = url.searchParams.get("q") ?? undefined;
+    const ativasParam = url.searchParams.get("ativas");
+    const somenteAtivos =
+      ativasParam === "false" || ativasParam === "0" ? false : true;
     const matrizes = await listarMatrizesAtivas(
       databaseUrl,
       cadastroId,
       consulta ?? undefined,
+      somenteAtivos,
     );
     return Response.json({
       matrizes: matrizes.map(paraApi),
     });
   }
 
+  if (
+    partes.length === 4 &&
+    partes[3] === "historico" &&
+    partes[2] &&
+    request.method === "GET"
+  ) {
+    const { historico, repeticoes } = await listarHistoricoMatriz(
+      databaseUrl,
+      cadastroId,
+      partes[2],
+    );
+    return Response.json({ historico, repeticoes });
+  }
+
   if (partes.length === 3 && partes[2] && request.method === "GET") {
-    const matriz = await obterMatriz(databaseUrl, cadastroId, partes[2]);
+    const matriz = await obterMatrizComSituacao(databaseUrl, cadastroId, partes[2]);
     if (!matriz) {
       return Response.json({ error: "Matriz não encontrada." }, { status: 404 });
     }
@@ -93,7 +108,15 @@ export async function handleMatrizesRequest(
         observacoes:
           body.observacoes == null ? null : String(body.observacoes),
       });
-      return Response.json({ matriz: paraApi(criada) }, { status: 201 });
+      const comSituacao = await obterMatrizComSituacao(
+        databaseUrl,
+        cadastroId,
+        criada.id,
+      );
+      if (!comSituacao) {
+        throw new Error("Falha ao carregar matriz criada.");
+      }
+      return Response.json({ matriz: paraApi(comSituacao) }, { status: 201 });
     } catch (erro) {
       return respostaErroMatriz(erro);
     }
@@ -109,7 +132,7 @@ export async function handleMatrizesRequest(
       return Response.json({ error: "Corpo inválido." }, { status: 400 });
     }
     try {
-      const atualizada = await atualizarMatriz(databaseUrl, cadastroId, partes[2], {
+      await atualizarMatriz(databaseUrl, cadastroId, partes[2], {
         nome: body.nome !== undefined ? String(body.nome) : undefined,
         brinco:
           body.brinco !== undefined
@@ -126,6 +149,14 @@ export async function handleMatrizesRequest(
             : undefined,
         ativa: typeof body.ativa === "boolean" ? body.ativa : undefined,
       });
+      const atualizada = await obterMatrizComSituacao(
+        databaseUrl,
+        cadastroId,
+        partes[2],
+      );
+      if (!atualizada) {
+        return Response.json({ error: "Matriz não encontrada." }, { status: 404 });
+      }
       return Response.json({ matriz: paraApi(atualizada) });
     } catch (erro) {
       return respostaErroMatriz(erro);

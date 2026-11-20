@@ -6,7 +6,7 @@
 
 - Nome é obrigatório; brinco é opcional, mas único dentro do cadastro
 - Busca por nome ou brinco, sem diferenciar maiúsculas e acentos
-- Matriz desativada some das listas de seleção, mas mantém o histórico
+- Matriz desativada some das listas de **seleção** (ex.: nova inseminação) e da lista principal; o filtro **Desativadas** e o histórico permanecem
 
 ## Testes unitários
 
@@ -17,4 +17,4 @@
 
 ## Estado atual
 
-**Implementado:** CRUD via `/api/matrizes`, lista/detalhe/formulário mobile ligados ao Postgres; situacao/histórico ainda mock até SPEC-04/06. Conta **demo** não grava (403).
+**Implementado:** CRUD via `/api/matrizes`, lista/detalhe/formulário mobile ligados ao Postgres; situação e histórico via SPEC-06. Conta **demo** não grava (403).

@@ -1,39 +1,55 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Plus, Search } from "lucide-react";
 import {
   AppShell,
   AvatarLetra,
   Cartao,
   Etiqueta,
+  FiltroSelecao,
   Vazio,
   cx,
 } from "../components/ui";
 import type { Situacao } from "../data/mock";
 import { listarMatrizesApi } from "../features/matrizes/infrastructure/matrizes-api";
 
-const filtros: { id: "todas" | Situacao; rotulo: string }[] = [
+type FiltroLista = "todas" | Situacao | "inativas";
+
+const filtros: { id: FiltroLista; rotulo: string }[] = [
   { id: "todas", rotulo: "Todas" },
   { id: "prenhe", rotulo: "Prenhes" },
   { id: "pendente", rotulo: "Pendentes" },
   { id: "vazia", rotulo: "Vazias" },
+  { id: "inativas", rotulo: "Desativadas" },
 ];
 
 export function Matrizes() {
-  const [filtro, setFiltro] = useState<"todas" | Situacao>("todas");
+  const location = useLocation();
+  const abrirInativas = Boolean(
+    (location.state as { abrirInativas?: boolean } | null)?.abrirInativas,
+  );
+  const [filtro, setFiltro] = useState<FiltroLista>(
+    abrirInativas ? "inativas" : "todas",
+  );
   const [busca, setBusca] = useState("");
   const [matrizes, setMatrizes] = useState<Awaited<ReturnType<typeof listarMatrizesApi>>>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  const carregar = useCallback(async (consulta: string) => {
+  const listandoInativas = filtro === "inativas";
+
+  const carregar = useCallback(async (consulta: string, inativas: boolean) => {
     setCarregando(true);
     setErro("");
     try {
-      const lista = await listarMatrizesApi(consulta);
+      const lista = await listarMatrizesApi(consulta, {
+        ativas: inativas ? false : true,
+      });
       setMatrizes(lista);
     } catch {
-      setErro("Não foi possível carregar. Verifique o login e o banco (make db-setup).");
+      setErro(
+        "Não foi possível carregar. Tente sair e entrar de novo; se persistir, confira o banco em produção.",
+      );
       setMatrizes([]);
     } finally {
       setCarregando(false);
@@ -42,18 +58,17 @@ export function Matrizes() {
 
   useEffect(() => {
     const t = window.setTimeout(() => {
-      void carregar(busca);
+      void carregar(busca, listandoInativas);
     }, 300);
     return () => window.clearTimeout(t);
-  }, [busca, carregar]);
+  }, [busca, carregar, listandoInativas]);
 
-  const lista = useMemo(
-    () =>
-      matrizes.filter(
-        (m) => filtro === "todas" || m.situacao === filtro,
-      ),
-    [matrizes, filtro],
-  );
+  const lista = useMemo(() => {
+    if (filtro === "inativas") return matrizes;
+    return matrizes.filter(
+      (m) => filtro === "todas" || m.situacao === filtro,
+    );
+  }, [matrizes, filtro]);
 
   return (
     <AppShell>
@@ -62,7 +77,11 @@ export function Matrizes() {
           <div>
             <h1 className="text-xl font-semibold">Matrizes</h1>
             <p className="text-sm opacity-80">
-              {carregando ? "Carregando…" : `${matrizes.length} animais ativos`}
+              {carregando
+                ? "Carregando…"
+                : listandoInativas
+                  ? `${matrizes.length} desativada${matrizes.length === 1 ? "" : "s"}`
+                  : `${matrizes.length} animais ativos`}
             </p>
           </div>
           <Link
@@ -86,27 +105,24 @@ export function Matrizes() {
       {erro && (
         <p className="px-4 pt-3 text-sm font-medium text-status-vazia">{erro}</p>
       )}
-      <div className="flex gap-2 overflow-x-auto px-4 py-4">
-        {filtros.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setFiltro(f.id)}
-            className={cx(
-              "press min-h-10 shrink-0 rounded-full px-4 text-sm font-semibold",
-              filtro === f.id
-                ? "bg-primary text-primary-foreground"
-                : "bg-brand-soft text-primary",
-            )}
-          >
-            {f.rotulo}
-          </button>
-        ))}
+      <div className="px-4 py-3">
+        <FiltroSelecao
+          rotulo="Situação"
+          valor={filtro}
+          opcoes={filtros}
+          onChange={setFiltro}
+          valorLimpar="todas"
+        />
       </div>
       <div className="space-y-2.5 px-4">
         {lista.map((matriz) => (
           <Link key={matriz.id} to={`/matrizes/${matriz.id}`}>
-            <Cartao className="press flex items-center gap-3 p-3.5">
+            <Cartao
+              className={cx(
+                "press flex items-center gap-3 p-3.5",
+                listandoInativas && "opacity-80",
+              )}
+            >
               <AvatarLetra nome={matriz.nome} situacao={matriz.situacao} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">
@@ -130,8 +146,16 @@ export function Matrizes() {
         ))}
         {!carregando && lista.length === 0 && (
           <Vazio
-            titulo="Nenhuma matriz por aqui"
-            texto="Cadastre uma nova matriz ou ajuste a busca."
+            titulo={
+              listandoInativas
+                ? "Nenhuma matriz desativada"
+                : "Nenhuma matriz por aqui"
+            }
+            texto={
+              listandoInativas
+                ? "As desativadas somem das listas de inseminação, mas continuam aqui."
+                : "Cadastre uma nova matriz ou ajuste a busca."
+            }
           />
         )}
       </div>

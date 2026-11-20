@@ -17,11 +17,14 @@ type UmaResposta = { matriz: MatrizLista };
 
 export async function listarMatrizesApi(
   consulta?: string,
+  opcoes?: { ativas?: boolean },
 ): Promise<MatrizLista[]> {
   const q = consulta?.trim();
-  const url = q
-    ? `/api/matrizes?q=${encodeURIComponent(q)}`
-    : "/api/matrizes";
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (opcoes?.ativas === false) params.set("ativas", "false");
+  const query = params.toString();
+  const url = query ? `/api/matrizes?${query}` : "/api/matrizes";
   const response = await apiFetch(url);
   if (!response.ok) {
     throw new Error("Não foi possível carregar as matrizes.");
@@ -55,6 +58,35 @@ export async function criarMatrizApi(dados: {
     throw new Error(body.error ?? "Não foi possível salvar.");
   }
   return body.matriz;
+}
+
+export type HistoricoInseminacao = {
+  id: string;
+  data: string;
+  tipo: "CN" | "IATF" | "Protocolo";
+  status: Situacao;
+  numeroTentativa: number;
+  reprodutor: string;
+  inseminador: string;
+  lote: string | null;
+  dataDiagnosticoPrevista: string | null;
+  previsaoParto: string | null;
+  observacoes: string | null;
+};
+
+export async function historicoMatrizApi(
+  matrizId: string,
+): Promise<{ historico: HistoricoInseminacao[]; repeticoes: number }> {
+  const response = await apiFetch(
+    `/api/matrizes/${encodeURIComponent(matrizId)}/historico`,
+  );
+  if (!response.ok) {
+    throw new Error("Não foi possível carregar o histórico.");
+  }
+  return (await response.json()) as {
+    historico: HistoricoInseminacao[];
+    repeticoes: number;
+  };
 }
 
 export async function atualizarMatrizApi(

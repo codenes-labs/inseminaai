@@ -5,7 +5,14 @@ import {
   normalizarBrinco,
   validarNomeMatriz,
 } from "../../features/matrizes/domain/validacao";
+import type { StatusInseminacao } from "../../features/inseminacoes/domain/calculos";
 import { textoBuscaCoincide } from "../../features/matrizes/domain/busca";
+import {
+  contarRepeticoesMatriz,
+  derivarSituacaoDaUltimaInseminacao,
+  formatarDataIsoParaBr,
+  type SituacaoMatriz,
+} from "../../features/matrizes/domain/resumo-reprodutivo";
 
 export type MatrizResumo = {
   id: string;
@@ -13,6 +20,32 @@ export type MatrizResumo = {
   brinco: string | null;
   raca: string | null;
   ativa: boolean;
+};
+
+export type MatrizResumoComSituacao = MatrizResumo & {
+  situacao: SituacaoMatriz;
+  ultimaInseminacao: string | null;
+};
+
+type LinhaInseminacaoResumo = {
+  matriz_id: string;
+  data: string;
+  status: StatusInseminacao;
+  numero_tentativa: number;
+};
+
+export type HistoricoInseminacaoMatriz = {
+  id: string;
+  data: string;
+  tipo: "CN" | "IATF" | "Protocolo";
+  status: StatusInseminacao;
+  numeroTentativa: number;
+  reprodutor: string;
+  inseminador: string;
+  lote: string | null;
+  dataDiagnosticoPrevista: string | null;
+  previsaoParto: string | null;
+  observacoes: string | null;
 };
 
 export type MatrizDetalhe = MatrizResumo & {
@@ -53,27 +86,163 @@ async function listarBrincos(
   });
 }
 
+function mapTipoInseminacao(tipo: string): HistoricoInseminacaoMatriz["tipo"] {
+  if (tipo === "PROTOCOLO") return "Protocolo";
+  if (tipo === "CN" || tipo === "IATF") return tipo;
+  return "IATF";
+}
+
+async function buscarResumosInseminacao(
+  databaseUrl: string,
+  cadastroId: string,
+): Promise<Map<string, LinhaInseminacaoResumo[]>> {
+  return comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+    const resultado = await cliente.query<LinhaInseminacaoResumo>(
+      `select matriz_id::text, data::text as data, status,
+              numero_tentativa
+       from public.inseminacoes`,
+    );
+    const porMatriz = new Map<string, LinhaInseminacaoResumo[]>();
+    for (const linha of resultado.rows) {
+      const atual = porMatriz.get(linha.matriz_id) ?? [];
+      atual.push(linha);
+      porMatriz.set(linha.matriz_id, atual);
+    }
+    return porMatriz;
+  });
+}
+
+function enriquecerComSituacao(
+  matriz: MatrizResumo,
+  historico: LinhaInseminacaoResumo[] | undefined,
+): MatrizResumoComSituacao {
+  const resumos =
+    historico?.map((h) => ({
+      data: h.data,
+      status: h.status,
+      numeroTentativa: h.numero_tentativa,
+    })) ?? [];
+  const { situacao, ultimaInseminacaoIso } =
+    derivarSituacaoDaUltimaInseminacao(resumos);
+  return {
+    ...matriz,
+    situacao,
+    ultimaInseminacao: ultimaInseminacaoIso
+      ? formatarDataIsoParaBr(ultimaInseminacaoIso)
+      : null,
+  };
+}
+
 export async function listarMatrizesAtivas(
   databaseUrl: string,
   cadastroId: string,
   consulta?: string,
-): Promise<MatrizResumo[]> {
-  const linhas = await comCadastroId(databaseUrl, cadastroId, async (cliente) => {
-    const resultado = await cliente.query<MatrizResumo>(
-      `select id, nome, brinco, raca, ativa
-       from public.matrizes
-       where ativa = true
-       order by nome asc`,
-    );
-    return resultado.rows;
-  });
+  somenteAtivos = true,
+): Promise<MatrizResumoComSituacao[]> {
+  const [linhas, inseminacoes] = await Promise.all([
+    comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+      const resultado = await cliente.query<MatrizResumo>(
+        `select id, nome, brinco, raca, ativa
+         from public.matrizes
+         where ativa = $1
+         order by nome asc`,
+        [somenteAtivos],
+      );
+      return resultado.rows;
+    }),
+    buscarResumosInseminacao(databaseUrl, cadastroId),
+  ]);
+  const enriquecidas = linhas.map((m) =>
+    enriquecerComSituacao(m, inseminacoes.get(m.id)),
+  );
   const q = consulta?.trim() ?? "";
-  if (!q) return linhas;
-  return linhas.filter(
+  if (!q) return enriquecidas;
+  return enriquecidas.filter(
     (m) =>
       textoBuscaCoincide(m.nome, q) ||
       (m.brinco != null && textoBuscaCoincide(m.brinco, q)),
   );
+}
+
+export async function obterMatrizComSituacao(
+  databaseUrl: string,
+  cadastroId: string,
+  id: string,
+): Promise<(MatrizDetalhe & MatrizResumoComSituacao) | null> {
+  const [detalhe, inseminacoes] = await Promise.all([
+    obterMatriz(databaseUrl, cadastroId, id),
+    buscarResumosInseminacao(databaseUrl, cadastroId),
+  ]);
+  if (!detalhe) return null;
+  return {
+    ...detalhe,
+    ...enriquecerComSituacao(detalhe, inseminacoes.get(id)),
+  };
+}
+
+export async function listarHistoricoMatriz(
+  databaseUrl: string,
+  cadastroId: string,
+  matrizId: string,
+): Promise<{ historico: HistoricoInseminacaoMatriz[]; repeticoes: number }> {
+  const historico = await comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+    const resultado = await cliente.query<{
+      id: string;
+      data: string;
+      tipo: string;
+      status: StatusInseminacao;
+      numero_tentativa: number;
+      data_diagnostico_prevista: string | null;
+      previsao_parto: string | null;
+      observacoes: string | null;
+      reprodutor_nome: string;
+      inseminador_nome: string;
+      lote_nome: string | null;
+    }>(
+      `select i.id, i.data::text as data, i.tipo, i.status, i.numero_tentativa,
+              i.data_diagnostico_prevista::text,
+              i.previsao_parto::text,
+              i.observacoes,
+              r.nome as reprodutor_nome,
+              ins.nome as inseminador_nome,
+              l.nome as lote_nome
+       from public.inseminacoes i
+       inner join public.reprodutores r on r.id = i.reprodutor_id
+       inner join public.inseminadores ins on ins.id = i.inseminador_id
+       left join public.lotes l on l.id = i.lote_id
+       where i.matriz_id = $1
+       order by i.data desc, i.numero_tentativa desc`,
+      [matrizId],
+    );
+    return {
+      linhas: resultado.rows,
+      itens: resultado.rows.map((linha) => ({
+        id: linha.id,
+        data: formatarDataIsoParaBr(linha.data),
+        tipo: mapTipoInseminacao(linha.tipo),
+        status: linha.status,
+        numeroTentativa: linha.numero_tentativa,
+        reprodutor: linha.reprodutor_nome,
+        inseminador: linha.inseminador_nome,
+        lote: linha.lote_nome,
+        dataDiagnosticoPrevista: linha.data_diagnostico_prevista
+          ? formatarDataIsoParaBr(linha.data_diagnostico_prevista)
+          : null,
+        previsaoParto: linha.previsao_parto
+          ? formatarDataIsoParaBr(linha.previsao_parto)
+          : null,
+        observacoes: linha.observacoes,
+      })),
+    };
+  });
+  const repeticoes = contarRepeticoesMatriz(
+    historico.linhas.map((linha) => ({
+      data: linha.data,
+      status: linha.status,
+      numeroTentativa: linha.numero_tentativa,
+    })),
+  );
+  return { historico: historico.itens, repeticoes };
 }
 
 /** @deprecated use listarMatrizesAtivas */

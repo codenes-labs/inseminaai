@@ -9,6 +9,7 @@ import {
   Cartao,
   cx,
   inputClass,
+  textareaClass,
 } from "../components/ui";
 import {
   inseminadores as inseminadoresMock,
@@ -352,11 +353,10 @@ export function NovaInseminacao() {
                 <span className="font-normal text-muted-foreground">(opcional)</span>
               </span>
               <textarea
-                rows={3}
                 value={observacoes}
                 onChange={(e) => setObservacoes(e.target.value)}
                 placeholder="Ex.: cio forte pela manhã"
-                className="w-full rounded-md border border-input bg-card p-3.5 text-base outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
+                className={textareaClass}
               />
             </label>
             {erro && (

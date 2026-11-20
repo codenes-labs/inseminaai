@@ -7,6 +7,7 @@ import {
   CabecalhoVoltar,
   Campo,
   inputClass,
+  textareaCampoClass,
 } from "../components/ui";
 import {
   atualizarMatrizApi,
@@ -121,9 +122,9 @@ export function MatrizForm() {
                 disabled={salvando}
               />
             </Campo>
-            <Campo rotulo="Observações">
+            <Campo rotulo="Observações" multilinha>
               <textarea
-                className={`${inputClass} min-h-24 py-3`}
+                className={textareaCampoClass}
                 value={observacoes}
                 onChange={(e) => setObservacoes(e.target.value)}
                 disabled={salvando}

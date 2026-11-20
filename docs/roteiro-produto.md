@@ -22,7 +22,7 @@ P1 (SPEC-12) e **P3 (SPEC-14)** concluídas na prática; próximo **SPEC-02** (m
 | 3 | **SPEC-03** Cadastros auxiliares | CRUD + filtros ativos | — |
 | 4 | **SPEC-04** Registrar inseminação | Persistência + API | Diagnóstico (SPEC-05); listas reais (SPEC-06) |
 | 5 | **SPEC-05** Diagnóstico | Persistência + API | Listas reais (SPEC-06) |
-| 6 | **SPEC-06** Lista/detalhe matrizes | Mock | Dados reais, timeline |
+| 6 | **SPEC-06** Lista/detalhe matrizes | **Implementado** | Revisão mobile; teste celular real |
 | 7 | **SPEC-07** Importação CSV | Não feito | Idempotência; fixture em `docs/fixtures/` quando liberar arquivo |
 | 8 | **SPEC-08** Dashboard | Números mock | Métricas do cadastro |
 | 9 | **SPEC-09** Lançamento em lote | Sem tela | Fluxo lote (mobile) |

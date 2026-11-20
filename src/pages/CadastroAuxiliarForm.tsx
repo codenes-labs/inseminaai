@@ -6,6 +6,7 @@ import {
   CabecalhoVoltar,
   Campo,
   inputClass,
+  textareaCampoClass,
 } from "../components/ui";
 import type { TipoCadastro } from "../features/cadastros-auxiliares/infrastructure/cadastros-auxiliares-api";
 import {
@@ -217,9 +218,9 @@ export function CadastroAuxiliarForm() {
                     disabled={salvando}
                   />
                 </Campo>
-                <Campo rotulo="Observações" opcional>
+                <Campo rotulo="Observações" opcional multilinha>
                   <textarea
-                    className={`${inputClass} min-h-20 py-3`}
+                    className={textareaCampoClass}
                     value={observacoes}
                     onChange={(e) => setObservacoes(e.target.value)}
                     disabled={salvando}

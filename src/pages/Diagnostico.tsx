@@ -9,6 +9,7 @@ import {
   Vazio,
   cx,
   inputClass,
+  textareaClass,
 } from "../components/ui";
 import {
   inseminacaoPendenteDaMatrizApi,
@@ -180,10 +181,9 @@ export function Diagnostico() {
               <span className="font-normal text-muted-foreground">(opcional)</span>
             </span>
             <textarea
-              rows={3}
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
-              className="w-full rounded-md border border-input bg-card p-3.5 text-base outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
+              className={textareaClass}
             />
           </label>
           {resultado === "prenhe" && (

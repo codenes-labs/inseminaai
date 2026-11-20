@@ -16,4 +16,4 @@
 
 ## Estado atual
 
-Lista, filtros, busca e detalhe visuais prontos, alimentados por mock.
+**Implementado:** lista com situação e última IA via Postgres; filtros e busca; detalhe com linha do tempo (`GET /api/matrizes/:id/historico`), repetições e botões de diagnóstico/nova IA. Domínio em `resumo-reprodutivo.ts`.

@@ -10,6 +10,9 @@ type DevApiHandler = (request: Request) => Promise<Response>;
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), devApi()],
+  build: {
+    sourcemap: false,
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

@@ -1,7 +1,8 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { NavLink, Link } from "react-router-dom";
 import {
   ChartColumn,
+  ChevronDown,
   House,
   Menu,
   Plus,
@@ -90,11 +91,13 @@ export function Campo({
   rotulo,
   icone,
   opcional,
+  multilinha,
   children,
 }: {
   rotulo: string;
   icone?: ReactNode;
   opcional?: boolean;
+  multilinha?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -105,8 +108,17 @@ export function Campo({
           <span className="font-normal text-muted-foreground">(opcional)</span>
         )}
       </span>
-      <div className="flex min-h-12 items-center gap-2.5 rounded-md border border-input bg-card px-3.5 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
-        {icone && <span className="text-muted-foreground">{icone}</span>}
+      <div
+        className={cx(
+          "flex gap-2.5 rounded-md border border-input bg-card px-3.5 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20",
+          multilinha ? "items-start py-3" : "min-h-12 items-center",
+        )}
+      >
+        {icone && (
+          <span className={cx("text-muted-foreground", multilinha && "pt-0.5")}>
+            {icone}
+          </span>
+        )}
         {children}
       </div>
     </label>
@@ -115,6 +127,102 @@ export function Campo({
 
 export const inputClass =
   "h-12 w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground";
+
+/** Textarea dentro de `<Campo multilinha>` — altura fixa, rolagem interna. */
+export const textareaCampoClass =
+  "h-24 max-h-24 w-full resize-none overflow-y-auto bg-transparent py-0 text-base text-foreground outline-none placeholder:text-muted-foreground";
+
+/** Textarea com borda própria (fora de `<Campo>`). */
+export const textareaClass =
+  "h-24 max-h-24 w-full resize-none overflow-y-auto rounded-md border border-input bg-card p-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20";
+
+export function FiltroSelecao<T extends string>({
+  rotulo,
+  valor,
+  opcoes,
+  onChange,
+  valorLimpar = "todas" as T,
+  rotuloLimpar = "Limpar filtro",
+}: {
+  rotulo: string;
+  valor: T;
+  opcoes: { id: T; rotulo: string }[];
+  onChange: (id: T) => void;
+  valorLimpar?: T;
+  rotuloLimpar?: string;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const selecionado = opcoes.find((o) => o.id === valor);
+
+  return (
+    <>
+      <Campo rotulo={rotulo}>
+        <button
+          type="button"
+          className="press flex h-12 min-w-0 flex-1 items-center justify-between gap-2 bg-transparent text-left text-base font-medium text-foreground outline-none"
+          aria-expanded={aberto}
+          aria-haspopup="listbox"
+          onClick={() => setAberto(true)}
+        >
+          <span className="truncate">{selecionado?.rotulo ?? "—"}</span>
+        </button>
+        <ChevronDown className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+      </Campo>
+      {aberto ? (
+        <div className="fixed inset-0 z-40 mx-auto max-w-[480px]">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            aria-label="Fechar filtro"
+            onClick={() => setAberto(false)}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 rounded-t-xl border border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-(--shadow-card)"
+            role="listbox"
+            aria-label={rotulo}
+          >
+            <p className="mb-3 text-base font-semibold text-foreground">{rotulo}</p>
+            <ul className="space-y-2">
+              {opcoes.map((opcao) => (
+                <li key={opcao.id}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={valor === opcao.id}
+                    className={cx(
+                      "press w-full rounded-lg px-4 py-3 text-left text-base font-medium",
+                      valor === opcao.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-brand-soft text-primary",
+                    )}
+                    onClick={() => {
+                      onChange(opcao.id);
+                      setAberto(false);
+                    }}
+                  >
+                    {opcao.rotulo}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {valor !== valorLimpar ? (
+              <button
+                type="button"
+                className="press mt-4 w-full rounded-lg py-3 text-center text-sm font-semibold text-brand"
+                onClick={() => {
+                  onChange(valorLimpar);
+                  setAberto(false);
+                }}
+              >
+                {rotuloLimpar}
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
 
 export function Cartao({
   children,

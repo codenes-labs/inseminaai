@@ -48,3 +48,14 @@ Alvo: `inseminaai.codenes.com.br` (custom domain no painel Cloudflare, ligado ao
 O secret `DATABASE_URL` deve apontar para um **usuário que exista** no Neon (em geral `inseminaai_user` ou o owner `neondb_owner`). O passo *Migrations e seed* precisa de permissão para criar tabelas/roles — se `inseminaai_user` não tiver, use a connection string do **owner** no secret até o schema estar criado.
 
 A migration `20251120100000_grant_inseminaai_user.sql` concede `inseminaai_app` ao `inseminaai_user` quando esse role existir (útil se o CI migrar como owner e o Worker conectar como `inseminaai_user`).
+
+### Pooled vs direct (importante)
+
+A API usa `SET LOCAL ROLE inseminaai_app` + `app.cadastro_id` em cada transação (RLS). No Neon, o host **com `-pooler`** (connection pooling) **não suporta** bem esse tipo de `SET` — login e health passam, mas **`GET /api/matrizes`** (e outras rotas autenticadas) podem falhar.
+
+| Uso | Connection pooling no Neon |
+| --- | --- |
+| Secret `DATABASE_URL` (Worker + mesmo URL no CI, se quiser um só) | **Desligado** (host **sem** `-pooler`) |
+| Migrations no CI | Preferir **direct** também |
+
+Depois de trocar a string, rode o deploy de novo (ou `wrangler secret bulk`) para o Worker pegar a URL nova.
