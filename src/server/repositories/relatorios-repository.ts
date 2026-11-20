@@ -11,9 +11,11 @@ import {
 } from "../../features/relatorios/domain/taxas";
 import type { StatusInseminacao } from "../../features/inseminacoes/domain/calculos";
 import { derivarSituacaoDaUltimaInseminacao } from "../../features/matrizes/domain/resumo-reprodutivo";
+import type { PeriodoRelatorio } from "../../features/relatorios/domain/periodo";
 import { comCadastroId } from "../db/context";
 
 export type ResumoRelatorios = {
+  periodo: PeriodoRelatorio;
   taxaPrenhezGeral: number;
   prenhes: number;
   diagnosticadas: number;
@@ -26,23 +28,14 @@ export type ResumoRelatorios = {
   mediaRepeticoes: number;
 };
 
-function inicioMes(isoHoje: string): string {
-  const [y, m] = isoHoje.split("-");
-  return `${y}-${m}-01`;
-}
-
-function fimMes(isoHoje: string): string {
-  const [y, m] = isoHoje.split("-");
-  const ano = Number(y);
-  const mes = Number(m);
-  const ultimo = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
-  return `${y}-${m}-${String(ultimo).padStart(2, "0")}`;
+function noPeriodo(data: string, periodo: PeriodoRelatorio): boolean {
+  return data >= periodo.inicio && data <= periodo.fim;
 }
 
 export async function obterResumoRelatorios(
   databaseUrl: string,
   cadastroId: string,
-  hoje: string,
+  periodo: PeriodoRelatorio,
 ): Promise<ResumoRelatorios> {
   return comCadastroId(databaseUrl, cadastroId, async (cliente) => {
     const insem = await cliente.query<{
@@ -66,11 +59,13 @@ export async function obterResumoRelatorios(
       ativa: boolean;
     }>(`select id::text, ativa from public.matrizes`);
 
+    const insemPeriodo = insem.rows.filter((r) => noPeriodo(r.data, periodo));
+
     const porMatriz = new Map<
       string,
       { data: string; status: StatusInseminacao; numeroTentativa: number }[]
     >();
-    for (const row of insem.rows) {
+    for (const row of insemPeriodo) {
       const grupo = porMatriz.get(row.matriz_id) ?? [];
       grupo.push({
         data: row.data,
@@ -84,23 +79,23 @@ export async function obterResumoRelatorios(
     for (const m of matrizes.rows) {
       if (!m.ativa) continue;
       const historico = porMatriz.get(m.id) ?? [];
+      if (historico.length === 0) {
+        porSituacao.sem++;
+        continue;
+      }
       const { situacao } = derivarSituacaoDaUltimaInseminacao(historico);
       porSituacao[situacao]++;
     }
 
-    const inicio = inicioMes(hoje);
-    const fim = fimMes(hoje);
-    const inseminadasMes = insem.rows.filter(
-      (r) => r.data >= inicio && r.data <= fim,
-    ).length;
+    const inseminadasMes = insemPeriodo.length;
 
-    const prenhes = insem.rows.filter((r) => r.status === "prenhe").length;
-    const diagnosticadas = insem.rows.filter((r) =>
+    const prenhes = insemPeriodo.filter((r) => r.status === "prenhe").length;
+    const diagnosticadas = insemPeriodo.filter((r) =>
       ["prenhe", "vazia"].includes(r.status),
     ).length;
-    const pendentes = insem.rows.filter((r) => r.status === "pendente").length;
+    const pendentes = insemPeriodo.filter((r) => r.status === "pendente").length;
 
-    const itensTaxa = insem.rows.map((r) => ({
+    const itensTaxa = insemPeriodo.map((r) => ({
       grupoReprodutor: r.reprodutor,
       grupoTipo: mapTipoInseminacaoParaExportacao(r.tipo),
       grupoLote: r.lote?.trim() || "Sem lote",
@@ -144,11 +139,12 @@ export async function obterResumoRelatorios(
       diagnosticadas: g.diagnosticadas,
     }));
 
-    const maxPorMatriz = [...porMatriz.values()].map((hist) =>
-      hist.length === 0 ? 1 : Math.max(...hist.map((h) => h.numeroTentativa)),
-    );
+    const maxPorMatriz = [...porMatriz.values()]
+      .filter((hist) => hist.length > 0)
+      .map((hist) => Math.max(...hist.map((h) => h.numeroTentativa)));
 
     return {
+      periodo,
       taxaPrenhezGeral: calcularTaxaPrenhez(prenhes, diagnosticadas),
       prenhes,
       diagnosticadas,
@@ -166,8 +162,15 @@ export async function obterResumoRelatorios(
 export async function exportarInseminacoesCsv(
   databaseUrl: string,
   cadastroId: string,
+  periodo?: PeriodoRelatorio,
 ): Promise<string> {
   return comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+    const filtroData =
+      periodo ?
+        `where i.data >= $1::date and i.data <= $2::date`
+      : "";
+    const params = periodo ? [periodo.inicio, periodo.fim] : [];
+
     const resultado = await cliente.query<{
       matriz: string;
       brinco: string | null;
@@ -185,7 +188,9 @@ export async function exportarInseminacoesCsv(
        join public.reprodutores r on r.id = i.reprodutor_id
        join public.inseminadores ins on ins.id = i.inseminador_id
        left join public.lotes l on l.id = i.lote_id
+       ${filtroData}
        order by i.data desc, m.nome asc, i.numero_tentativa asc`,
+      params,
     );
 
     const linhas: LinhaExportacaoInseminacao[] = resultado.rows.map((row) => ({

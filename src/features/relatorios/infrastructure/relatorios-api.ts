@@ -1,6 +1,12 @@
 import { apiFetch } from "../../../lib/api-client";
+import type { PeriodoRelatorio } from "../domain/periodo";
+import {
+  montarQueryRelatorios,
+  type ConsultaRelatorios,
+} from "./consulta-periodo";
 
 export type ResumoRelatoriosApi = {
+  periodo: PeriodoRelatorio;
   taxaPrenhezGeral: number;
   prenhes: number;
   diagnosticadas: number;
@@ -30,16 +36,22 @@ export type ResumoRelatoriosApi = {
   mediaRepeticoes: number;
 };
 
-export async function obterResumoRelatoriosApi(): Promise<ResumoRelatoriosApi> {
-  const response = await apiFetch("/api/relatorios/resumo");
+export async function obterResumoRelatoriosApi(
+  consulta: ConsultaRelatorios,
+): Promise<ResumoRelatoriosApi> {
+  const query = montarQueryRelatorios(consulta);
+  const response = await apiFetch(`/api/relatorios/resumo?${query}`);
   if (!response.ok) {
     throw new Error("Não foi possível carregar os relatórios.");
   }
   return (await response.json()) as ResumoRelatoriosApi;
 }
 
-export async function baixarCsvInseminacoes(): Promise<Blob> {
-  const response = await apiFetch("/api/relatorios/inseminacoes.csv");
+export async function baixarCsvInseminacoes(
+  consulta: ConsultaRelatorios,
+): Promise<Blob> {
+  const query = montarQueryRelatorios(consulta);
+  const response = await apiFetch(`/api/relatorios/inseminacoes.csv?${query}`);
   if (!response.ok) {
     throw new Error("Não foi possível exportar o CSV.");
   }

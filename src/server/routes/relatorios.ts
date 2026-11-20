@@ -1,8 +1,29 @@
+import { resolverPeriodoRelatorio } from "../../features/relatorios/domain/periodo";
 import type { AuthUser } from "../auth/types";
 import {
   exportarInseminacoesCsv,
   obterResumoRelatorios,
 } from "../repositories/relatorios-repository";
+
+function hojeServidor(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${dia}`;
+}
+
+function periodoDaUrl(url: URL) {
+  try {
+    return resolverPeriodoRelatorio({
+      de: url.searchParams.get("de"),
+      ate: url.searchParams.get("ate"),
+      mes: url.searchParams.get("mes"),
+      hoje: url.searchParams.get("hoje") ?? hojeServidor(),
+    });
+  } catch {
+    return null;
+  }
+}
 
 export async function handleRelatoriosRequest(
   request: Request,
@@ -11,14 +32,14 @@ export async function handleRelatoriosRequest(
   const url = new URL(request.url);
 
   if (url.pathname === "/api/relatorios/resumo" && request.method === "GET") {
-    const hoje =
-      url.searchParams.get("hoje")?.match(/^\d{4}-\d{2}-\d{2}$/) ?
-        url.searchParams.get("hoje")!
-      : new Date().toISOString().slice(0, 10);
+    const periodo = periodoDaUrl(url);
+    if (!periodo) {
+      return Response.json({ erro: "Período inválido." }, { status: 400 });
+    }
     const resumo = await obterResumoRelatorios(
       context.databaseUrl,
       context.usuario.cadastroId,
-      hoje,
+      periodo,
     );
     return Response.json(resumo);
   }
@@ -27,9 +48,14 @@ export async function handleRelatoriosRequest(
     url.pathname === "/api/relatorios/inseminacoes.csv" &&
     request.method === "GET"
   ) {
+    const periodo = periodoDaUrl(url);
+    if (!periodo) {
+      return Response.json({ erro: "Período inválido." }, { status: 400 });
+    }
     const csv = await exportarInseminacoesCsv(
       context.databaseUrl,
       context.usuario.cadastroId,
+      periodo,
     );
     const bom = "\uFEFF";
     return new Response(bom + csv, {

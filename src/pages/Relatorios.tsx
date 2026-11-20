@@ -1,11 +1,33 @@
-import { useEffect, useState } from "react";
-import { Download } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Share2 } from "lucide-react";
 import { AppShell, Botao, Cartao } from "../components/ui";
+import {
+  periodoMesDe,
+  type PeriodoRelatorio,
+} from "../features/relatorios/domain/periodo";
+import { ComprovanteRelatorio } from "../features/relatorios/presentation/ComprovanteRelatorio";
+import { RelatorioCompletoDocumento } from "../features/relatorios/presentation/RelatorioCompletoDocumento";
+import { ExportarRelatoriosSheet } from "../features/relatorios/presentation/ExportarRelatoriosSheet";
+import { PreviaRelatorioPdf } from "../features/relatorios/presentation/PreviaRelatorioPdf";
+import { SeletorPeriodoRelatorio } from "../features/relatorios/presentation/SeletorPeriodoRelatorio";
 import {
   baixarCsvInseminacoes,
   obterResumoRelatoriosApi,
   type ResumoRelatoriosApi,
 } from "../features/relatorios/infrastructure/relatorios-api";
+import {
+  capturarComprovantePng,
+  compartilharOuBaixarArquivo,
+  formatarGeradoEm,
+  gerarRelatorioPdfDoElemento,
+} from "../features/relatorios/infrastructure/exportar-comprovante";
+
+function hojeISO(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${dia}`;
+}
 
 function ListaTaxas({
   titulo,
@@ -22,10 +44,11 @@ function ListaTaxas({
         {itens.map((item) => (
           <li key={item.chave} className="flex items-center justify-between gap-2">
             <span className="truncate">{item.chave}</span>
-            <span className="shrink-0 font-semibold text-primary">
-              {item.taxaPercentual}%{" "}
-              <span className="text-xs font-normal text-muted-foreground">
-                (n={item.diagnosticadas})
+            <span className="shrink-0 text-right font-semibold text-primary">
+              {item.taxaPercentual}%
+              <span className="block text-xs font-normal text-muted-foreground">
+                {item.diagnosticadas}{" "}
+                {item.diagnosticadas === 1 ? "diagnóstico" : "diagnósticos"}
               </span>
             </span>
           </li>
@@ -36,61 +59,138 @@ function ListaTaxas({
 }
 
 export function Relatorios() {
+  const comprovanteRef = useRef<HTMLDivElement>(null);
+  const relatorioPdfRef = useRef<HTMLDivElement>(null);
   const [resumo, setResumo] = useState<ResumoRelatoriosApi | null>(null);
   const [erro, setErro] = useState("");
-  const [exportando, setExportando] = useState(false);
+  const [exportando, setExportando] = useState<
+    "csv" | "imagem" | "pdf" | null
+  >(null);
+  const [geradoEm, setGeradoEm] = useState(() => formatarGeradoEm());
+  const [exportarAberto, setExportarAberto] = useState(false);
+  const [previaPdfAberta, setPreviaPdfAberta] = useState(false);
+  const [periodo, setPeriodo] = useState<PeriodoRelatorio>(() =>
+    periodoMesDe(hojeISO()),
+  );
+  const [carregando, setCarregando] = useState(true);
+
+  const consulta = useMemo(
+  () => ({
+      tipo: "intervalo" as const,
+      de: periodo.inicio,
+      ate: periodo.fim,
+      hoje: hojeISO(),
+    }),
+    [periodo.inicio, periodo.fim],
+  );
 
   useEffect(() => {
     let ativo = true;
+    setCarregando(true);
     void (async () => {
       try {
-        const dados = await obterResumoRelatoriosApi();
-        if (ativo) setResumo(dados);
+        const dados = await obterResumoRelatoriosApi(consulta);
+        if (ativo) {
+          setResumo(dados);
+          setErro("");
+        }
       } catch {
         if (ativo) setErro("Não foi possível carregar.");
+      } finally {
+        if (ativo) setCarregando(false);
       }
     })();
     return () => {
       ativo = false;
     };
-  }, []);
+  }, [consulta]);
 
   async function exportarCsv() {
-    setExportando(true);
+    setExportando("csv");
     setErro("");
     try {
-      const blob = await baixarCsvInseminacoes();
-      const arquivo = new File([blob], "inseminaai-inseminacoes.csv", {
-        type: "text/csv",
-      });
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.share &&
-        navigator.canShare?.({ files: [arquivo] })
-      ) {
-        await navigator.share({
-          files: [arquivo],
-          title: "Inseminações exportadas",
-        });
-        return;
-      }
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "inseminaai-inseminacoes.csv";
-      link.click();
-      URL.revokeObjectURL(url);
+      const blob = await baixarCsvInseminacoes(consulta);
+      await compartilharOuBaixarArquivo(
+        blob,
+        "inseminaai-inseminacoes.csv",
+        "Inseminações exportadas",
+      );
     } catch (cause) {
       if (cause instanceof Error && cause.name === "AbortError") return;
       setErro(
         cause instanceof Error ? cause.message : "Falha ao exportar o CSV.",
       );
     } finally {
-      setExportando(false);
+      setExportando(null);
+    }
+  }
+
+  async function exportarComprovanteImagem() {
+    const el = comprovanteRef.current;
+    if (!el || !resumo) {
+      setErro("Aguarde o resumo carregar.");
+      return;
+    }
+    setExportando("imagem");
+    setErro("");
+    const momento = formatarGeradoEm();
+    setGeradoEm(momento);
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    try {
+      const png = await capturarComprovantePng(el);
+      await compartilharOuBaixarArquivo(
+        png,
+        `inseminaai-comprovante-${Date.now()}.png`,
+        "Comprovante Insemina aí",
+      );
+    } catch (cause) {
+      setErro(
+        cause instanceof Error ? cause.message : "Falha ao gerar comprovante.",
+      );
+    } finally {
+      setExportando(null);
+    }
+  }
+
+  function abrirPreviaPdf() {
+    if (!resumo) {
+      setErro("Aguarde o resumo carregar.");
+      return;
+    }
+    setGeradoEm(formatarGeradoEm());
+    setPreviaPdfAberta(true);
+  }
+
+  async function exportarRelatorioPdf() {
+    const el = relatorioPdfRef.current;
+    if (!el || !resumo) {
+      setErro("Aguarde o resumo carregar.");
+      return;
+    }
+    setExportando("pdf");
+    setErro("");
+    const momento = formatarGeradoEm();
+    setGeradoEm(momento);
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    try {
+      const pdf = await gerarRelatorioPdfDoElemento(el);
+      await compartilharOuBaixarArquivo(
+        pdf,
+        `inseminaai-relatorio-${Date.now()}.pdf`,
+        "Relatório Insemina aí",
+      );
+      setPreviaPdfAberta(false);
+    } catch (cause) {
+      setErro(
+        cause instanceof Error ? cause.message : "Falha ao gerar o PDF.",
+      );
+    } finally {
+      setExportando(null);
     }
   }
 
   const dados = resumo ?? {
+    periodo,
     taxaPrenhezGeral: 0,
     prenhes: 0,
     diagnosticadas: 0,
@@ -113,12 +213,19 @@ export function Relatorios() {
           <p className="text-sm font-medium text-status-vazia">{erro}</p>
         ) : null}
         <Cartao className="p-4">
+          <SeletorPeriodoRelatorio periodo={periodo} onChange={setPeriodo} />
+        </Cartao>
+        {carregando ? (
+          <p className="text-sm text-muted-foreground">Atualizando números…</p>
+        ) : null}
+        <Cartao className="p-4">
           <p className="text-xs text-muted-foreground">Taxa de prenhez</p>
           <p className="mt-1 text-3xl font-semibold">
             {dados.taxaPrenhezGeral}%
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {dados.prenhes} prenhes em {dados.diagnosticadas} com diagnóstico
+            (prenhe ou vazia)
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Média de repetições por matriz:{" "}
@@ -127,9 +234,15 @@ export function Relatorios() {
             </span>
           </p>
         </Cartao>
+        <Cartao className="p-4 text-sm text-muted-foreground">
+          Nas taxas por reprodutor, tipo ou lote, o número abaixo da porcentagem
+          é <strong className="text-foreground">quantos diagnósticos</strong>{" "}
+          entraram no cálculo daquele grupo — não é fórmula do mercado, é só o
+          tamanho da amostra no seu cadastro.
+        </Cartao>
         <div className="grid grid-cols-2 gap-3">
           <Cartao className="p-4">
-            <p className="text-xs text-muted-foreground">Inseminadas no mês</p>
+            <p className="text-xs text-muted-foreground">Inseminadas no período</p>
             <p className="mt-1 text-2xl font-semibold">
               {dados.inseminadasMes}
             </p>
@@ -174,12 +287,47 @@ export function Relatorios() {
         <Botao
           type="button"
           variante="suave"
-          disabled={exportando}
-          onClick={() => void exportarCsv()}
+          disabled={exportando !== null}
+          onClick={() => setExportarAberto(true)}
         >
-          <Download className="size-5" />
-          {exportando ? "Gerando CSV…" : "Exportar inseminações (.csv)"}
+          <Share2 className="size-5" />
+          {exportando !== null ? "Gerando…" : "Exportar / compartilhar"}
         </Botao>
+        <ExportarRelatoriosSheet
+          aberto={exportarAberto}
+          exportando={exportando}
+          desabilitarResumo={!resumo}
+          onFechar={() => setExportarAberto(false)}
+          onExportarCsv={() => void exportarCsv()}
+          onExportarImagem={() => void exportarComprovanteImagem()}
+          onExportarPdf={() => void exportarRelatorioPdf()}
+          onPreviaPdf={abrirPreviaPdf}
+        />
+        {resumo ? (
+          <PreviaRelatorioPdf
+            aberto={previaPdfAberta}
+            dados={resumo}
+            geradoEm={geradoEm}
+            gerandoPdf={exportando === "pdf"}
+            onFechar={() => setPreviaPdfAberta(false)}
+            onGerarPdf={() => void exportarRelatorioPdf()}
+          />
+        ) : null}
+      </div>
+      <div
+        aria-hidden
+        className="pointer-events-none fixed left-0 top-0 -z-10 opacity-0"
+      >
+        <ComprovanteRelatorio
+          ref={comprovanteRef}
+          dados={dados}
+          geradoEm={geradoEm}
+        />
+        <RelatorioCompletoDocumento
+          ref={relatorioPdfRef}
+          dados={dados}
+          geradoEm={geradoEm}
+        />
       </div>
     </AppShell>
   );

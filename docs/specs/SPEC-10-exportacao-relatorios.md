@@ -4,8 +4,10 @@
 
 ## Critérios de aceite
 
-- Exportar inseminações em **arquivo `.csv`** (UTF-8, separador conforme locale BR ou `;` documentado), com as **mesmas colunas** da planilha de referência
+- Relatório e CSV respeitam **período**: padrão mês civil atual; **um campo** com faixa `DD/MM/YYYY – DD/MM/YYYY`, calendário com seleção entre duas datas, **Limpar** (mês atual) e **Hoje** (dia 1 até hoje)
+- Exportar inseminações em **arquivo `.csv`** (UTF-8, separador conforme locale BR ou `;` documentado), com as **mesmas colunas** da planilha de referência, **filtrado pelo período**
 - Download pelo app (mobile): compartilhar/salvar o CSV no dispositivo
+- Comprovante em **imagem** (estilo resumo para WhatsApp) e **PDF completo** (taxas, situação, listas por reprodutor/tipo/lote); marca e site **uma vez** no rodapé; **prévia** do PDF antes de gerar; um botão **Exportar** abre escolha (CSV, imagem, prévia/PDF)
 - Taxa de prenhez por reprodutor, tipo e lote
 - Número médio de repetições
 
