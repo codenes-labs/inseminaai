@@ -5,7 +5,7 @@
 ## Regras de negócio
 
 - A tentativa é 1 para a primeira inseminação da matriz e aumenta quando a anterior ficou vazia
-- A data prevista do diagnóstico é a data da inseminação mais 30 dias, ajustável nas configurações
+- A data prevista do diagnóstico é inseminação + **30 dias** sem histórico; com diagnósticos anteriores na **mesma matriz**, usa a **média de dias** entre IA e diagnóstico (entre 7 e 60)
 - Se a matriz já tem inseminação pendente, o sistema avisa antes de salvar
 - Data não pode ser futura
 

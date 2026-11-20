@@ -1,10 +1,15 @@
 import { randomUUID } from "node:crypto";
 import {
-  calcularDataDiagnosticoPrevista,
   calcularProximaTentativa,
   matrizComInseminacaoPendente,
   type InseminacaoResumo,
 } from "../../features/inseminacoes/domain/calculos";
+import {
+  DIAS_DIAGNOSTICO_PADRAO,
+  calcularDataDiagnosticoPrevistaParaMatriz,
+  inferirDiasDiagnosticoDaMatriz,
+  type DiagnosticoHistorico,
+} from "../../features/inseminacoes/domain/previsao-diagnostico";
 import {
   calcularCamposDiagnostico,
   type ResultadoDiagnostico,
@@ -81,15 +86,59 @@ async function historicoMatriz(
   );
 }
 
+async function historicoDiagnosticoMatrizNoCliente(
+  cliente: DbCliente,
+  matrizId: string,
+): Promise<DiagnosticoHistorico[]> {
+  const resultado = await cliente.query<{
+    data: string;
+    data_diagnostico: string;
+  }>(
+    `select data::text, data_diagnostico::text
+     from public.inseminacoes
+     where matriz_id = $1
+       and data_diagnostico is not null
+     order by data asc`,
+    [matrizId],
+  );
+  return resultado.rows.map((linha) => ({
+    dataInseminacao: linha.data,
+    dataDiagnostico: linha.data_diagnostico,
+  }));
+}
+
+function previsaoDiagnosticoParaInseminacao(
+  dataInseminacao: string,
+  historicoDiagnostico: DiagnosticoHistorico[],
+): string {
+  return calcularDataDiagnosticoPrevistaParaMatriz(
+    dataInseminacao,
+    historicoDiagnostico,
+  ).dataPrevista;
+}
+
 export async function contextoMatrizInseminacao(
   databaseUrl: string,
   cadastroId: string,
   matrizId: string,
-): Promise<{ temPendente: boolean; proximaTentativa: number }> {
+): Promise<{
+  temPendente: boolean;
+  proximaTentativa: number;
+  diasDiagnosticoPrevisto: number;
+  aprendidoDaMatriz: boolean;
+}> {
   const historico = await historicoMatriz(databaseUrl, cadastroId, matrizId);
+  const historicoDiag = await comCadastroId(
+    databaseUrl,
+    cadastroId,
+    async (cliente) => historicoDiagnosticoMatrizNoCliente(cliente, matrizId),
+  );
+  const aprendido = inferirDiasDiagnosticoDaMatriz(historicoDiag);
   return {
     temPendente: matrizComInseminacaoPendente(historico),
     proximaTentativa: calcularProximaTentativa(historico),
+    diasDiagnosticoPrevisto: aprendido ?? DIAS_DIAGNOSTICO_PADRAO,
+    aprendidoDaMatriz: aprendido !== null,
   };
 }
 
@@ -148,12 +197,19 @@ export async function criarInseminacao(
 
   const historico = await historicoMatriz(databaseUrl, cadastroId, input.matriz_id);
   const numeroTentativa = calcularProximaTentativa(historico);
-  const dataDiagnosticoPrevista = calcularDataDiagnosticoPrevista(input.data);
   const tipoDb = mapTipoParaDb(input.tipo);
   const id = randomUUID();
   const observacoes = input.observacoes?.trim() || null;
 
   return comCadastroId(databaseUrl, cadastroId, async (cliente) => {
+    const historicoDiag = await historicoDiagnosticoMatrizNoCliente(
+      cliente,
+      input.matriz_id,
+    );
+    const dataDiagnosticoPrevista = previsaoDiagnosticoParaInseminacao(
+      input.data,
+      historicoDiag,
+    );
     await cliente.query(
       `insert into public.inseminacoes (
          id, cadastro_id, matriz_id, reprodutor_id, inseminador_id, lote_id,
@@ -277,9 +333,14 @@ export async function criarInseminacoesEmLote(
         }
 
         const historico = await historicoMatrizNoCliente(cliente, matriz_id);
+        const historicoDiag = await historicoDiagnosticoMatrizNoCliente(
+          cliente,
+          matriz_id,
+        );
         const numeroTentativa = calcularProximaTentativa(historico);
-        const dataDiagnosticoPrevista = calcularDataDiagnosticoPrevista(
+        const dataDiagnosticoPrevista = previsaoDiagnosticoParaInseminacao(
           input.data,
+          historicoDiag,
         );
         const id = randomUUID();
 
@@ -329,6 +390,7 @@ export type InseminacaoPendente = {
   data: string;
   numero_tentativa: number;
   tipo: TipoInseminacaoDb;
+  data_diagnostico_prevista: string | null;
 };
 
 export async function obterInseminacaoPendenteDaMatriz(
@@ -343,8 +405,10 @@ export async function obterInseminacaoPendenteDaMatriz(
       data: string;
       numero_tentativa: number;
       tipo: TipoInseminacaoDb;
+      data_diagnostico_prevista: string | null;
     }>(
-      `select id, matriz_id, data::text, numero_tentativa, tipo
+      `select id, matriz_id, data::text, numero_tentativa, tipo,
+              data_diagnostico_prevista::text
        from public.inseminacoes
        where matriz_id = $1 and status = 'pendente'
        order by created_at desc
@@ -359,6 +423,7 @@ export async function obterInseminacaoPendenteDaMatriz(
       data: linha.data,
       numero_tentativa: linha.numero_tentativa,
       tipo: linha.tipo,
+      data_diagnostico_prevista: linha.data_diagnostico_prevista,
     };
   });
 }

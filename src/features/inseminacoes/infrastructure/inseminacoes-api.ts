@@ -3,6 +3,8 @@ import { apiFetch } from "../../../lib/api-client";
 export type ContextoInseminacao = {
   temPendente: boolean;
   proximaTentativa: number;
+  diasDiagnosticoPrevisto: number;
+  aprendidoDaMatriz: boolean;
 };
 
 export type InseminacaoCriada = {
@@ -38,6 +40,7 @@ export type InseminacaoPendente = {
   data: string;
   numero_tentativa: number;
   tipo: string;
+  data_diagnostico_prevista: string | null;
 };
 
 export type DiagnosticoRegistrado = {

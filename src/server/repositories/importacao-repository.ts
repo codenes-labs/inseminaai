@@ -4,7 +4,10 @@ import {
   parsearCsv,
   type LinhaImportacao,
 } from "../../features/importacao/domain/csv";
-import { calcularDataDiagnosticoPrevista } from "../../features/inseminacoes/domain/calculos";
+import {
+  calcularDataDiagnosticoPrevistaParaMatriz,
+  type DiagnosticoHistorico,
+} from "../../features/inseminacoes/domain/previsao-diagnostico";
 import { mapTipoParaDb } from "./inseminacoes-repository";
 import { STATUS_INICIAL_INSEMINACAO } from "../../features/inseminacoes/domain/registrar";
 import { comCadastroId } from "../db/context";
@@ -114,8 +117,23 @@ async function inserirLinha(
     );
   }
 
+  const historicoDiag = (await cliente.query(
+    `select data::text as data, data_diagnostico::text
+     from public.inseminacoes
+     where matriz_id = $1 and data_diagnostico is not null`,
+    [matrizId],
+  )) as { rows: { data: string; data_diagnostico: string }[] };
+  const diagHistorico: DiagnosticoHistorico[] = historicoDiag.rows.map(
+    (linha) => ({
+      dataInseminacao: linha.data,
+      dataDiagnostico: linha.data_diagnostico,
+    }),
+  );
+  const dataDiagnosticoPrevista = calcularDataDiagnosticoPrevistaParaMatriz(
+    linha.dataIso,
+    diagHistorico,
+  ).dataPrevista;
   const id = randomUUID();
-  const dataDiagnosticoPrevista = calcularDataDiagnosticoPrevista(linha.dataIso);
   const tipoDb = mapTipoParaDb(linha.tipo);
 
   await cliente.query(

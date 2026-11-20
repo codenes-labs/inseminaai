@@ -61,6 +61,8 @@ export function NovaInseminacao() {
   const [matrizes, setMatrizes] = useState<MatrizLista[]>([]);
   const [temPendente, setTemPendente] = useState(false);
   const [proximaTentativa, setProximaTentativa] = useState<number | null>(null);
+  const [diasDiagnostico, setDiasDiagnostico] = useState<number | null>(null);
+  const [previsaoAprendida, setPrevisaoAprendida] = useState(false);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
 
@@ -102,6 +104,8 @@ export function NovaInseminacao() {
     if (!matrizId) {
       setTemPendente(false);
       setProximaTentativa(null);
+      setDiasDiagnostico(null);
+      setPrevisaoAprendida(false);
       return;
     }
     void (async () => {
@@ -109,9 +113,13 @@ export function NovaInseminacao() {
         const ctx = await contextoMatrizInseminacaoApi(matrizId);
         setTemPendente(ctx.temPendente);
         setProximaTentativa(ctx.proximaTentativa);
+        setDiasDiagnostico(ctx.diasDiagnosticoPrevisto);
+        setPrevisaoAprendida(ctx.aprendidoDaMatriz);
       } catch {
         setTemPendente(false);
         setProximaTentativa(null);
+        setDiasDiagnostico(null);
+        setPrevisaoAprendida(false);
       }
     })();
   }, [matrizId]);
@@ -235,6 +243,17 @@ export function NovaInseminacao() {
                   {proximaTentativa}
                 </span>
                 .
+              </p>
+            )}
+            {diasDiagnostico != null && matrizId && (
+              <p className="text-sm text-muted-foreground">
+                Previsão de diagnóstico em{" "}
+                <span className="font-semibold text-foreground">
+                  {diasDiagnostico} dias
+                </span>
+                {previsaoAprendida
+                  ? " (média dos diagnósticos anteriores desta matriz)."
+                  : " (padrão de 30 dias até haver histórico)."}
               </p>
             )}
             <Campo rotulo="Data" icone={<Calendar className="size-5" strokeWidth={1.75} />}>

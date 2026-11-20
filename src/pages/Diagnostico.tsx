@@ -140,6 +140,16 @@ export function Diagnostico() {
               ? ` (tentativa ${pendente.numero_tentativa})`
               : ""}
           </p>
+          {pendente.data_diagnostico_prevista ? (
+            <p className="text-sm text-muted-foreground">
+              Previsão para retorno:{" "}
+              <span className="font-medium text-foreground">
+                {formatarDataBr(pendente.data_diagnostico_prevista)}
+              </span>
+              . Registrar antes ou depois ajusta a previsão das próximas IAs
+              desta matriz.
+            </p>
+          ) : null}
           <div>
             <span className="mb-1.5 block text-sm font-semibold">Resultado</span>
             <div className="grid grid-cols-2 gap-2">

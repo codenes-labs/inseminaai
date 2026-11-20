@@ -85,7 +85,7 @@ Cada inseminação (inclusive repetição) é uma linha.
 | tipo | text | CN, IATF ou PROTOCOLO |
 | numero_tentativa | int | 1 = primeira, 2 = primeira repetição, etc. |
 | status | text | pendente, prenhe, vazia |
-| data_diagnostico_prevista | date | data + 30 dias (ajustável) |
+| data_diagnostico_prevista | date | data + N dias (30 padrão; média por matriz após diagnósticos) |
 | data_diagnostico | date | quando o diagnóstico foi feito |
 | previsao_parto | date | data + 283 dias, só se prenhe |
 | data_parto | date | preenchida quando ocorrer |
