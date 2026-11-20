@@ -15,6 +15,7 @@ const CONTAS: SeedAccount[] = [
     cadastroId: CADASTRO_ADMIN_ID,
     papel: "administrador",
     demo: false,
+    plataformaAdmin: true,
   },
   {
     id: "00000000-0000-4000-9000-000000000002",
@@ -24,6 +25,7 @@ const CONTAS: SeedAccount[] = [
     cadastroId: CADASTRO_DEMO_ID,
     papel: "inseminador",
     demo: true,
+    plataformaAdmin: false,
   },
 ];
 

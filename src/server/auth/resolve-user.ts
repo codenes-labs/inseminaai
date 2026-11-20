@@ -17,6 +17,7 @@ function mapUsuario(usuario: {
   cadastroId: string;
   papel: AuthUser["papel"];
   demo: boolean;
+  plataformaAdmin: boolean;
 }): AuthUser {
   return usuario;
 }
@@ -37,6 +38,7 @@ function usuarioDoPayload(payload: {
     cadastroId: payload.cadastro_id,
     papel: payload.papel,
     demo: payload.demo,
+    plataformaAdmin: false,
   };
 }
 

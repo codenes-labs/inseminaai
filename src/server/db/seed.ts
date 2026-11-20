@@ -15,23 +15,24 @@ const SQL_CATALOGO_ADMIN = join(
 export async function aplicarSeedDev(databaseUrl: string): Promise<void> {
   await semContextoRls(databaseUrl, async (cliente) => {
     await cliente.query(
-      `insert into public.cadastros (id, nome, plano, ativa)
+      `insert into public.cadastros (id, nome, tipo, plano, ativa)
        values
-         ($1, 'Cadastro administrador', 'pro', true),
-         ($2, 'Cadastro demo', 'gratuito', true)
+         ($1, 'Cadastro administrador', 'autonomo', 'pro', true),
+         ($2, 'Cadastro demo', 'autonomo', 'gratuito', true)
        on conflict (id) do nothing`,
       [CADASTRO_ADMIN_ID, CADASTRO_DEMO_ID],
     );
 
     await cliente.query(
-      `insert into public.users (id, email, password_hash, nome, demo)
+      `insert into public.users (id, email, password_hash, nome, demo, plataforma_admin)
        values
-         ($1, 'admin@codenes.com.br', $3, 'Vitor Almeida', false),
-         ($2, 'teste@teste.com', $4, 'Conta demo', true)
+         ($1, 'admin@codenes.com.br', $3, 'Vitor Almeida', false, true),
+         ($2, 'teste@teste.com', $4, 'Conta demo', true, false)
        on conflict (email) do update
          set password_hash = excluded.password_hash,
              nome = excluded.nome,
-             demo = excluded.demo`,
+             demo = excluded.demo,
+             plataforma_admin = excluded.plataforma_admin`,
       [
         USER_ADMIN_ID,
         USER_DEMO_ID,

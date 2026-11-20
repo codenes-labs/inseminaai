@@ -13,6 +13,7 @@ function paraSession(
     cadastro_id: string;
     papel: SessionUser["papel"];
     demo: boolean;
+    plataforma_admin?: boolean;
   },
   expiresAt: number,
 ): Session {
@@ -24,6 +25,7 @@ function paraSession(
     cadastroId: user.cadastro_id,
     papel: user.papel,
     demo: user.demo,
+    plataformaAdmin: Boolean(user.plataforma_admin),
     identificador: user.email,
     expiresAt,
     lastActivityAt: momento,
@@ -53,6 +55,9 @@ export function lerSessao(): Session | null {
     if (!sessao.identificador) {
       sessao.identificador = sessao.email;
     }
+    if (typeof sessao.plataformaAdmin !== "boolean") {
+      sessao.plataformaAdmin = false;
+    }
     return sessao;
   } catch {
     return null;
@@ -67,6 +72,7 @@ export function gravarSessaoApi(
     cadastro_id: string;
     papel: SessionUser["papel"];
     demo: boolean;
+    plataforma_admin?: boolean;
   },
   expiresAt: number,
 ) {

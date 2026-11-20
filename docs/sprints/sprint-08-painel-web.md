@@ -16,26 +16,26 @@ Mobile: **intocado** (inseminador no curral).
 
 ### Fundação
 
-- [ ] Papel **administrador geral** (plataforma) definido e testado no seed.
-- [ ] Migration `users.ativo`; login rejeita inativo.
-- [ ] Migration `cadastros.tipo` (`autonomo` \| `empresa`, default `autonomo`).
+- [x] Papel **administrador geral** (`users.plataforma_admin`) no seed.
+- [x] Migration `users.ativo`; login rejeita inativo.
+- [x] Migration `cadastros.tipo` (`autonomo` \| `empresa`, default `autonomo`).
 
 ### Shell web
 
-- [ ] `src/pages/web/`, `WebShell`, rotas `/web/*`.
+- [x] `src/pages/web/`, `WebShell`, rotas `/web/cadastros`.
 - [ ] Guardas: geral vs admin do cadastro.
 
 ### SPEC-21 — Autônomo (prioridade negócio)
 
-- [ ] `POST /api/plataforma/cadastros` — cria cadastro + 1º admin.
-- [ ] UI `/web/cadastros` (lista) + **novo autônomo**.
+- [x] `GET/POST /api/plataforma/cadastros` — cria cadastro autônomo + 1º admin.
+- [x] UI `/web/cadastros` (lista) + **novo autônomo**.
 - [ ] Teste: novo usuário loga e vê cadastro vazio no mobile.
 
 ### SPEC-20 — Usuários no cadastro
 
 - [ ] API `/api/cadastro/membros`.
 - [ ] UI `/web/usuarios` (criar inseminador / segundo admin).
-- [ ] Login responsivo: conteúdo centralizado igual; desktop só expande `bg-login` + ondas full width (vaquinha fixa no canto) — ver SPEC-20.
+- [x] Login responsivo: fundo full width + ondas no desktop (conteúdo centralizado 480px).
 
 ## Futuro (não nesta sprint)
 

@@ -7,6 +7,7 @@ export type AuthUser = {
   cadastroId: string;
   papel: Papel;
   demo: boolean;
+  plataformaAdmin: boolean;
 };
 
 export type AuthTokenPayload = {

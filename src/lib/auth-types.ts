@@ -6,6 +6,7 @@ export type SessionUser = {
   cadastroId: string;
   papel: Papel;
   demo: boolean;
+  plataformaAdmin: boolean;
 };
 
 export type Session = SessionUser & {

@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 import { AvisoFilaOffline } from "./components/aviso-fila-offline";
 import { RotaEntrar } from "./components/rota-entrar";
+import { RotaPlataforma } from "./components/rota-plataforma";
 import { RotaProtegida } from "./components/rota-protegida";
 import { Diagnostico } from "./pages/Diagnostico";
 import { Inicio } from "./pages/Inicio";
@@ -22,6 +23,7 @@ import { LandingPage } from "./pages/landing-page";
 import { DocsOverviewPage } from "./pages/public/DocsOverviewPage";
 import { PrivacyPage } from "./pages/public/PrivacidadePage";
 import { TermsPage } from "./pages/public/TermosPage";
+import { WebCadastros } from "./pages/web/WebCadastros";
 
 function comProtecao(element: ReactElement) {
   return <RotaProtegida>{element}</RotaProtegida>;
@@ -44,6 +46,22 @@ export function App() {
       <Route path="/termos" element={<TermsPage />} />
       <Route path="/privacidade" element={<PrivacyPage />} />
       <Route path="/docs" element={<DocsOverviewPage />} />
+      <Route
+        path="/web/cadastros"
+        element={
+          <RotaPlataforma>
+            <WebCadastros />
+          </RotaPlataforma>
+        }
+      />
+      <Route
+        path="/web"
+        element={
+          <RotaPlataforma>
+            <WebCadastros />
+          </RotaPlataforma>
+        }
+      />
       <Route path="/inicio" element={comProtecao(<Inicio />)} />
       <Route path="/matrizes" element={comProtecao(<Matrizes />)} />
       <Route path="/matrizes/nova" element={comProtecao(<MatrizForm />)} />

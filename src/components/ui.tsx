@@ -500,11 +500,15 @@ export function CabecalhoVoltar({
   );
 }
 
-export function OndasOvelha() {
+export function OndasOvelha({
+  className = "pointer-events-none -mx-6 mt-8 block w-[calc(100%+3rem)]",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       viewBox="0 0 400 140"
-      className="pointer-events-none -mx-6 mt-8 block w-[calc(100%+3rem)]"
+      className={className}
       preserveAspectRatio="none"
       aria-hidden
     >

@@ -9,6 +9,7 @@ export type UsuarioAutenticado = {
   cadastroId: string;
   papel: Papel;
   demo: boolean;
+  plataformaAdmin: boolean;
 };
 
 type LinhaLogin = {
@@ -17,7 +18,9 @@ type LinhaLogin = {
   password_hash: string;
   nome: string;
   demo: boolean;
+  plataforma_admin: boolean;
   cadastro_id: string;
+  cadastro_ativa: boolean;
   papel: string;
 };
 
@@ -29,16 +32,20 @@ export async function autenticarNoBanco(
   const alvo = email.trim().toLowerCase();
   return semContextoRls(databaseUrl, async (cliente) => {
     const resultado = await cliente.query<LinhaLogin>(
-      `select u.id, u.email, u.password_hash, u.nome, u.demo,
-              m.cadastro_id, m.papel
+      `select u.id, u.email, u.password_hash, u.nome, u.demo, u.plataforma_admin,
+              m.cadastro_id, m.papel, c.ativa as cadastro_ativa
        from public.users u
        inner join public.membros_cadastro m on m.user_id = u.id
-       where lower(u.email) = $1
+       inner join public.cadastros c on c.id = m.cadastro_id
+       where lower(u.email) = $1 and u.ativo = true
        limit 1`,
       [alvo],
     );
     const linha = resultado.rows[0];
     if (!linha || !senhaConfere(senha, linha.password_hash)) {
+      return null;
+    }
+    if (!linha.cadastro_ativa) {
       return null;
     }
     if (linha.papel !== "administrador" && linha.papel !== "inseminador") {
@@ -51,6 +58,7 @@ export async function autenticarNoBanco(
       cadastroId: linha.cadastro_id,
       papel: linha.papel,
       demo: linha.demo,
+      plataformaAdmin: linha.plataforma_admin,
     };
   });
 }
@@ -92,16 +100,20 @@ export async function usuarioPorIdNoBanco(
 ): Promise<UsuarioAutenticado | null> {
   return semContextoRls(databaseUrl, async (cliente) => {
     const resultado = await cliente.query<LinhaLogin>(
-      `select u.id, u.email, u.password_hash, u.nome, u.demo,
-              m.cadastro_id, m.papel
+      `select u.id, u.email, u.password_hash, u.nome, u.demo, u.plataforma_admin,
+              m.cadastro_id, m.papel, c.ativa as cadastro_ativa
        from public.users u
        inner join public.membros_cadastro m on m.user_id = u.id
-       where u.id = $1
+       inner join public.cadastros c on c.id = m.cadastro_id
+       where u.id = $1 and u.ativo = true
        limit 1`,
       [userId],
     );
     const linha = resultado.rows[0];
     if (!linha) return null;
+    if (!linha.cadastro_ativa) {
+      return null;
+    }
     if (linha.papel !== "administrador" && linha.papel !== "inseminador") {
       return null;
     }
@@ -112,6 +124,7 @@ export async function usuarioPorIdNoBanco(
       cadastroId: linha.cadastro_id,
       papel: linha.papel,
       demo: linha.demo,
+      plataformaAdmin: linha.plataforma_admin,
     };
   });
 }

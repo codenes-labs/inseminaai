@@ -10,7 +10,7 @@ import {
   inputClass,
 } from "../components/ui";
 import { TurnstileLogin } from "../components/TurnstileLogin";
-import { MENSAGEM_LOGIN_INVALIDO, entrarComSenha } from "../lib/auth";
+import { MENSAGEM_LOGIN_INVALIDO, entrarComSenha, lerSessao } from "../lib/auth";
 
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? "";
 
@@ -43,7 +43,13 @@ export function Login() {
         setErro(resultado.erro);
         return;
       }
-      navigate("/inicio");
+      const sessao = lerSessao();
+      const desktop = window.matchMedia("(min-width: 1024px)").matches;
+      if (sessao?.plataformaAdmin && desktop) {
+        navigate("/web/cadastros");
+      } else {
+        navigate("/inicio");
+      }
     } catch {
       setErro(MENSAGEM_LOGIN_INVALIDO);
     } finally {
@@ -52,8 +58,9 @@ export function Login() {
   }
 
   return (
-    <div className="bg-login relative mx-auto flex min-h-screen w-full max-w-[480px] flex-col overflow-hidden px-6">
-      <div className="animate-in fade-in slide-in-from-bottom-3 relative z-10 flex flex-1 flex-col pt-16 duration-500">
+    <div className="bg-login relative min-h-screen w-full">
+      <div className="animate-in fade-in slide-in-from-bottom-3 relative z-10 mx-auto flex min-h-screen w-full max-w-[480px] flex-col overflow-hidden px-6">
+        <div className="flex flex-1 flex-col pt-16 duration-500">
         <div className="mb-3 flex size-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-(--shadow-fab)">
           <CowIcon className="size-9" />
         </div>
@@ -109,8 +116,10 @@ export function Login() {
             Voltar ao site
           </Link>
         </p>
+        </div>
+        <OndasOvelha className="pointer-events-none -mx-6 mt-8 block w-[calc(100%+3rem)] lg:hidden" />
       </div>
-      <OndasOvelha />
+      <OndasOvelha className="pointer-events-none fixed inset-x-0 bottom-0 z-0 hidden w-full lg:block" />
     </div>
   );
 }

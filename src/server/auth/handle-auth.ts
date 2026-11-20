@@ -40,6 +40,7 @@ function respostaUsuario(usuario: AuthUser) {
     cadastro_id: usuario.cadastroId,
     papel: usuario.papel,
     demo: usuario.demo,
+    plataforma_admin: usuario.plataformaAdmin,
   };
 }
 

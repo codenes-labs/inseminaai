@@ -81,4 +81,4 @@ Documentar a escolha em SPEC-13 ao implementar.
 
 ## Estado atual
 
-**Planejado (2026-11-20).** Implementar após ou em paralelo à base da SPEC-20 (shell web + `users.ativo`). Sprint: `sprint-08-painel-web.md`.
+**Em implementação (2026-11-20):** migration `users.ativo`, `plataforma_admin`, `cadastros.tipo`; API `GET/POST /api/plataforma/cadastros`; tela `/web/cadastros` (admin geral). Pendente: membros no tenant (SPEC-20), tipo empresa.

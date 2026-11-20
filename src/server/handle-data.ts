@@ -5,6 +5,7 @@ import { handleCadastrosAuxiliaresRequest } from "./routes/cadastros-auxiliares"
 import { handleInseminacoesRequest } from "./routes/inseminacoes";
 import { handleImportacaoRequest } from "./routes/importacao";
 import { handleMatrizesRequest } from "./routes/matrizes";
+import { handlePlataformaRequest } from "./routes/plataforma";
 
 export type DataHandlerContext = {
   databaseUrl: string;
@@ -35,6 +36,14 @@ export async function handleDataRequest(
   if (!usuario) {
     return Response.json({ error: "Não autorizado." }, { status: 401 });
   }
+
+    const plataforma = await handlePlataformaRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (plataforma) {
+      return plataforma;
+    }
 
     const matrizes = await handleMatrizesRequest(request, {
       databaseUrl: context.databaseUrl,
