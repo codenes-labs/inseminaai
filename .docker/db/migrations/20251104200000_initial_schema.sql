@@ -169,4 +169,9 @@ grant select, insert, update, delete on public.lotes to inseminaai_app;
 grant select, insert, update, delete on public.inseminacoes to inseminaai_app;
 grant select on public.users to inseminaai_app;
 grant execute on function public.current_cadastro_id() to inseminaai_app;
-grant inseminaai_app to inseminaai;
+
+do $$
+begin
+  execute format('grant inseminaai_app to %I', current_user);
+end
+$$;
