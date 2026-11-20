@@ -1,5 +1,6 @@
 import { bearerToken, usuarioDoToken } from "./auth/resolve-user";
 import { handleDashboardRequest } from "./routes/dashboard";
+import { handleRelatoriosRequest } from "./routes/relatorios";
 import { handleCadastrosAuxiliaresRequest } from "./routes/cadastros-auxiliares";
 import { handleInseminacoesRequest } from "./routes/inseminacoes";
 import { handleImportacaoRequest } from "./routes/importacao";
@@ -73,6 +74,14 @@ export async function handleDataRequest(
     });
     if (importacao) {
       return importacao;
+    }
+
+    const relatorios = await handleRelatoriosRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (relatorios) {
+      return relatorios;
     }
 
     return Response.json({ error: "Não encontrado." }, { status: 404 });

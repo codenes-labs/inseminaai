@@ -16,4 +16,4 @@
 
 ## Estado atual
 
-Há um resumo visual em Relatórios. Sem exportação CSV nem taxas por reprodutor/tipo/lote. **Decisão:** exportação em CSV (não `.xlsx` no MVP).
+**Implementado (2026-11-20):** `GET /api/relatorios/resumo`, `GET /api/relatorios/inseminacoes.csv` (colunas alinhadas ao import), taxas por reprodutor/tipo/lote e média de repetições na aba Relatórios.
