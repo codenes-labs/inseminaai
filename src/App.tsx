@@ -19,11 +19,9 @@ import { InseminacaoLote } from "./pages/InseminacaoLote";
 import { NovaInseminacao } from "./pages/NovaInseminacao";
 import { Relatorios } from "./pages/Relatorios";
 import { LandingPage } from "./pages/landing-page";
-import {
-  DocsOverviewPage,
-  PrivacyPage,
-  TermsPage,
-} from "./pages/public-stub-pages";
+import { DocsOverviewPage } from "./pages/public/DocsOverviewPage";
+import { PrivacyPage } from "./pages/public/PrivacidadePage";
+import { TermsPage } from "./pages/public/TermosPage";
 
 function comProtecao(element: ReactElement) {
   return <RotaProtegida>{element}</RotaProtegida>;

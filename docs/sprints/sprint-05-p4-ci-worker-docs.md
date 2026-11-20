@@ -6,5 +6,5 @@
 
 - [ ] Workflows GitHub Actions
 - [ ] Deploy Worker + Neon
-- [ ] Termos, privacidade e `/docs` completos
+- [x] Termos, privacidade e `/docs` completos (2026-11-20)
 - [ ] Turnstile quando houver secret

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Moon, Sun } from "lucide-react";
 import type { ThemeMode } from "../domain/theme/theme-mode";
 import { useTheme } from "./theme";
-import { Logo, cx } from "./ui";
+import { Logo } from "./ui";
 
 function HeaderActions({
   themeLabel,
@@ -44,7 +44,7 @@ export function PublicSiteChrome({ children }: { children: ReactNode }) {
   const themeLabel = mode === "dark" ? "Ativar tema claro" : "Ativar tema escuro";
 
   return (
-    <div className="mx-auto min-h-dvh w-full min-w-0 max-w-6xl px-4 py-5">
+    <div className="mx-auto min-h-dvh w-full min-w-0 max-w-[1080px] overflow-x-clip px-4 py-5 sm:px-8">
       <header className="flex w-full min-w-0 items-center justify-between gap-2">
         <Link to="/" className="inline-flex min-w-0 max-w-full" aria-label="Insemina aí">
           <Logo />
@@ -76,23 +76,5 @@ export function PublicSiteFooter() {
         </Link>
       </nav>
     </footer>
-  );
-}
-
-export function PublicStubArticle({
-  titulo,
-  texto,
-}: {
-  titulo: string;
-  texto: string;
-}) {
-  return (
-    <article className={cx("mt-8 grid max-w-3xl gap-4")}>
-      <h1 className="text-3xl font-semibold">{titulo}</h1>
-      <p className="text-muted-foreground">{texto}</p>
-      <Link to="/" className="font-semibold text-primary">
-        Voltar ao início
-      </Link>
-    </article>
   );
 }
