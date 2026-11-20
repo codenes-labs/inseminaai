@@ -32,6 +32,8 @@ Em `/entrar`, com `JWT_SECRET` em `.docker/.env` (mín. 32 caracteres):
 | Admin | `admin@codenes.com.br` | `CodenesTemp1` |
 | Demo | `teste@teste.com` | `teste` |
 
+O **admin** recebe dados de exemplo **no Postgres** (arquivo `.docker/db/seeds/admin_dev_catalog.sql`) ao rodar `make db-setup` ou `npm run db:seed`. O app não usa `mock.ts` nas telas logadas. A conta **demo** continua sem gravar no banco.
+
 ## Comandos
 
 - `npm run dev` — Vite (lê `PORT_INTERNAL` e `.docker/.env` se existir)

@@ -11,7 +11,7 @@ const CONTAS: SeedAccount[] = [
     id: "00000000-0000-4000-9000-000000000001",
     email: "admin@codenes.com.br",
     password: "CodenesTemp1",
-    nome: "Administrador",
+    nome: "Vitor Almeida",
     cadastroId: CADASTRO_ADMIN_ID,
     papel: "administrador",
     demo: false,

@@ -13,11 +13,6 @@ import {
   textareaClass,
 } from "../components/ui";
 import {
-  inseminadores as inseminadoresMock,
-  lotes as lotesMock,
-  reprodutores as reprodutoresMock,
-} from "../data/mock";
-import {
   type Inseminador,
   type Lote,
   type Reprodutor,
@@ -98,31 +93,7 @@ export function NovaInseminacao() {
           setInseminadorId((atual) => atual || i[0].id);
         }
       } catch {
-        setReprodutores(
-          reprodutoresMock.map((nome, idx) => ({
-            id: `mock-r-${idx}`,
-            nome,
-            raca: null,
-            codigo_semen: null,
-            ativo: true,
-          })),
-        );
-        setInseminadores(
-          inseminadoresMock.map((nome, idx) => ({
-            id: `mock-i-${idx}`,
-            nome,
-            ativo: true,
-          })),
-        );
-        setLotes(
-          lotesMock.map((nome, idx) => ({
-            id: `mock-l-${idx}`,
-            nome,
-            data_inicio: hojeISO(),
-            observacoes: null,
-            ativo: true,
-          })),
-        );
+        setErro("Não foi possível carregar os cadastros.");
       }
     })();
   }, [matrizIdInicial]);
