@@ -38,6 +38,7 @@ export function CadastroAuxiliarForm() {
   const [codigoSemen, setCodigoSemen] = useState("");
   const [dataInicio, setDataInicio] = useState(hojeISO());
   const [observacoes, setObservacoes] = useState("");
+  const [ativo, setAtivo] = useState(true);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(editar);
   const [salvando, setSalvando] = useState(false);
@@ -71,6 +72,7 @@ export function CadastroAuxiliarForm() {
           setNome(item.nome);
           setRaca(item.raca ?? "");
           setCodigoSemen(item.codigo_semen ?? "");
+          setAtivo(item.ativo);
         } else if (cadastroTipo === "inseminadores") {
           const lista = await listarInseminadoresApi(false);
           const item = lista.find((r) => r.id === id);
@@ -79,6 +81,7 @@ export function CadastroAuxiliarForm() {
             return;
           }
           setNome(item.nome);
+          setAtivo(item.ativo);
         } else {
           const lista = await listarLotesApi(false);
           const item = lista.find((l) => l.id === id);
@@ -89,6 +92,7 @@ export function CadastroAuxiliarForm() {
           setNome(item.nome);
           setDataInicio(item.data_inicio.slice(0, 10));
           setObservacoes(item.observacoes ?? "");
+          setAtivo(item.ativo);
         }
       } catch {
         if (ativo) setErro("Não foi possível carregar.");
@@ -150,21 +154,26 @@ export function CadastroAuxiliarForm() {
     }
   }
 
-  async function desativar() {
+  async function alterarAtivo(novoAtivo: boolean) {
     if (!editar || !id || !cadastroTipo) return;
     setSalvando(true);
+    setErro("");
     try {
       if (cadastroTipo === "reprodutores") {
-        await atualizarReprodutorApi(id, { ativo: false });
+        await atualizarReprodutorApi(id, { ativo: novoAtivo });
       } else if (cadastroTipo === "inseminadores") {
-        await atualizarInseminadorApi(id, { ativo: false });
+        await atualizarInseminadorApi(id, { ativo: novoAtivo });
       } else {
-        await atualizarLoteApi(id, { ativo: false });
+        await atualizarLoteApi(id, { ativo: novoAtivo });
       }
       navigate(voltar);
     } catch (cause) {
       setErro(
-        cause instanceof Error ? cause.message : "Não foi possível desativar.",
+        cause instanceof Error
+          ? cause.message
+          : novoAtivo
+            ? "Não foi possível reativar."
+            : "Não foi possível desativar.",
       );
     } finally {
       setSalvando(false);
@@ -234,14 +243,29 @@ export function CadastroAuxiliarForm() {
             <Botao type="submit" disabled={salvando}>
               {salvando ? "Salvando…" : "Salvar"}
             </Botao>
-            {editar && (
+            {editar && !ativo && (
+              <p className="text-sm text-muted-foreground">
+                Cadastro inativo — não aparece em novas inseminações.
+              </p>
+            )}
+            {editar && ativo && (
               <Botao
                 type="button"
                 variante="suave"
                 disabled={salvando}
-                onClick={() => void desativar()}
+                onClick={() => void alterarAtivo(false)}
               >
                 Desativar
+              </Botao>
+            )}
+            {editar && !ativo && (
+              <Botao
+                type="button"
+                variante="suave"
+                disabled={salvando}
+                onClick={() => void alterarAtivo(true)}
+              >
+                {salvando ? "Reativando…" : "Reativar"}
               </Botao>
             )}
             <Link to={voltar} className="block text-center text-sm text-brand">

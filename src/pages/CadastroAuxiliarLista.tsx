@@ -96,34 +96,40 @@ export function CadastroAuxiliarLista() {
           <Plus className="size-5" />
         </Link>
       </header>
-      <div className="space-y-2 px-4 py-4">
-        {erro && <p className="text-sm font-medium text-status-vazia">{erro}</p>}
-        {carregando && (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        )}
-        {itens.map((item) => (
-          <Link key={item.id} to={`${base}/${item.id}/editar`}>
-            <Cartao className="press flex items-center gap-3 p-3.5">
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">{item.nome}</p>
-                {item.detalhe && (
-                  <p className="text-xs text-muted-foreground">{item.detalhe}</p>
-                )}
-                {!item.ativo && (
-                  <p className="text-xs text-status-vazia">Inativo</p>
-                )}
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Cartao>
-          </Link>
-        ))}
-        {!carregando && itens.length === 0 && (
-          <Vazio
-            titulo={`Nenhum cadastro`}
-            texto={`Toque em + para adicionar ${titulo.toLowerCase()}.`}
-          />
-        )}
-        <Link to="/mais">
+      <div className="px-4 py-4">
+        <div className="space-y-2">
+          {erro && (
+            <p className="text-sm font-medium text-status-vazia">{erro}</p>
+          )}
+          {carregando && (
+            <p className="text-sm text-muted-foreground">Carregando…</p>
+          )}
+          {itens.map((item) => (
+            <Link key={item.id} to={`${base}/${item.id}/editar`}>
+              <Cartao className="press flex items-center gap-3 p-3.5">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{item.nome}</p>
+                  {item.detalhe && (
+                    <p className="text-xs text-muted-foreground">
+                      {item.detalhe}
+                    </p>
+                  )}
+                  {!item.ativo && (
+                    <p className="text-xs text-status-vazia">Inativo</p>
+                  )}
+                </div>
+                <ChevronRight className="size-4 text-muted-foreground" />
+              </Cartao>
+            </Link>
+          ))}
+          {!carregando && itens.length === 0 && (
+            <Vazio
+              titulo={`Nenhum cadastro`}
+              texto={`Toque em + para adicionar ${titulo.toLowerCase()}.`}
+            />
+          )}
+        </div>
+        <Link to="/mais" className="mt-6 block">
           <Botao variante="suave" className="w-full">
             Voltar
           </Botao>

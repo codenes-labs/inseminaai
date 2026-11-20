@@ -1,12 +1,13 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Calendar, ChevronDown, Search, TriangleAlert } from "lucide-react";
+import { Calendar, Search, TriangleAlert } from "lucide-react";
 import {
   AppShell,
   Botao,
   CabecalhoVoltar,
   Campo,
   Cartao,
+  SelecaoSheet,
   cx,
   inputClass,
   textareaClass,
@@ -42,36 +43,6 @@ function hojeISO() {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const dia = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${m}-${dia}`;
-}
-
-function SelectField({
-  opcoes,
-  valorId,
-  placeholder,
-  onChange,
-}: {
-  opcoes: { id: string; nome: string }[];
-  valorId?: string;
-  placeholder?: string;
-  onChange?: (id: string) => void;
-}) {
-  return (
-    <>
-      <select
-        value={valorId ?? ""}
-        onChange={(e) => onChange?.(e.target.value)}
-        className="h-12 w-full appearance-none bg-transparent text-base outline-none"
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {opcoes.map((op) => (
-          <option key={op.id} value={op.id}>
-            {op.nome}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="size-5 shrink-0 text-muted-foreground" />
-    </>
-  );
 }
 
 export function NovaInseminacao() {
@@ -324,29 +295,39 @@ export function NovaInseminacao() {
                 ))}
               </div>
             </div>
-            <Campo rotulo="Reprodutor">
-              <SelectField
-                opcoes={reprodutores}
-                valorId={reprodutorId}
-                placeholder="Selecione o reprodutor"
-                onChange={setReprodutorId}
-              />
-            </Campo>
-            <Campo rotulo="Inseminador">
-              <SelectField
-                opcoes={inseminadores}
-                valorId={inseminadorId}
-                onChange={setInseminadorId}
-              />
-            </Campo>
-            <Campo rotulo="Lote" opcional>
-              <SelectField
-                opcoes={lotes}
-                valorId={loteId}
-                placeholder="Sem lote"
-                onChange={setLoteId}
-              />
-            </Campo>
+            <SelecaoSheet
+              rotulo="Reprodutor"
+              valor={reprodutorId}
+              onChange={setReprodutorId}
+              comBusca
+              placeholderBusca="Buscar reprodutor"
+              rotuloVazio="Selecione o reprodutor"
+              valorVazio=""
+              opcoes={reprodutores.map((r) => ({ id: r.id, rotulo: r.nome }))}
+            />
+            <SelecaoSheet
+              rotulo="Inseminador"
+              valor={inseminadorId}
+              onChange={setInseminadorId}
+              comBusca
+              placeholderBusca="Buscar inseminador"
+              rotuloVazio="Selecione o inseminador"
+              valorVazio=""
+              opcoes={inseminadores.map((i) => ({ id: i.id, rotulo: i.nome }))}
+            />
+            <SelecaoSheet
+              rotulo="Lote"
+              opcional
+              valor={loteId}
+              onChange={setLoteId}
+              comBusca
+              placeholderBusca="Buscar lote"
+              rotuloVazio="Sem lote"
+              valorVazio=""
+              valorLimpar=""
+              rotuloLimpar="Sem lote"
+              opcoes={lotes.map((l) => ({ id: l.id, rotulo: l.nome }))}
+            />
             <label className="block">
               <span className="mb-1.5 flex gap-1 text-sm font-semibold">
                 Observações{" "}

@@ -1,4 +1,4 @@
-import { useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useMemo, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { NavLink, Link } from "react-router-dom";
 import {
   ChartColumn,
@@ -6,10 +6,12 @@ import {
   House,
   Menu,
   Plus,
+  Search,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import type { Situacao } from "../data/mock";
+import { textoBuscaCoincide } from "../features/matrizes/domain/busca";
 
 export function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -136,6 +138,150 @@ export const textareaCampoClass =
 export const textareaClass =
   "h-24 max-h-24 w-full resize-none overflow-y-auto rounded-md border border-input bg-card p-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20";
 
+export function SelecaoSheet<T extends string>({
+  rotulo,
+  valor,
+  opcoes,
+  onChange,
+  comBusca = false,
+  placeholderBusca = "Buscar…",
+  rotuloVazio,
+  valorVazio,
+  valorLimpar,
+  rotuloLimpar,
+  opcional,
+}: {
+  rotulo: string;
+  valor: T | "";
+  opcoes: { id: T; rotulo: string }[];
+  onChange: (id: T | "") => void;
+  comBusca?: boolean;
+  placeholderBusca?: string;
+  rotuloVazio?: string;
+  valorVazio?: T | "";
+  valorLimpar?: T | "";
+  rotuloLimpar?: string;
+  opcional?: boolean;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const [busca, setBusca] = useState("");
+
+  const vazio = valorVazio !== undefined ? valor === valorVazio : valor === "";
+  const selecionado = opcoes.find((o) => o.id === valor);
+  const rotuloBotao = vazio
+    ? (rotuloVazio ?? "—")
+    : (selecionado?.rotulo ?? rotuloVazio ?? "—");
+
+  const opcoesVisiveis = useMemo(() => {
+    if (!comBusca || !busca.trim()) return opcoes;
+    return opcoes.filter((o) => textoBuscaCoincide(o.rotulo, busca));
+  }, [busca, comBusca, opcoes]);
+
+  function fechar() {
+    setAberto(false);
+    setBusca("");
+  }
+
+  function escolher(id: T | "") {
+    onChange(id);
+    fechar();
+  }
+
+  const podeLimpar =
+    valorLimpar !== undefined && valor !== valorLimpar && rotuloLimpar;
+
+  return (
+    <>
+      <Campo rotulo={rotulo} opcional={opcional}>
+        <button
+          type="button"
+          className={cx(
+            "press flex h-12 min-w-0 flex-1 items-center justify-between gap-2 bg-transparent text-left text-base font-medium outline-none",
+            vazio && rotuloVazio ? "text-muted-foreground" : "text-foreground",
+          )}
+          aria-expanded={aberto}
+          aria-haspopup="listbox"
+          onClick={() => setAberto(true)}
+        >
+          <span className="truncate">{rotuloBotao}</span>
+        </button>
+        <ChevronDown className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+      </Campo>
+      {aberto ? (
+        <div className="fixed inset-0 z-40 mx-auto max-w-[480px]">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            aria-label="Fechar seleção"
+            onClick={fechar}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 rounded-t-xl border border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-(--shadow-card)"
+            role="listbox"
+            aria-label={rotulo}
+          >
+            <p className="mb-3 text-base font-semibold text-foreground">{rotulo}</p>
+            {comBusca ? (
+              <div className="mb-3 flex min-h-12 items-center gap-2.5 rounded-md border border-input bg-background px-3.5">
+                <Search
+                  className="size-5 shrink-0 text-muted-foreground"
+                  strokeWidth={1.75}
+                />
+                <input
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  placeholder={placeholderBusca}
+                  className="h-12 w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
+                  autoFocus
+                />
+              </div>
+            ) : null}
+            <ul
+              className={cx(
+                "space-y-2",
+                comBusca && "max-h-[50vh] overflow-y-auto pr-1",
+              )}
+            >
+              {opcoesVisiveis.map((opcao) => (
+                <li key={opcao.id}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={valor === opcao.id}
+                    className={cx(
+                      "press w-full rounded-lg px-4 py-3 text-left text-base font-medium",
+                      valor === opcao.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-brand-soft text-primary",
+                    )}
+                    onClick={() => escolher(opcao.id)}
+                  >
+                    {opcao.rotulo}
+                  </button>
+                </li>
+              ))}
+              {comBusca && opcoesVisiveis.length === 0 ? (
+                <li className="rounded-lg bg-brand-soft px-4 py-3 text-sm text-muted-foreground">
+                  Nenhum resultado.
+                </li>
+              ) : null}
+            </ul>
+            {podeLimpar ? (
+              <button
+                type="button"
+                className="press mt-4 w-full rounded-lg py-3 text-center text-sm font-semibold text-brand"
+                onClick={() => escolher(valorLimpar)}
+              >
+                {rotuloLimpar}
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export function FiltroSelecao<T extends string>({
   rotulo,
   valor,
@@ -151,76 +297,17 @@ export function FiltroSelecao<T extends string>({
   valorLimpar?: T;
   rotuloLimpar?: string;
 }) {
-  const [aberto, setAberto] = useState(false);
-  const selecionado = opcoes.find((o) => o.id === valor);
-
   return (
-    <>
-      <Campo rotulo={rotulo}>
-        <button
-          type="button"
-          className="press flex h-12 min-w-0 flex-1 items-center justify-between gap-2 bg-transparent text-left text-base font-medium text-foreground outline-none"
-          aria-expanded={aberto}
-          aria-haspopup="listbox"
-          onClick={() => setAberto(true)}
-        >
-          <span className="truncate">{selecionado?.rotulo ?? "—"}</span>
-        </button>
-        <ChevronDown className="size-5 shrink-0 text-muted-foreground" aria-hidden />
-      </Campo>
-      {aberto ? (
-        <div className="fixed inset-0 z-40 mx-auto max-w-[480px]">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            aria-label="Fechar filtro"
-            onClick={() => setAberto(false)}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 rounded-t-xl border border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-(--shadow-card)"
-            role="listbox"
-            aria-label={rotulo}
-          >
-            <p className="mb-3 text-base font-semibold text-foreground">{rotulo}</p>
-            <ul className="space-y-2">
-              {opcoes.map((opcao) => (
-                <li key={opcao.id}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={valor === opcao.id}
-                    className={cx(
-                      "press w-full rounded-lg px-4 py-3 text-left text-base font-medium",
-                      valor === opcao.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-brand-soft text-primary",
-                    )}
-                    onClick={() => {
-                      onChange(opcao.id);
-                      setAberto(false);
-                    }}
-                  >
-                    {opcao.rotulo}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {valor !== valorLimpar ? (
-              <button
-                type="button"
-                className="press mt-4 w-full rounded-lg py-3 text-center text-sm font-semibold text-brand"
-                onClick={() => {
-                  onChange(valorLimpar);
-                  setAberto(false);
-                }}
-              >
-                {rotuloLimpar}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-    </>
+    <SelecaoSheet
+      rotulo={rotulo}
+      valor={valor}
+      opcoes={opcoes}
+      onChange={(id) => {
+        if (id !== "") onChange(id);
+      }}
+      valorLimpar={valorLimpar}
+      rotuloLimpar={rotuloLimpar}
+    />
   );
 }
 
