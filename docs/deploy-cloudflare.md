@@ -13,7 +13,7 @@
 
 | Secret | Uso |
 | --- | --- |
-| `DATABASE_URL` | Neon (Worker) |
+| `DATABASE_URL` | Neon (Worker + `db:setup` no CI) |
 | `JWT_SECRET` | ≥ 32 caracteres (Worker) |
 | `TURNSTILE_SECRET_KEY` | Verificação no `POST /api/auth/sign-in` |
 | `TURNSTILE_SITE_KEY` | Build (`VITE_TURNSTILE_SITE_KEY`) + Worker |
@@ -36,3 +36,15 @@ Alvo: `inseminaai.codenes.com.br` (custom domain no painel Cloudflare, ligado ao
 ## Health
 
 `GET /api/health` → `configured`, `database_ok`, `jwt`.
+
+## Neon: roles
+
+| Role | Onde |
+| --- | --- |
+| `inseminaai_app` | Criado na migration; a API faz `SET ROLE` para RLS |
+| `inseminaai_user` | Usuário de conexão em produção (connection string) |
+| `inseminaai` | Só no Postgres do Docker (compose) |
+
+O secret `DATABASE_URL` deve apontar para um **usuário que exista** no Neon (em geral `inseminaai_user` ou o owner `neondb_owner`). O passo *Migrations e seed* precisa de permissão para criar tabelas/roles — se `inseminaai_user` não tiver, use a connection string do **owner** no secret até o schema estar criado.
+
+A migration `20251120100000_grant_inseminaai_user.sql` concede `inseminaai_app` ao `inseminaai_user` quando esse role existir (útil se o CI migrar como owner e o Worker conectar como `inseminaai_user`).
