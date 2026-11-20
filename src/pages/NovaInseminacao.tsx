@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Search, TriangleAlert } from "lucide-react";
 import {
   AppShell,
@@ -320,6 +320,12 @@ export function NovaInseminacao() {
           <Botao type="submit" disabled={salvando}>
             {salvando ? "Salvando…" : "Salvar inseminação"}
           </Botao>
+          <Link
+            to="/inseminacao-lote"
+            className="mt-2 block text-center text-sm font-medium text-brand"
+          >
+            Lançamento em lote
+          </Link>
         </div>
       </form>
     </AppShell>

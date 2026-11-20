@@ -12,6 +12,7 @@ import { Mais } from "./pages/Mais";
 import { MatrizDetalhe } from "./pages/MatrizDetalhe";
 import { MatrizForm } from "./pages/MatrizForm";
 import { Matrizes } from "./pages/Matrizes";
+import { InseminacaoLote } from "./pages/InseminacaoLote";
 import { NovaInseminacao } from "./pages/NovaInseminacao";
 import { Relatorios } from "./pages/Relatorios";
 import { LandingPage } from "./pages/landing-page";
@@ -52,6 +53,10 @@ export function App() {
       <Route
         path="/nova-inseminacao"
         element={comProtecao(<NovaInseminacao />)}
+      />
+      <Route
+        path="/inseminacao-lote"
+        element={comProtecao(<InseminacaoLote />)}
       />
       <Route path="/relatorios" element={comProtecao(<Relatorios />)} />
       <Route path="/mais/importar" element={comProtecao(<ImportarCsv />)} />

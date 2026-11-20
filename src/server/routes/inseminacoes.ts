@@ -3,6 +3,8 @@ import {
   ErroInseminacao,
   contextoMatrizInseminacao,
   criarInseminacao,
+  criarInseminacoesEmLote,
+  listarMatrizesPendentesNoLote,
   obterInseminacaoPendenteDaMatriz,
   registrarDiagnostico,
   ultimoInseminadorId,
@@ -94,6 +96,57 @@ export async function handleInseminacoesRequest(
         },
       );
       return Response.json({ diagnostico: registro });
+    } catch (erro) {
+      return respostaErro(erro);
+    }
+  }
+
+  if (url.pathname === "/api/inseminacoes/lote/preview" && request.method === "POST") {
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return Response.json({ error: "Corpo inválido." }, { status: 400 });
+    }
+    const ids = Array.isArray(body.matriz_ids)
+      ? body.matriz_ids.map(String)
+      : [];
+    const pendentes = await listarMatrizesPendentesNoLote(
+      databaseUrl,
+      cadastroId,
+      ids,
+    );
+    return Response.json({ matrizes_com_pendencia: pendentes });
+  }
+
+  if (url.pathname === "/api/inseminacoes/lote" && request.method === "POST") {
+    const demo = bloqueiaDemo(usuario);
+    if (demo) return demo;
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return Response.json({ error: "Corpo inválido." }, { status: 400 });
+    }
+    const matriz_ids = Array.isArray(body.matriz_ids)
+      ? body.matriz_ids.map(String)
+      : [];
+    try {
+      const resultado = await criarInseminacoesEmLote(databaseUrl, cadastroId, {
+        matriz_ids,
+        reprodutor_id: String(body.reprodutor_id ?? ""),
+        inseminador_id: String(body.inseminador_id ?? ""),
+        lote_id:
+          body.lote_id == null || body.lote_id === ""
+            ? null
+            : String(body.lote_id),
+        data: String(body.data ?? ""),
+        tipo: String(body.tipo ?? ""),
+        observacoes:
+          body.observacoes == null ? null : String(body.observacoes),
+        hoje: hojeLocalIso(),
+      });
+      return Response.json(resultado, { status: 201 });
     } catch (erro) {
       return respostaErro(erro);
     }

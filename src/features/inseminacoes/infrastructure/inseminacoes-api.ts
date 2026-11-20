@@ -88,6 +88,54 @@ export async function registrarDiagnosticoApi(
   return body.diagnostico;
 }
 
+export type MatrizPendenciaLote = {
+  matriz_id: string;
+  nome: string;
+};
+
+export async function previewLotePendenciasApi(
+  matriz_ids: string[],
+): Promise<MatrizPendenciaLote[]> {
+  const response = await apiFetch("/api/inseminacoes/lote/preview", {
+    method: "POST",
+    body: JSON.stringify({ matriz_ids }),
+  });
+  if (!response.ok) {
+    throw new Error("Não foi possível verificar pendências.");
+  }
+  const body = (await response.json()) as {
+    matrizes_com_pendencia: MatrizPendenciaLote[];
+  };
+  return body.matrizes_com_pendencia;
+}
+
+export type ResultadoLancamentoLoteApi = {
+  criadas: InseminacaoCriada[];
+  matrizes_com_pendencia: MatrizPendenciaLote[];
+};
+
+export async function criarInseminacoesLoteApi(dados: {
+  matriz_ids: string[];
+  reprodutor_id: string;
+  inseminador_id: string;
+  lote_id?: string | null;
+  data: string;
+  tipo: string;
+  observacoes?: string;
+}): Promise<ResultadoLancamentoLoteApi> {
+  const response = await apiFetch("/api/inseminacoes/lote", {
+    method: "POST",
+    body: JSON.stringify(dados),
+  });
+  const body = (await response.json()) as ResultadoLancamentoLoteApi & {
+    error?: string;
+  };
+  if (!response.ok) {
+    throw new Error(body.error ?? "Não foi possível salvar o lote.");
+  }
+  return body;
+}
+
 export async function criarInseminacaoApi(dados: {
   matriz_id: string;
   reprodutor_id: string;

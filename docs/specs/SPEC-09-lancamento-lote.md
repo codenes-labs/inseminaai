@@ -16,4 +16,4 @@
 
 ## Estado atual
 
-Não implementado. Não há tela de lote no app.
+**Implementado (2026-11-20):** `POST /api/inseminacoes/lote` (transação única), preview de pendências, tela `/inseminacao-lote`, domínio `lancamento-lote.ts`.

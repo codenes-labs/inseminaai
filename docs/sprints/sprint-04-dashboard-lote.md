@@ -5,4 +5,4 @@
 ## Checklist
 
 - [x] SPEC-08: cartões, alertas e partos com dados reais (layout já existe)
-- [ ] SPEC-09: lançamento em lote com gravação atômica (tela ainda não existe)
+- [x] SPEC-09: lançamento em lote com gravação atômica
