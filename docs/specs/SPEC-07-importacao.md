@@ -33,4 +33,4 @@ A planilha de referência tem duas abas lógicas (inseminações e repetições)
 
 ## Estado atual
 
-Não implementado. Falta o CSV de referência em `docs/fixtures/`.
+**Implementado (2026-11-20):** domínio `src/features/importacao/domain/csv.ts`, `POST /api/importacao/csv`, migration `importacao_chave`, tela em Mais → Importar planilha. Fixture em `docs/fixtures/`.

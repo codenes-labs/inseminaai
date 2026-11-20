@@ -4,7 +4,7 @@
 
 ## Checklist
 
-- [ ] SPEC-07: importador da planilha, com testes de idempotência
+- [x] SPEC-07: importador da planilha, com testes de idempotência
 - [ ] Conferência dos dados importados contra a planilha original
 - [ ] Correções vindas do uso real
 

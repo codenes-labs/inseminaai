@@ -7,6 +7,7 @@ const linksCadastro = [
   { to: "/mais/reprodutores", rotulo: "Reprodutores" },
   { to: "/mais/inseminadores", rotulo: "Inseminadores" },
   { to: "/mais/lotes", rotulo: "Lotes" },
+  { to: "/mais/importar", rotulo: "Importar planilha (CSV)" },
 ] as const;
 
 export function Mais() {

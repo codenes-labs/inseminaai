@@ -7,6 +7,7 @@ import { Inicio } from "./pages/Inicio";
 import { Login } from "./pages/Login";
 import { CadastroAuxiliarForm } from "./pages/CadastroAuxiliarForm";
 import { CadastroAuxiliarLista } from "./pages/CadastroAuxiliarLista";
+import { ImportarCsv } from "./pages/ImportarCsv";
 import { Mais } from "./pages/Mais";
 import { MatrizDetalhe } from "./pages/MatrizDetalhe";
 import { MatrizForm } from "./pages/MatrizForm";
@@ -53,6 +54,7 @@ export function App() {
         element={comProtecao(<NovaInseminacao />)}
       />
       <Route path="/relatorios" element={comProtecao(<Relatorios />)} />
+      <Route path="/mais/importar" element={comProtecao(<ImportarCsv />)} />
       <Route
         path="/mais/:tipo/nova"
         element={comProtecao(<CadastroAuxiliarForm />)}
