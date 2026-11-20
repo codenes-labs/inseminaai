@@ -9,6 +9,11 @@ import {
   MENSAGEM_CREDENCIAIS_INVALIDAS,
   type AuthUser,
 } from "./types";
+import { senhaNovaValida } from "../../features/conta/domain/gerar-senha";
+import {
+  atualizarSenhaNoBanco,
+  senhaAtualConfereNoBanco,
+} from "../repositories/users-repository";
 import { verificarTurnstile } from "./turnstile";
 
 export type AuthHandlerContext = {
@@ -21,6 +26,11 @@ type SignInBody = {
   email?: string;
   password?: string;
   turnstile_token?: string;
+};
+
+type ChangePasswordBody = {
+  current_password?: string;
+  new_password?: string;
 };
 
 function respostaUsuario(usuario: AuthUser) {
@@ -120,6 +130,67 @@ export async function handleAuthRequest(
 
   if (url.pathname === "/api/auth/sign-out" && request.method === "POST") {
     return new Response(null, { status: 204 });
+  }
+
+  if (
+    url.pathname === "/api/auth/change-password" &&
+    request.method === "POST"
+  ) {
+    const databaseUrl = context.databaseUrl?.trim();
+    if (!databaseUrl) {
+      return Response.json(
+        { error: "Alteração de senha indisponível neste ambiente." },
+        { status: 503 },
+      );
+    }
+    const token = bearerToken(request);
+    if (!token) {
+      return Response.json({ error: "Não autorizado." }, { status: 401 });
+    }
+    const usuario = await usuarioDoToken(token, secret, databaseUrl);
+    if (!usuario) {
+      return Response.json({ error: "Não autorizado." }, { status: 401 });
+    }
+    let body: ChangePasswordBody;
+    try {
+      body = (await request.json()) as ChangePasswordBody;
+    } catch {
+      return Response.json({ error: "Dados inválidos." }, { status: 400 });
+    }
+    const atual = body.current_password ?? "";
+    const nova = body.new_password ?? "";
+    if (!atual || !nova) {
+      return Response.json(
+        { error: "Informe a senha atual e a nova senha." },
+        { status: 400 },
+      );
+    }
+    if (!senhaNovaValida(nova)) {
+      return Response.json(
+        { error: "A nova senha deve ter pelo menos 8 caracteres." },
+        { status: 400 },
+      );
+    }
+    const confere = await senhaAtualConfereNoBanco(
+      databaseUrl,
+      usuario.id,
+      atual,
+    );
+    if (!confere) {
+      return Response.json({ error: "Senha atual incorreta." }, { status: 401 });
+    }
+    const atualizou = await atualizarSenhaNoBanco(
+      databaseUrl,
+      usuario.id,
+      nova,
+    );
+    if (!atualizou) {
+      return Response.json(
+        { error: "Não foi possível alterar a senha." },
+        { status: 500 },
+      );
+    }
+    return Response.json({ ok: true });
   }
 
   return Response.json({ error: "Não encontrado." }, { status: 404 });

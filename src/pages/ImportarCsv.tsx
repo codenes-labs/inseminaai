@@ -76,8 +76,11 @@ export function ImportarCsv() {
   return (
     <AppShell>
       <header className="sticky top-0 z-20 flex h-16 items-center gap-2 bg-primary px-4 text-primary-foreground">
-        <Link to="/mais" className="press -ml-2 text-sm font-medium">
-          ← Mais
+        <Link
+          to="/mais/configuracoes"
+          className="press -ml-2 text-sm font-medium"
+        >
+          ← Configurações
         </Link>
         <h1 className="text-lg font-semibold">Importar planilha</h1>
       </header>

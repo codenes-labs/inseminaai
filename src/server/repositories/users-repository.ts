@@ -1,6 +1,6 @@
 import type { Papel } from "../auth/types";
 import { semContextoRls } from "../db/context";
-import { senhaConfere } from "../db/password";
+import { hashSenha, senhaConfere } from "../db/password";
 
 export type UsuarioAutenticado = {
   id: string;
@@ -52,6 +52,37 @@ export async function autenticarNoBanco(
       papel: linha.papel,
       demo: linha.demo,
     };
+  });
+}
+
+export async function senhaAtualConfereNoBanco(
+  databaseUrl: string,
+  userId: string,
+  senha: string,
+): Promise<boolean> {
+  return semContextoRls(databaseUrl, async (cliente) => {
+    const resultado = await cliente.query<{ password_hash: string }>(
+      `select password_hash from public.users where id = $1`,
+      [userId],
+    );
+    const linha = resultado.rows[0];
+    if (!linha) return false;
+    return senhaConfere(senha, linha.password_hash);
+  });
+}
+
+export async function atualizarSenhaNoBanco(
+  databaseUrl: string,
+  userId: string,
+  senhaNova: string,
+): Promise<boolean> {
+  const hash = hashSenha(senhaNova);
+  return semContextoRls(databaseUrl, async (cliente) => {
+    const resultado = await cliente.query(
+      `update public.users set password_hash = $2 where id = $1`,
+      [userId, hash],
+    );
+    return (resultado.rowCount ?? 0) > 0;
   });
 }
 

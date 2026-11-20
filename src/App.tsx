@@ -8,6 +8,8 @@ import { Inicio } from "./pages/Inicio";
 import { Login } from "./pages/Login";
 import { CadastroAuxiliarForm } from "./pages/CadastroAuxiliarForm";
 import { CadastroAuxiliarLista } from "./pages/CadastroAuxiliarLista";
+import { AlterarSenha } from "./pages/AlterarSenha";
+import { Configuracoes } from "./pages/Configuracoes";
 import { ImportarCsv } from "./pages/ImportarCsv";
 import { Mais } from "./pages/Mais";
 import { MatrizDetalhe } from "./pages/MatrizDetalhe";
@@ -63,6 +65,14 @@ export function App() {
       />
       <Route path="/relatorios" element={comProtecao(<Relatorios />)} />
       <Route path="/mais/importar" element={comProtecao(<ImportarCsv />)} />
+      <Route
+        path="/mais/configuracoes"
+        element={comProtecao(<Configuracoes />)}
+      />
+      <Route
+        path="/mais/configuracoes/senha"
+        element={comProtecao(<AlterarSenha />)}
+      />
       <Route
         path="/mais/:tipo/nova"
         element={comProtecao(<CadastroAuxiliarForm />)}

@@ -1,14 +1,39 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Settings } from "lucide-react";
 import { AppShell, Botao, Cartao } from "../components/ui";
 import { lerSessao, sair } from "../lib/auth";
 
-const linksCadastro = [
+const linksCadastrosAuxiliares = [
   { to: "/mais/reprodutores", rotulo: "Reprodutores" },
   { to: "/mais/inseminadores", rotulo: "Inseminadores" },
   { to: "/mais/lotes", rotulo: "Lotes" },
-  { to: "/mais/importar", rotulo: "Importar planilha (CSV)" },
 ] as const;
+
+function GrupoLinks({
+  titulo,
+  links,
+}: {
+  titulo: string;
+  links: readonly { to: string; rotulo: string }[];
+}) {
+  return (
+    <Cartao className="divide-y divide-border p-0">
+      <p className="px-4 pb-2 pt-4 text-sm font-semibold text-muted-foreground">
+        {titulo}
+      </p>
+      {links.map((link) => (
+        <Link
+          key={link.to}
+          to={link.to}
+          className="press flex min-h-12 items-center justify-between px-4 text-foreground"
+        >
+          <span className="font-medium">{link.rotulo}</span>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </Link>
+      ))}
+    </Cartao>
+  );
+}
 
 export function Mais() {
   const navigate = useNavigate();
@@ -30,18 +55,24 @@ export function Mais() {
           <p className="text-lg font-semibold">{sessao?.nome ?? "—"}</p>
           <p className="text-sm text-muted-foreground">{sessao?.identificador}</p>
         </Cartao>
+        <GrupoLinks
+          titulo="Cadastros auxiliares"
+          links={linksCadastrosAuxiliares}
+        />
         <Cartao className="divide-y divide-border p-0">
-          <p className="px-4 pb-2 pt-4 font-semibold">Cadastros auxiliares</p>
-          {linksCadastro.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="press flex min-h-12 items-center justify-between px-4 text-foreground"
-            >
-              <span className="font-medium">{link.rotulo}</span>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-          ))}
+          <p className="px-4 pb-2 pt-4 text-sm font-semibold text-muted-foreground">
+            Sistema
+          </p>
+          <Link
+            to="/mais/configuracoes"
+            className="press flex min-h-12 items-center justify-between gap-3 px-4 text-foreground"
+          >
+            <span className="flex items-center gap-3">
+              <Settings className="size-5 text-muted-foreground" />
+              <span className="font-medium">Configurações</span>
+            </span>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </Link>
         </Cartao>
         <Botao variante="suave" onClick={encerrar}>
           Sair
