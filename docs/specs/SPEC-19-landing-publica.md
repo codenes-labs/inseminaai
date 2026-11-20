@@ -14,11 +14,6 @@
 
 - `theme-mode`: parse e classe `theme-dark`
 
-## Melhorias pendentes (backlog)
-
-- Hero e cards com algo **animado ou interativo** (motion leve, hover, ilustração) — **sem** redesenhar identidade verde nem trocar copy sem revisão (aguardando confirmação).
-- Depende da revisão de texto da sprint 1; não bloqueia P2 (auth).
-
 ## Estado atual
 
-Implementado na sprint 1 (2026-11-17). Critérios de aceite atendidos; melhorias visuais acima ficam em aberto.
+**Concluída (2026-11-20).** Landing em React na rota `/`: hero, demonstração em 3 etapas no celular (Voltar/Próximo), cards de passos, bloco “Para quem é”, **Entrar** → `/entrar`, tema via `ThemeProvider`, rodapé com links para termos, privacidade e documentação.

@@ -1,0 +1,110 @@
+.landing-page {
+  --landing-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-page .font-display {
+  font-family: "Plus Jakarta Sans", var(--font-sans);
+}
+
+.landing-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s var(--landing-ease),
+    transform 0.7s var(--landing-ease);
+}
+
+.landing-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.landing-animate-float {
+  animation: landing-float 5.5s ease-in-out infinite;
+}
+
+@keyframes landing-signal {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+}
+
+.landing-signal {
+  animation: landing-signal 2.4s var(--landing-ease) infinite;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.landing-signal-delay {
+  animation: landing-signal 2.4s var(--landing-ease) 1.2s infinite;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.landing-step-card:hover .landing-icon-bounce {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.landing-glow-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    420px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--color-brand) 12%, transparent),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.landing-glow-card:hover::before {
+  opacity: 1;
+}
+
+.landing-field-grid {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-primary) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+}
+
+.landing-phone-shadow {
+  box-shadow:
+    0 22px 45px -12px color-mix(in srgb, var(--color-primary) 22%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.landing-soft-shadow {
+  box-shadow:
+    0 4px 20px -2px color-mix(in srgb, var(--color-primary) 8%, transparent),
+    0 1px 3px 0 rgb(0 0 0 / 0.03);
+}
+
+.landing-soft-shadow-hover {
+  box-shadow:
+    0 14px 30px -6px color-mix(in srgb, var(--color-primary) 14%, transparent),
+    0 4px 10px -2px rgb(0 0 0 / 0.04);
+}
