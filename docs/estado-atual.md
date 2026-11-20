@@ -39,5 +39,7 @@
 
 ## Próximo foco sugerido
 
-1. Validação ponta a ponta do fluxo principal (login → matriz → IA → diagnóstico → relatório).
-2. SPEC-20: cadastro de usuários no mesmo `cadastro_id` (sem matriz de permissões ainda).
+1. Validação ponta a ponta do fluxo **mobile** (login → matriz → IA → diagnóstico → relatório).
+2. **SPEC-21 + SPEC-20** — sprint 08: web estilo IHB — **novo autônomo** + **usuários do cadastro**; mobile intocado.
+
+Ver `docs/sprints/sprint-08-painel-web.md`.

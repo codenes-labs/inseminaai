@@ -21,7 +21,9 @@ O visual e as telas do app logado já foram feitos em **React + Vite + TypeScrip
 | Rota | Tela |
 | --- | --- |
 | `/` | Landing |
-| `/entrar` | Login (JWT) |
+| `/entrar` | Login JWT (mobile + layout desktop responsivo) |
+| `/web/cadastros` | Provisionar cadastros — MVP autônomo (SPEC-21, planejado) |
+| `/web/usuarios` | Membros do cadastro atual (SPEC-20, planejado) |
 | `/termos`, `/privacidade`, `/docs` | Termos, privacidade (LGPD), índice técnico (SPEC-17) |
 
 ## Telas do app (design pronto — rotas ativas após login)

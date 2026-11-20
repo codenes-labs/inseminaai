@@ -185,7 +185,8 @@ Itens **substitutos** (entram em P1–P4):
 | SPEC-16 | CI/CD | `docs/specs/SPEC-16-ci-cd.md` |
 | SPEC-17 | Docs/termos | `docs/specs/SPEC-17-docs-publicas.md` (**concluída** 2026-11-20) |
 | SPEC-18 | Governança | `docs/specs/SPEC-18-governanca.md` |
-| SPEC-20 | Painel web + usuários | `docs/specs/SPEC-20-painel-web-usuarios.md` (fase 2, planejada) |
+| SPEC-20 | Painel web + usuários no cadastro | `docs/specs/SPEC-20-painel-web-usuarios.md` (fase 2) |
+| SPEC-21 | Cadastro de empresas (autônomo primeiro) | `docs/specs/SPEC-21-cadastro-empresas.md` (fase 2, web IHB) |
 
 Critérios detalhados de implementação entram ao abrir cada sprint P1–P5.
 

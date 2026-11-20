@@ -8,8 +8,9 @@ Todas as tabelas de dados carregam **cadastro_id**. Cada cadastro é um cliente 
 | --- | --- | --- |
 | id | uuid | chave primária |
 | nome | text | ex.: Vitor Bezerra, Cooperativa Boa Terra |
+| tipo | text | **planejado (SPEC-21):** `autonomo` \| `empresa`; MVP web começa só `autonomo` |
 | plano | text | gratuito, básico, pro (para uso futuro) |
-| ativa | boolean | padrão true |
+| ativa | boolean | padrão true; desativa login de todo o tenant |
 | created_at | timestamptz | automático |
 
 ## membros_cadastro

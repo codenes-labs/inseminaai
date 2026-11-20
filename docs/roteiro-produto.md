@@ -33,7 +33,8 @@ P1 (SPEC-12) e **P3 (SPEC-14)** concluídas na prática; próximo **SPEC-02** (m
 
 | Spec | Foco |
 | --- | --- |
-| **SPEC-20** | Painel web + criar usuários no mesmo `cadastro_id` (permissões finas depois) |
+| **SPEC-21** | Web: provisionar cadastro **autônomo** (ex. Vitor) + 1º login |
+| **SPEC-20** | Web: usuários dentro do `cadastro_id`; login responsivo (mobile intocado) |
 
 Validação **E2E** (pode ser mockada) antes de abrir SPEC-20.
 
