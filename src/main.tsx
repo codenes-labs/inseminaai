@@ -5,6 +5,12 @@ import { App } from "./App";
 import { ThemeProvider } from "./components/theme";
 import "./index.css";
 
+if ("serviceWorker" in navigator) {
+  void navigator.serviceWorker.register("/sw.js").catch(() => {
+    /* ambiente sem HTTPS ou SW indisponível */
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>

@@ -5,7 +5,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["dist", "node_modules", ".preview-ref"],
+    ignores: ["dist", "node_modules", ".preview-ref", "public/sw.js"],
   },
   {
     files: ["**/*.{ts,tsx}"],

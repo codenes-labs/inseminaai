@@ -1,4 +1,8 @@
+import { apiFetchComFilaOffline } from "../../offline/infrastructure/api-com-fila";
+import { OfflineEnfileiradoError } from "../../offline/infrastructure/sincronizar-fila";
 import { apiFetch } from "../../../lib/api-client";
+
+export { OfflineEnfileiradoError };
 
 export type ContextoInseminacao = {
   temPendente: boolean;
@@ -74,12 +78,13 @@ export async function registrarDiagnosticoApi(
     observacoes?: string;
   },
 ): Promise<DiagnosticoRegistrado> {
-  const response = await apiFetch(
+  const response = await apiFetchComFilaOffline(
     `/api/inseminacoes/${encodeURIComponent(inseminacaoId)}/diagnostico`,
     {
       method: "PATCH",
       body: JSON.stringify(dados),
     },
+    "diagnostico",
   );
   const body = (await response.json()) as {
     diagnostico: DiagnosticoRegistrado;
@@ -126,10 +131,14 @@ export async function criarInseminacoesLoteApi(dados: {
   tipo: string;
   observacoes?: string;
 }): Promise<ResultadoLancamentoLoteApi> {
-  const response = await apiFetch("/api/inseminacoes/lote", {
-    method: "POST",
-    body: JSON.stringify(dados),
-  });
+  const response = await apiFetchComFilaOffline(
+    "/api/inseminacoes/lote",
+    {
+      method: "POST",
+      body: JSON.stringify(dados),
+    },
+    "inseminacao_lote",
+  );
   const body = (await response.json()) as ResultadoLancamentoLoteApi & {
     error?: string;
   };
@@ -148,10 +157,14 @@ export async function criarInseminacaoApi(dados: {
   tipo: string;
   observacoes?: string;
 }): Promise<InseminacaoCriada> {
-  const response = await apiFetch("/api/inseminacoes", {
-    method: "POST",
-    body: JSON.stringify(dados),
-  });
+  const response = await apiFetchComFilaOffline(
+    "/api/inseminacoes",
+    {
+      method: "POST",
+      body: JSON.stringify(dados),
+    },
+    "inseminacao",
+  );
   const body = (await response.json()) as {
     inseminacao: InseminacaoCriada;
     error?: string;

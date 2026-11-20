@@ -17,4 +17,4 @@
 
 ## Estado atual
 
-Há `manifest.webmanifest`. Sem service worker nem fila offline.
+**Implementado (2026-11-20):** `sw.js`, manifest instalável, fila local (`localStorage`) para IA/diagnóstico/lote, sincronização em ordem ao voltar online; conflito/erro mantém itens na fila.

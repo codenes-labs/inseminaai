@@ -13,6 +13,7 @@ import {
 } from "../components/ui";
 import {
   inseminacaoPendenteDaMatrizApi,
+  OfflineEnfileiradoError,
   registrarDiagnosticoApi,
   type InseminacaoPendente,
 } from "../features/inseminacoes/infrastructure/inseminacoes-api";
@@ -90,6 +91,10 @@ export function Diagnostico() {
       }
       navigate(`/matrizes/${matrizId}`);
     } catch (cause) {
+      if (cause instanceof OfflineEnfileiradoError) {
+        navigate(`/matrizes/${matrizId}`);
+        return;
+      }
       setErro(
         cause instanceof Error ? cause.message : "Não foi possível salvar.",
       );

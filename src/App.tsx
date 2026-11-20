@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
+import { AvisoFilaOffline } from "./components/aviso-fila-offline";
 import { RotaEntrar } from "./components/rota-entrar";
 import { RotaProtegida } from "./components/rota-protegida";
 import { Diagnostico } from "./pages/Diagnostico";
@@ -28,7 +29,9 @@ function comProtecao(element: ReactElement) {
 
 export function App() {
   return (
-    <Routes>
+    <>
+      <AvisoFilaOffline />
+      <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route
         path="/entrar"
@@ -75,5 +78,6 @@ export function App() {
       <Route path="/mais" element={comProtecao(<Mais />)} />
       <Route path="*" element={<LandingPage />} />
     </Routes>
+    </>
   );
 }

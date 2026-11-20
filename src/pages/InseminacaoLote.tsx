@@ -22,6 +22,7 @@ import {
 } from "../features/cadastros-auxiliares/infrastructure/cadastros-auxiliares-api";
 import {
   criarInseminacoesLoteApi,
+  OfflineEnfileiradoError,
   previewLotePendenciasApi,
   ultimoInseminadorIdApi,
 } from "../features/inseminacoes/infrastructure/inseminacoes-api";
@@ -146,6 +147,10 @@ export function InseminacaoLote() {
       });
       navigate("/inicio");
     } catch (cause) {
+      if (cause instanceof OfflineEnfileiradoError) {
+        navigate("/inicio");
+        return;
+      }
       setErro(
         cause instanceof Error ? cause.message : "Não foi possível salvar.",
       );

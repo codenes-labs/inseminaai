@@ -23,6 +23,7 @@ import {
 import {
   contextoMatrizInseminacaoApi,
   criarInseminacaoApi,
+  OfflineEnfileiradoError,
   ultimoInseminadorIdApi,
 } from "../features/inseminacoes/infrastructure/inseminacoes-api";
 import {
@@ -165,6 +166,10 @@ export function NovaInseminacao() {
       });
       navigate("/inicio");
     } catch (cause) {
+      if (cause instanceof OfflineEnfileiradoError) {
+        navigate("/inicio");
+        return;
+      }
       setErro(
         cause instanceof Error ? cause.message : "Não foi possível salvar.",
       );
