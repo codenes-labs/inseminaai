@@ -80,6 +80,7 @@ export function Inicio() {
     prenhes: 0,
     vazias: 0,
     diagnosticosVencendo7Dias: 0,
+    diagnosticosProximos7Dias: [],
     proximosPartos: [],
     ultimasInseminacoes: [],
   };
@@ -134,7 +135,12 @@ export function Inicio() {
             </p>
             <Link
               to="/matrizes"
-              state={{ filtroInicial: "pendente" }}
+              state={{
+                apenasMatrizIds: resumo.diagnosticosProximos7Dias.map(
+                  (d) => d.matrizId,
+                ),
+                contextoLista: "Diagnósticos nos próximos 7 dias",
+              }}
               className="press flex min-h-11 items-center rounded-md bg-status-pendente px-4 text-sm font-semibold text-primary-foreground"
             >
               Ver

@@ -48,10 +48,47 @@ export function contarDiagnosticosVencendoEmDias(
   hoje: string,
   dias: number,
 ): number {
-  const fim = adicionarDias(hoje, dias);
-  return datasDiagnostico.filter(
-    (data) => data >= hoje && data <= fim,
+  return listarDiagnosticosVencendoEmDias(
+    datasDiagnostico.map((dataDiagnostico) => ({
+      matrizId: "",
+      nome: "",
+      brinco: null,
+      dataDiagnostico,
+    })),
+    hoje,
+    dias,
   ).length;
+}
+
+export type DiagnosticoVencendoEntrada = {
+  matrizId: string;
+  nome: string;
+  brinco: string | null;
+  dataDiagnostico: string;
+};
+
+export type DiagnosticoVencendoExibicao = DiagnosticoVencendoEntrada & {
+  dias: number;
+  dataBr: string;
+};
+
+export function listarDiagnosticosVencendoEmDias(
+  itens: DiagnosticoVencendoEntrada[],
+  hoje: string,
+  dias: number,
+): DiagnosticoVencendoExibicao[] {
+  const fim = adicionarDias(hoje, dias);
+  return [...itens]
+    .filter(
+      (item) =>
+        item.dataDiagnostico >= hoje && item.dataDiagnostico <= fim,
+    )
+    .sort((a, b) => a.dataDiagnostico.localeCompare(b.dataDiagnostico))
+    .map((item) => ({
+      ...item,
+      dias: diasEntre(hoje, item.dataDiagnostico),
+      dataBr: formatarDataIsoParaBr(item.dataDiagnostico),
+    }));
 }
 
 export function diasEntre(hoje: string, futuro: string): number {

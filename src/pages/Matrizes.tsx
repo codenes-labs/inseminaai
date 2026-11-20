@@ -28,9 +28,13 @@ export function Matrizes() {
   const stateNav = location.state as {
     abrirInativas?: boolean;
     filtroInicial?: FiltroLista;
+    apenasMatrizIds?: string[];
+    contextoLista?: string;
   } | null;
   const abrirInativas = Boolean(stateNav?.abrirInativas);
   const filtroInicial = stateNav?.filtroInicial;
+  const apenasMatrizIds = stateNav?.apenasMatrizIds;
+  const contextoLista = stateNav?.contextoLista;
   const [filtro, setFiltro] = useState<FiltroLista>(() => {
     if (abrirInativas) return "inativas";
     if (
@@ -75,11 +79,22 @@ export function Matrizes() {
   }, [busca, carregar, listandoInativas]);
 
   const lista = useMemo(() => {
-    if (filtro === "inativas") return matrizes;
-    return matrizes.filter(
-      (m) => filtro === "todas" || m.situacao === filtro,
-    );
-  }, [matrizes, filtro]);
+    let base = matrizes;
+    if (filtro === "inativas") {
+      base = matrizes;
+    } else {
+      base = matrizes.filter(
+        (m) => filtro === "todas" || m.situacao === filtro,
+      );
+    }
+    if (apenasMatrizIds?.length) {
+      const ordem = new Map(apenasMatrizIds.map((id, indice) => [id, indice]));
+      base = base
+        .filter((m) => ordem.has(m.id))
+        .sort((a, b) => (ordem.get(a.id) ?? 0) - (ordem.get(b.id) ?? 0));
+    }
+    return base;
+  }, [matrizes, filtro, apenasMatrizIds]);
 
   return (
     <AppShell>
@@ -116,6 +131,11 @@ export function Matrizes() {
       {erro && (
         <p className="px-4 pt-3 text-sm font-medium text-status-vazia">{erro}</p>
       )}
+      {contextoLista ? (
+        <p className="px-4 pt-2 text-sm font-medium text-foreground">
+          {contextoLista}
+        </p>
+      ) : null}
       <div className="px-4 py-3">
         <FiltroSelecao
           rotulo="Situação"

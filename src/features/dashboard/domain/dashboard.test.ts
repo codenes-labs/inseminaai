@@ -4,6 +4,7 @@ import {
   contarDiagnosticosVencendoEmDias,
   contarMatrizesAtivasPorSituacao,
   intervaloMesCalendario,
+  listarDiagnosticosVencendoEmDias,
   ordenarProximosPartos,
 } from "./dashboard";
 
@@ -31,6 +32,36 @@ describe("SPEC-08 dashboard", () => {
       "2026-11-28",
     ];
     expect(contarDiagnosticosVencendoEmDias(datas, hoje, 7)).toBe(3);
+  });
+
+  it("lista diagnósticos na janela ordenados por data", () => {
+    const hoje = "2026-11-20";
+    const lista = listarDiagnosticosVencendoEmDias(
+      [
+        {
+          matrizId: "2",
+          nome: "B",
+          brinco: null,
+          dataDiagnostico: "2026-11-27",
+        },
+        {
+          matrizId: "1",
+          nome: "A",
+          brinco: "01",
+          dataDiagnostico: "2026-11-22",
+        },
+        {
+          matrizId: "3",
+          nome: "C",
+          brinco: null,
+          dataDiagnostico: "2026-11-19",
+        },
+      ],
+      hoje,
+      7,
+    );
+    expect(lista.map((d) => d.nome)).toEqual(["A", "B"]);
+    expect(lista[0]?.dias).toBe(2);
   });
 
   it("ordena partos previstos por data crescente", () => {

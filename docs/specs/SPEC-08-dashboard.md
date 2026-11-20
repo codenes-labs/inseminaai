@@ -17,3 +17,5 @@
 ## Estado atual
 
 **Implementado (2026-11-20):** `GET /api/dashboard`, domínio `dashboard.ts`, tela Início com dados reais (cartões, alerta 7 dias, partos e últimas IA).
+
+**Implementado (2026-11-20):** lista `diagnosticosProximos7Dias` na API; **Ver** no alerta abre Matrizes filtrada por esses IDs (ordem da data prevista), sem lista duplicada no Início.

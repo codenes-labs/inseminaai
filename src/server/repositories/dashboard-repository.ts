@@ -1,8 +1,8 @@
 import {
   contarDatasNoIntervalo,
-  contarDiagnosticosVencendoEmDias,
   contarMatrizesAtivasPorSituacao,
   intervaloMesCalendario,
+  listarDiagnosticosVencendoEmDias,
   ordenarProximosPartos,
 } from "../../features/dashboard/domain/dashboard";
 import { derivarSituacaoDaUltimaInseminacao } from "../../features/matrizes/domain/resumo-reprodutivo";
@@ -27,6 +27,13 @@ export type DashboardDto = {
   prenhes: number;
   vazias: number;
   diagnosticosVencendo7Dias: number;
+  diagnosticosProximos7Dias: {
+    matrizId: string;
+    nome: string;
+    brinco: string | null;
+    dataBr: string;
+    dias: number;
+  }[];
   proximosPartos: {
     matrizId: string;
     nome: string;
@@ -103,7 +110,12 @@ export async function obterDashboard(
     const { aguardando, prenhes, vazias } =
       contarMatrizesAtivasPorSituacao(matrizesComSituacao);
 
-    const datasDiagnosticoPendente: string[] = [];
+    const diagnosticosPendentes: {
+      matrizId: string;
+      nome: string;
+      brinco: string | null;
+      dataDiagnostico: string;
+    }[] = [];
     const partos: Parameters<typeof ordenarProximosPartos>[0] = [];
 
     for (const m of matrizesComSituacao) {
@@ -127,7 +139,12 @@ export async function obterDashboard(
         situacaoUltima === "pendente" &&
         linhaCompleta.data_diagnostico_prevista
       ) {
-        datasDiagnosticoPendente.push(linhaCompleta.data_diagnostico_prevista);
+        diagnosticosPendentes.push({
+          matrizId: m.id,
+          nome: m.nome,
+          brinco: m.brinco,
+          dataDiagnostico: linhaCompleta.data_diagnostico_prevista,
+        });
       }
       if (situacaoUltima === "prenhe" && linhaCompleta.previsao_parto) {
         partos.push({
@@ -139,11 +156,18 @@ export async function obterDashboard(
       }
     }
 
-    const diagnosticosVencendo7Dias = contarDiagnosticosVencendoEmDias(
-      datasDiagnosticoPendente,
+    const diagnosticosProximos7Dias = listarDiagnosticosVencendoEmDias(
+      diagnosticosPendentes,
       hoje,
       7,
-    );
+    ).map((d) => ({
+      matrizId: d.matrizId,
+      nome: d.nome,
+      brinco: d.brinco,
+      dataBr: d.dataBr,
+      dias: d.dias,
+    }));
+    const diagnosticosVencendo7Dias = diagnosticosProximos7Dias.length;
 
     const proximosPartos = ordenarProximosPartos(partos, hoje).map((p) => ({
       matrizId: p.matrizId,
@@ -171,6 +195,7 @@ export async function obterDashboard(
       prenhes,
       vazias,
       diagnosticosVencendo7Dias,
+      diagnosticosProximos7Dias,
       proximosPartos,
       ultimasInseminacoes,
     };

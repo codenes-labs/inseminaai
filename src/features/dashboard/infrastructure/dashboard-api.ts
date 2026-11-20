@@ -6,6 +6,13 @@ export type DashboardApi = {
   prenhes: number;
   vazias: number;
   diagnosticosVencendo7Dias: number;
+  diagnosticosProximos7Dias: {
+    matrizId: string;
+    nome: string;
+    brinco: string | null;
+    dataBr: string;
+    dias: number;
+  }[];
   proximosPartos: {
     matrizId: string;
     nome: string;
