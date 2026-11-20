@@ -69,4 +69,4 @@
 
 ## Estado atual
 
-**Planejado (2026-11-20).** Sprint `sprint-08-painel-web.md`; SPEC-21 em paralelo para **cadastro autônomo**.
+**Implementado (2026-11-20):** API `/api/cadastro/membros` (GET/POST/PATCH), `/web/usuarios`, hook `useEntrar`, login responsivo, rota `RotaWebAdmin`. SPEC-21 concluída em paralelo.

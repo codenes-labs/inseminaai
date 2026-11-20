@@ -33,8 +33,8 @@ Mobile: **intocado** (inseminador no curral).
 
 ### SPEC-20 — Usuários no cadastro
 
-- [ ] API `/api/cadastro/membros`.
-- [ ] UI `/web/usuarios` (criar inseminador / segundo admin).
+- [x] API `/api/cadastro/membros` (listar, criar, ativar/desativar).
+- [x] UI `/web/usuarios` (criar inseminador / administrador).
 - [x] Login responsivo: fundo full width + ondas no desktop (conteúdo centralizado 480px).
 
 ## Futuro (não nesta sprint)

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "../../components/ui";
-import { sair } from "../../lib/auth";
+import { lerSessao, sair } from "../../lib/auth";
 
 export function WebShell({
   titulo,
@@ -10,14 +10,20 @@ export function WebShell({
   titulo: string;
   children: ReactNode;
 }) {
+  const sessao = lerSessao();
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <header className="border-b border-border bg-card px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <Logo />
           <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link to="/web/cadastros" className="text-primary">
-              Cadastros
+            {sessao?.plataformaAdmin ? (
+              <Link to="/web/cadastros" className="text-primary">
+                Cadastros
+              </Link>
+            ) : null}
+            <Link to="/web/usuarios" className="text-primary">
+              Usuários
             </Link>
             <Link to="/inicio" className="text-muted-foreground hover:text-foreground">
               App mobile

@@ -1,5 +1,4 @@
-import { FormEvent, useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Lock, Mail } from "lucide-react";
 import {
   Botao,
@@ -10,112 +9,80 @@ import {
   inputClass,
 } from "../components/ui";
 import { TurnstileLogin } from "../components/TurnstileLogin";
-import { MENSAGEM_LOGIN_INVALIDO, entrarComSenha, lerSessao } from "../lib/auth";
-
-const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? "";
+import { useEntrar } from "../features/auth/presentation/use-entrar";
 
 export function Login() {
-  const navigate = useNavigate();
-  const [erro, setErro] = useState("");
-  const [carregando, setCarregando] = useState(false);
-  const [identificador, setIdentificador] = useState("");
-  const [senha, setSenha] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const onTurnstileToken = useCallback((token: string) => {
-    setTurnstileToken(token);
-  }, []);
-
-  async function enviar(e: FormEvent) {
-    e.preventDefault();
-    setErro("");
-    if (turnstileSiteKey && !turnstileToken) {
-      setErro("Confirme o captcha antes de entrar.");
-      return;
-    }
-    setCarregando(true);
-    try {
-      const resultado = await entrarComSenha(
-        identificador,
-        senha,
-        turnstileToken || undefined,
-      );
-      if (!resultado.ok) {
-        setErro(resultado.erro);
-        return;
-      }
-      const sessao = lerSessao();
-      const desktop = window.matchMedia("(min-width: 1024px)").matches;
-      if (sessao?.plataformaAdmin && desktop) {
-        navigate("/web/cadastros");
-      } else {
-        navigate("/inicio");
-      }
-    } catch {
-      setErro(MENSAGEM_LOGIN_INVALIDO);
-    } finally {
-      setCarregando(false);
-    }
-  }
+  const {
+    erro,
+    carregando,
+    identificador,
+    setIdentificador,
+    senha,
+    setSenha,
+    onTurnstileToken,
+    enviar,
+    turnstileSiteKey,
+  } = useEntrar();
 
   return (
     <div className="bg-login relative min-h-screen w-full">
       <div className="animate-in fade-in slide-in-from-bottom-3 relative z-10 mx-auto flex min-h-screen w-full max-w-[480px] flex-col overflow-hidden px-6">
         <div className="flex flex-1 flex-col pt-16 duration-500">
-        <div className="mb-3 flex size-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-(--shadow-fab)">
-          <CowIcon className="size-9" />
-        </div>
-        <div className="text-3xl">
-          <Logo icone={false} />
-        </div>
-        <p className="mt-2 text-base text-muted-foreground">
-          Registre suas inseminações com segurança
-        </p>
-        <form className="mt-10 space-y-4" onSubmit={enviar}>
-          <Campo rotulo="E-mail" icone={<Mail className="size-5" strokeWidth={1.75} />}>
-            <input
-              type="email"
-              autoComplete="username"
-              placeholder="seu@email.com"
-              className={inputClass}
-              value={identificador}
-              onChange={(e) => setIdentificador(e.target.value)}
-              disabled={carregando}
-            />
-          </Campo>
-          <Campo rotulo="Senha" icone={<Lock className="size-5" strokeWidth={1.75} />}>
-            <input
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              className={inputClass}
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              disabled={carregando}
-            />
-          </Campo>
-          {erro && (
-            <p className="text-sm font-medium text-status-vazia">{erro}</p>
-          )}
-          <div className="flex justify-end">
-            <a href="#esqueci" className="py-2 text-sm font-medium text-brand">
-              Esqueci minha senha
-            </a>
+          <div className="mb-3 flex size-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-(--shadow-fab)">
+            <CowIcon className="size-9" />
           </div>
-          {turnstileSiteKey ? (
-            <TurnstileLogin siteKey={turnstileSiteKey} onToken={onTurnstileToken} />
-          ) : null}
-          <Botao type="submit" disabled={carregando}>
-            {carregando ? "Entrando…" : "Entrar"}
-          </Botao>
-          <p className="pt-2 text-center text-sm text-muted-foreground">
-            Novos acessos são liberados pelo administrador.
+          <div className="text-3xl">
+            <Logo icone={false} />
+          </div>
+          <p className="mt-2 text-base text-muted-foreground">
+            Registre suas inseminações com segurança
           </p>
-        </form>
-        <p className="mt-6 text-center text-sm">
-          <Link to="/" className="font-medium text-brand">
-            Voltar ao site
-          </Link>
-        </p>
+          <form className="mt-10 space-y-4" onSubmit={enviar}>
+            <Campo rotulo="E-mail" icone={<Mail className="size-5" strokeWidth={1.75} />}>
+              <input
+                type="email"
+                autoComplete="username"
+                placeholder="seu@email.com"
+                className={inputClass}
+                value={identificador}
+                onChange={(e) => setIdentificador(e.target.value)}
+                disabled={carregando}
+              />
+            </Campo>
+            <Campo rotulo="Senha" icone={<Lock className="size-5" strokeWidth={1.75} />}>
+              <input
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className={inputClass}
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                disabled={carregando}
+              />
+            </Campo>
+            {erro && (
+              <p className="text-sm font-medium text-status-vazia">{erro}</p>
+            )}
+            <div className="flex justify-end">
+              <a href="#esqueci" className="py-2 text-sm font-medium text-brand">
+                Esqueci minha senha
+              </a>
+            </div>
+            {turnstileSiteKey ? (
+              <TurnstileLogin siteKey={turnstileSiteKey} onToken={onTurnstileToken} />
+            ) : null}
+            <Botao type="submit" disabled={carregando}>
+              {carregando ? "Entrando…" : "Entrar"}
+            </Botao>
+            <p className="pt-2 text-center text-sm text-muted-foreground">
+              Novos acessos são liberados pelo administrador.
+            </p>
+          </form>
+          <p className="mt-6 text-center text-sm">
+            <Link to="/" className="font-medium text-brand">
+              Voltar ao site
+            </Link>
+          </p>
         </div>
         <OndasOvelha className="pointer-events-none -mx-6 mt-8 block w-[calc(100%+3rem)] lg:hidden" />
       </div>

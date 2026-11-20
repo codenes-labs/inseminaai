@@ -5,6 +5,7 @@ import { handleCadastrosAuxiliaresRequest } from "./routes/cadastros-auxiliares"
 import { handleInseminacoesRequest } from "./routes/inseminacoes";
 import { handleImportacaoRequest } from "./routes/importacao";
 import { handleMatrizesRequest } from "./routes/matrizes";
+import { handleCadastroMembrosRequest } from "./routes/cadastro-membros";
 import { handlePlataformaRequest } from "./routes/plataforma";
 
 export type DataHandlerContext = {
@@ -43,6 +44,14 @@ export async function handleDataRequest(
     });
     if (plataforma) {
       return plataforma;
+    }
+
+    const membrosCadastro = await handleCadastroMembrosRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (membrosCadastro) {
+      return membrosCadastro;
     }
 
     const matrizes = await handleMatrizesRequest(request, {

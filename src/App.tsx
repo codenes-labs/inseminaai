@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { AvisoFilaOffline } from "./components/aviso-fila-offline";
 import { RotaEntrar } from "./components/rota-entrar";
 import { RotaPlataforma } from "./components/rota-plataforma";
+import { RotaWebAdmin } from "./components/rota-web-admin";
 import { RotaProtegida } from "./components/rota-protegida";
 import { Diagnostico } from "./pages/Diagnostico";
 import { Inicio } from "./pages/Inicio";
@@ -24,6 +25,7 @@ import { DocsOverviewPage } from "./pages/public/DocsOverviewPage";
 import { PrivacyPage } from "./pages/public/PrivacidadePage";
 import { TermsPage } from "./pages/public/TermosPage";
 import { WebCadastros } from "./pages/web/WebCadastros";
+import { WebUsuarios } from "./pages/web/WebUsuarios";
 
 function comProtecao(element: ReactElement) {
   return <RotaProtegida>{element}</RotaProtegida>;
@@ -55,11 +57,19 @@ export function App() {
         }
       />
       <Route
+        path="/web/usuarios"
+        element={
+          <RotaWebAdmin>
+            <WebUsuarios />
+          </RotaWebAdmin>
+        }
+      />
+      <Route
         path="/web"
         element={
-          <RotaPlataforma>
-            <WebCadastros />
-          </RotaPlataforma>
+          <RotaWebAdmin>
+            <WebUsuarios />
+          </RotaWebAdmin>
         }
       />
       <Route path="/inicio" element={comProtecao(<Inicio />)} />
