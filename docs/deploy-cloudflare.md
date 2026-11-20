@@ -4,7 +4,10 @@
 
 1. Push em `master` dispara `.github/workflows/deploy.yml`.
 2. Jobs: lint → coverage → build (`dist/`) → deploy com Wrangler.
-3. Secrets do GitHub são enviados ao Worker (`wrangler secret bulk`).
+3. Antes do Worker: `npm run db:setup` (migrations em `.docker/db/migrations/` + seed admin/demo no Neon).
+4. Secrets do GitHub são enviados ao Worker (`wrangler secret bulk`).
+
+`TURNSTILE_SITE_KEY` precisa existir no **build** (`VITE_TURNSTILE_SITE_KEY` no bundle). Se o Worker tiver `TURNSTILE_SECRET_KEY` mas o front sair sem site key, o login responde *“Confirme o captcha antes de entrar.”* sem exibir o widget.
 
 ## Secrets no GitHub (Actions)
 

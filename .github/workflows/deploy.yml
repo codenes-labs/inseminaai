@@ -67,6 +67,15 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Validar Turnstile para o build
+        run: |
+          if [ -z "$TURNSTILE_SITE_KEY" ]; then
+            echo "::error::Secret TURNSTILE_SITE_KEY obrigatório no build (widget no login)"
+            exit 1
+          fi
+        env:
+          TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+
       - name: Build
         run: npm run build
         env:
@@ -129,6 +138,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+
+      - name: Migrations e seed no Neon
+        run: npm run db:setup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Sync Worker secrets
         run: |
