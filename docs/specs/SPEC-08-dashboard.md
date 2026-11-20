@@ -16,4 +16,4 @@
 
 ## Estado atual
 
-Dashboard visual pronto, números mock.
+**Implementado (2026-11-20):** `GET /api/dashboard`, domínio `dashboard.ts`, tela Início com dados reais (cartões, alerta 7 dias, partos e últimas IA).

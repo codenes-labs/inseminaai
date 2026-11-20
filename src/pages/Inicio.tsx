@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   CalendarClock,
@@ -14,12 +15,12 @@ import {
   Cartao,
   Logo,
   TituloSecao,
+  Vazio,
 } from "../components/ui";
 import {
-  proximosPartos,
-  resumo,
-  ultimasInseminacoes,
-} from "../data/mock";
+  obterDashboardApi,
+  type DashboardApi,
+} from "../features/dashboard/infrastructure/dashboard-api";
 import { lerSessao } from "../lib/auth";
 
 const hoje = new Date().toLocaleDateString("pt-BR", {
@@ -55,6 +56,33 @@ function CartaoResumo({
 export function Inicio() {
   const nome = lerSessao()?.nome ?? "Vitor";
   const data = hoje.charAt(0).toUpperCase() + hoje.slice(1);
+  const [dados, setDados] = useState<DashboardApi | null>(null);
+  const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    let ativo = true;
+    void (async () => {
+      try {
+        const res = await obterDashboardApi();
+        if (ativo) setDados(res);
+      } catch {
+        if (ativo) setErro("Não foi possível carregar o resumo.");
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const resumo = dados ?? {
+    inseminadasMes: 0,
+    aguardando: 0,
+    prenhes: 0,
+    vazias: 0,
+    diagnosticosVencendo7Dias: 0,
+    proximosPartos: [],
+    ultimasInseminacoes: [],
+  };
 
   return (
     <AppShell>
@@ -64,6 +92,9 @@ export function Inicio() {
         <p className="mt-1 text-sm opacity-80">{data}</p>
       </header>
       <div className="-mt-10 px-4">
+        {erro ? (
+          <p className="mb-3 text-sm font-medium text-status-vazia">{erro}</p>
+        ) : null}
         <div className="grid grid-cols-2 gap-3">
           <CartaoResumo
             icone={<Syringe />}
@@ -90,33 +121,63 @@ export function Inicio() {
             tom="bg-danger-soft text-status-vazia"
           />
         </div>
-        <div className="mt-4 flex items-center gap-3 rounded-lg border border-status-pendente/30 bg-warning-soft p-4">
-          <TriangleAlert className="size-6 shrink-0 text-status-pendente" strokeWidth={1.75} />
-          <p className="flex-1 text-sm font-medium text-foreground">
-            3 diagnósticos vencem nos próximos 7 dias
-          </p>
-          <Link
-            to="/matrizes"
-            className="press flex min-h-11 items-center rounded-md bg-status-pendente px-4 text-sm font-semibold text-primary-foreground"
-          >
-            Ver
-          </Link>
-        </div>
+        {resumo.diagnosticosVencendo7Dias > 0 ? (
+          <div className="mt-4 flex items-center gap-3 rounded-lg border border-status-pendente/30 bg-warning-soft p-4">
+            <TriangleAlert
+              className="size-6 shrink-0 text-status-pendente"
+              strokeWidth={1.75}
+            />
+            <p className="flex-1 text-sm font-medium text-foreground">
+              {resumo.diagnosticosVencendo7Dias === 1
+                ? "1 diagnóstico vence nos próximos 7 dias"
+                : `${resumo.diagnosticosVencendo7Dias} diagnósticos vencem nos próximos 7 dias`}
+            </p>
+            <Link
+              to="/matrizes"
+              state={{ filtroInicial: "pendente" }}
+              className="press flex min-h-11 items-center rounded-md bg-status-pendente px-4 text-sm font-semibold text-primary-foreground"
+            >
+              Ver
+            </Link>
+          </div>
+        ) : null}
         <TituloSecao>Próximos partos</TituloSecao>
-        <Cartao className="divide-y divide-border p-0">
-          {proximosPartos.map((parto) => (
-            <div key={parto.nome} className="flex items-center gap-3 px-4 py-3.5">
-              <div className="flex size-10 items-center justify-center rounded-full bg-brand-soft text-brand">
-                <CalfIcon className="size-6" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold">{parto.nome}</p>
-                <p className="text-xs text-muted-foreground">Previsto {parto.data}</p>
-              </div>
-              <span className="text-sm font-semibold text-primary">{parto.dias} dias</span>
-            </div>
-          ))}
-        </Cartao>
+        {resumo.proximosPartos.length > 0 ? (
+          <Cartao className="divide-y divide-border p-0">
+            {resumo.proximosPartos.map((parto) => (
+              <Link
+                key={parto.matrizId}
+                to={`/matrizes/${parto.matrizId}`}
+                className="flex items-center gap-3 px-4 py-3.5"
+              >
+                <div className="flex size-10 items-center justify-center rounded-full bg-brand-soft text-brand">
+                  <CalfIcon className="size-6" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">
+                    {parto.nome}
+                    {parto.brinco ? (
+                      <span className="ml-1 text-xs font-normal text-muted-foreground">
+                        #{parto.brinco}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Previsto {parto.dataBr}
+                  </p>
+                </div>
+                <span className="text-sm font-semibold text-primary">
+                  {parto.dias} dias
+                </span>
+              </Link>
+            ))}
+          </Cartao>
+        ) : (
+          <Vazio
+            titulo="Nenhum parto previsto"
+            texto="Quando houver matrizes prenhes, aparecem aqui."
+          />
+        )}
         <TituloSecao
           acao={
             <Link to="/matrizes" className="text-sm font-medium text-brand">
@@ -126,31 +187,40 @@ export function Inicio() {
         >
           Últimas inseminações
         </TituloSecao>
-        <Cartao className="divide-y divide-border p-0">
-          {ultimasInseminacoes.map((item) => (
-            <Link
-              key={item.nome}
-              to="/matrizes"
-              className="flex items-center gap-3 px-4 py-3.5"
-            >
-              <div className="flex-1">
-                <p className="font-semibold">
-                  {item.nome}{" "}
-                  <span className="text-xs font-normal text-muted-foreground">
-                    #{item.brinco}
-                  </span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {item.data} · {item.reprodutor}
-                </p>
-              </div>
-              <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-primary">
-                {item.tipo}
-              </span>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-          ))}
-        </Cartao>
+        {resumo.ultimasInseminacoes.length > 0 ? (
+          <Cartao className="divide-y divide-border p-0">
+            {resumo.ultimasInseminacoes.map((item) => (
+              <Link
+                key={`${item.matrizId}-${item.dataBr}`}
+                to={`/matrizes/${item.matrizId}`}
+                className="flex items-center gap-3 px-4 py-3.5"
+              >
+                <div className="flex-1">
+                  <p className="font-semibold">
+                    {item.nome}{" "}
+                    {item.brinco ? (
+                      <span className="text-xs font-normal text-muted-foreground">
+                        #{item.brinco}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.dataBr} · {item.reprodutor}
+                  </p>
+                </div>
+                <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-primary">
+                  {item.tipo}
+                </span>
+                <ChevronRight className="size-4 text-muted-foreground" />
+              </Link>
+            ))}
+          </Cartao>
+        ) : (
+          <Vazio
+            titulo="Nenhuma inseminação ainda"
+            texto="Registre a primeira pela aba Nova IA."
+          />
+        )}
       </div>
     </AppShell>
   );

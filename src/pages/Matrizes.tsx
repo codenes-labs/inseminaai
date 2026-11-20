@@ -25,12 +25,23 @@ const filtros: { id: FiltroLista; rotulo: string }[] = [
 
 export function Matrizes() {
   const location = useLocation();
-  const abrirInativas = Boolean(
-    (location.state as { abrirInativas?: boolean } | null)?.abrirInativas,
-  );
-  const [filtro, setFiltro] = useState<FiltroLista>(
-    abrirInativas ? "inativas" : "todas",
-  );
+  const stateNav = location.state as {
+    abrirInativas?: boolean;
+    filtroInicial?: FiltroLista;
+  } | null;
+  const abrirInativas = Boolean(stateNav?.abrirInativas);
+  const filtroInicial = stateNav?.filtroInicial;
+  const [filtro, setFiltro] = useState<FiltroLista>(() => {
+    if (abrirInativas) return "inativas";
+    if (
+      filtroInicial &&
+      filtros.some((f) => f.id === filtroInicial) &&
+      filtroInicial !== "inativas"
+    ) {
+      return filtroInicial;
+    }
+    return "todas";
+  });
   const [busca, setBusca] = useState("");
   const [matrizes, setMatrizes] = useState<Awaited<ReturnType<typeof listarMatrizesApi>>>([]);
   const [carregando, setCarregando] = useState(true);

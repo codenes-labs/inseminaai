@@ -1,4 +1,5 @@
 import { bearerToken, usuarioDoToken } from "./auth/resolve-user";
+import { handleDashboardRequest } from "./routes/dashboard";
 import { handleCadastrosAuxiliaresRequest } from "./routes/cadastros-auxiliares";
 import { handleInseminacoesRequest } from "./routes/inseminacoes";
 import { handleImportacaoRequest } from "./routes/importacao";
@@ -40,6 +41,14 @@ export async function handleDataRequest(
     });
     if (matrizes) {
       return matrizes;
+    }
+
+    const dashboard = await handleDashboardRequest(request, {
+      databaseUrl: context.databaseUrl,
+      usuario,
+    });
+    if (dashboard) {
+      return dashboard;
     }
 
     const cadastros = await handleCadastrosAuxiliaresRequest(request, {
