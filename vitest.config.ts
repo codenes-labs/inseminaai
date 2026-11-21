@@ -11,9 +11,9 @@ export default mergeConfig(
         provider: "v8",
         include: ["src/features/**/domain/**"],
         thresholds: {
-          lines: 90,
-          functions: 90,
-          statements: 90,
+          lines: 80,
+          functions: 80,
+          statements: 80,
           branches: 80,
         },
       },

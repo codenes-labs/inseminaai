@@ -10,4 +10,8 @@ describe("gerarSenhaSugerida", () => {
     expect(senhaNovaValida("1234567")).toBe(false);
     expect(senhaNovaValida("12345678")).toBe(true);
   });
+
+  it("rejeita comprimento abaixo de 8", () => {
+    expect(() => gerarSenhaSugerida(7)).toThrow("Comprimento mínimo é 8.");
+  });
 });
