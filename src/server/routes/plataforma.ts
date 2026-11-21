@@ -1,6 +1,11 @@
+import { emailEhAdminPlataformaCodenes } from "../../domain/auth/admin-plataforma-codenes";
 import { validarCriarMembroCadastro } from "../../features/conta/domain/criar-membro-cadastro";
 import { cadastroPermiteMultiplosAcessos } from "../../features/plataforma/domain/tipo-cadastro-plataforma";
-import { validarProvisionarCadastroAutonomo } from "../../features/plataforma/domain/provisionar-cadastro-autonomo";
+import {
+  validarProvisionarCadastroAutonomo,
+  type ProvisionarCadastroAutonomoInput,
+  type TipoCadastroPlataforma,
+} from "../../features/plataforma/domain/provisionar-cadastro-autonomo";
 import type { AuthUser } from "../auth/types";
 import type { Papel } from "../auth/types";
 import {
@@ -26,7 +31,7 @@ export async function handlePlataformaRequest(
     return null;
   }
 
-  if (!context.usuario.plataformaAdmin) {
+  if (!emailEhAdminPlataformaCodenes(context.usuario.email)) {
     return Response.json({ error: "Acesso restrito à plataforma." }, { status: 403 });
   }
 
@@ -44,8 +49,9 @@ export async function handlePlataformaRequest(
     }
     const raw = body as Record<string, unknown>;
     const tipoRaw = String(raw.tipo ?? "autonomo");
-    const tipo = tipoRaw === "empresa" ? "empresa" : "autonomo";
-    const input = {
+    const tipo: TipoCadastroPlataforma =
+      tipoRaw === "empresa" ? "empresa" : "autonomo";
+    const input: ProvisionarCadastroAutonomoInput = {
       nomeCadastro: String(raw.nome_cadastro ?? raw.nomeCadastro ?? ""),
       nomeUsuario: String(raw.nome_usuario ?? raw.nomeUsuario ?? ""),
       email: String(raw.email ?? ""),
