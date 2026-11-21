@@ -42,6 +42,23 @@ export async function aplicarSeedDev(databaseUrl: string): Promise<void> {
     );
 
     await cliente.query(
+      `delete from public.membros_cadastro
+       where cadastro_id = $1 and user_id <> $2`,
+      [CADASTRO_ADMIN_ID, USER_ADMIN_ID],
+    );
+    await cliente.query(
+      `delete from public.membros_cadastro
+       where cadastro_id = $1 and user_id <> $2`,
+      [CADASTRO_DEMO_ID, USER_DEMO_ID],
+    );
+    await cliente.query(
+      `update public.cadastros
+       set tipo = 'autonomo'
+       where id in ($1, $2)`,
+      [CADASTRO_ADMIN_ID, CADASTRO_DEMO_ID],
+    );
+
+    await cliente.query(
       `insert into public.membros_cadastro (cadastro_id, user_id, papel)
        values
          ($1, $3, 'administrador'),
