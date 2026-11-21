@@ -4,20 +4,23 @@ import {
   resolverDestinoPosLogin,
 } from "./resolver-destino-pos-login";
 
+const ID_ADMIN = "admin@codenes.com.br";
+const ID_PRODUTOR = "produtor@exemplo.com";
+
 describe("resolver destino pós-login (SPEC-22)", () => {
   it("modo app manda produtor para inicio", () => {
     expect(
       resolverDestinoPosLogin(
-        { plataformaAdmin: false, papel: "administrador" },
+        { identificador: ID_PRODUTOR, papel: "administrador" },
         "app",
       ),
     ).toBe("/inicio");
   });
 
-  it("modo app manda plataforma para admin", () => {
+  it("modo app manda admin codenes para admin", () => {
     expect(
       resolverDestinoPosLogin(
-        { plataformaAdmin: true, papel: "administrador" },
+        { identificador: ID_ADMIN, papel: "administrador" },
         "app",
       ),
     ).toBe("/admin/cadastros");
@@ -26,18 +29,28 @@ describe("resolver destino pós-login (SPEC-22)", () => {
   it("modo app plataforma respeita preview do produtor", () => {
     expect(
       resolverDestinoPosLogin(
-        { plataformaAdmin: true, papel: "administrador" },
+        { identificador: ID_ADMIN, papel: "administrador" },
         "app",
         { modoAppPlataforma: true },
       ),
     ).toBe("/inicio");
   });
 
-  it("modo plataforma exige flag", () => {
-    expect(contaPodeEntrarModoPlataforma(false)).toBe(false);
+  it("outro e-mail com plataforma_admin no banco ainda vai para inicio", () => {
     expect(
       resolverDestinoPosLogin(
-        { plataformaAdmin: true, papel: "administrador" },
+        { identificador: "outro@codenes.com.br", papel: "administrador" },
+        "app",
+      ),
+    ).toBe("/inicio");
+  });
+
+  it("modo plataforma exige e-mail codenes", () => {
+    expect(contaPodeEntrarModoPlataforma(ID_PRODUTOR)).toBe(false);
+    expect(contaPodeEntrarModoPlataforma(ID_ADMIN)).toBe(true);
+    expect(
+      resolverDestinoPosLogin(
+        { identificador: ID_ADMIN, papel: "administrador" },
         "plataforma",
       ),
     ).toBe("/admin/cadastros");

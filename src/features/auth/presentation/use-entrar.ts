@@ -55,7 +55,7 @@ export function useEntrar(modo: ModoEntrada = "app") {
       }
       if (
         modo === "plataforma" &&
-        !contaPodeEntrarModoPlataforma(sessao.plataformaAdmin)
+        !contaPodeEntrarModoPlataforma(sessao.identificador)
       ) {
         limparSessao();
         void apiSignOut();
@@ -66,7 +66,7 @@ export function useEntrar(modo: ModoEntrada = "app") {
         desativarModoAppPlataforma();
       }
       const destino = resolverDestinoPosLogin(
-        { plataformaAdmin: sessao.plataformaAdmin, papel: sessao.papel },
+        { identificador: sessao.identificador, papel: sessao.papel },
         modo,
         { modoAppPlataforma: plataformaEmModoApp() },
       );

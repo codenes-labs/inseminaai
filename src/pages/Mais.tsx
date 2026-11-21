@@ -1,10 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronRight, Settings } from "lucide-react";
 import { AppShell, Botao, Cartao } from "../components/ui";
-import {
-  ehAdminPlataformaCodenes,
-  mostrarAtalhoCadastrosPlataformaNoApp,
-} from "../domain/auth/admin-plataforma-codenes";
+import { mostrarAtalhoCadastrosPlataformaNoApp } from "../domain/auth/admin-plataforma-codenes";
 import { desativarModoAppPlataforma } from "../domain/auth/plataforma-modo-app";
 import { lerSessao, sair } from "../lib/auth";
 
@@ -70,11 +67,7 @@ export function Mais() {
               className="press flex min-h-12 items-center justify-between px-4 text-foreground"
               onClick={() => desativarModoAppPlataforma()}
             >
-              <span className="font-medium">
-                {ehAdminPlataformaCodenes(sessao)
-                  ? "Administração da plataforma"
-                  : "Clientes na plataforma"}
-              </span>
+              <span className="font-medium">Administração da plataforma</span>
               <ChevronRight className="size-4 text-muted-foreground" />
             </Link>
           </Cartao>

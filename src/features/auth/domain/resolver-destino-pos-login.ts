@@ -1,9 +1,10 @@
+import { emailEhAdminPlataformaCodenes } from "../../../domain/auth/admin-plataforma-codenes";
 import type { Papel } from "../../../lib/auth-types";
 
 export type ModoEntrada = "app" | "plataforma";
 
 export type SessaoDestinoInput = {
-  plataformaAdmin: boolean;
+  identificador: string;
   papel: Papel;
 };
 
@@ -13,15 +14,16 @@ export function resolverDestinoPosLogin(
   opcoes?: { modoAppPlataforma?: boolean },
 ): string {
   const emModoApp = opcoes?.modoAppPlataforma === true;
+  const adminPlataforma = emailEhAdminPlataformaCodenes(sessao.identificador);
   if (modo === "plataforma") {
-    return sessao.plataformaAdmin ? "/admin/cadastros" : "/entrar";
+    return adminPlataforma ? "/admin/cadastros" : "/entrar";
   }
-  if (sessao.plataformaAdmin && !emModoApp) {
+  if (adminPlataforma && !emModoApp) {
     return "/admin/cadastros";
   }
   return "/inicio";
 }
 
-export function contaPodeEntrarModoPlataforma(plataformaAdmin: boolean): boolean {
-  return plataformaAdmin;
+export function contaPodeEntrarModoPlataforma(identificador: string): boolean {
+  return emailEhAdminPlataformaCodenes(identificador);
 }

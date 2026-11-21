@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { Navigate } from "react-router-dom";
+import { ehAdminPlataformaCodenes } from "../domain/auth/admin-plataforma-codenes";
 import { lerSessao, sessaoValida } from "../lib/auth";
 
 export function RotaAcessosCadastro({ children }: { children: ReactElement }) {
@@ -7,7 +8,7 @@ export function RotaAcessosCadastro({ children }: { children: ReactElement }) {
     return <Navigate to="/entrar" replace state={{ de: "/mais/acessos" }} />;
   }
   const sessao = lerSessao();
-  if (sessao?.plataformaAdmin) {
+  if (ehAdminPlataformaCodenes(sessao)) {
     return <Navigate to="/admin/cadastros" replace />;
   }
   if (sessao?.papel !== "administrador") {

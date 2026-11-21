@@ -9,10 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Logo, cx } from "./ui";
-import {
-  ehAdminPlataformaCodenes,
-  mostrarAtalhoCadastrosPlataformaNoApp,
-} from "../domain/auth/admin-plataforma-codenes";
+import { mostrarAtalhoCadastrosPlataformaNoApp } from "../domain/auth/admin-plataforma-codenes";
 import { desativarModoAppPlataforma } from "../domain/auth/plataforma-modo-app";
 import { lerSessao, sair } from "../lib/auth";
 
@@ -77,9 +74,7 @@ export function LayoutDesktopProdutor({ children }: { children: ReactNode }) {
             className="press mt-3 block rounded-lg border border-border px-3 py-2 text-center text-xs font-semibold text-primary"
             onClick={() => desativarModoAppPlataforma()}
           >
-            {ehAdminPlataformaCodenes(sessao)
-              ? "Administração da plataforma"
-              : "Clientes na plataforma"}
+            Administração da plataforma
           </Link>
         ) : null}
         <button

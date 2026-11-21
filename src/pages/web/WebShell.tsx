@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { ehAdminPlataformaCodenes } from "../../domain/auth/admin-plataforma-codenes";
 import { ativarModoAppPlataforma } from "../../domain/auth/plataforma-modo-app";
 import { Logo } from "../../components/ui";
 import { lerSessao, sair } from "../../lib/auth";
@@ -18,7 +19,7 @@ export function WebShell({
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <Logo />
           <nav className="flex items-center gap-4 text-sm font-medium">
-            {sessao?.plataformaAdmin ? (
+            {ehAdminPlataformaCodenes(sessao) ? (
               <>
                 <Link to="/admin/cadastros" className="text-primary">
                   Cadastros

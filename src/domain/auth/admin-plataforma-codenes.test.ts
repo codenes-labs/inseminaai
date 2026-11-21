@@ -19,23 +19,28 @@ const sessaoBase: Session = {
 describe("ehAdminPlataformaCodenes", () => {
   it("reconhece admin@codenes.com.br", () => {
     expect(ehAdminPlataformaCodenes(sessaoBase)).toBe(true);
+    expect(mostrarAtalhoCadastrosPlataformaNoApp(sessaoBase)).toBe(true);
   });
 
-  it("atalho no app com e-mail codenes mesmo sem flag", () => {
+  it("nega outro e-mail mesmo com plataforma_admin", () => {
+    const outro = {
+      ...sessaoBase,
+      identificador: "outro@codenes.com.br",
+      email: "outro@codenes.com.br",
+      plataformaAdmin: true,
+    };
+    expect(ehAdminPlataformaCodenes(outro)).toBe(false);
+    expect(mostrarAtalhoCadastrosPlataformaNoApp(outro)).toBe(false);
+  });
+
+  it("cliente criado pelo admin na plataforma não vê atalho no app", () => {
     expect(
       mostrarAtalhoCadastrosPlataformaNoApp({
         ...sessaoBase,
+        identificador: "cliente@fazenda.com",
+        email: "cliente@fazenda.com",
         plataformaAdmin: false,
-      }),
-    ).toBe(true);
-  });
-
-  it("nega outro e-mail com plataforma_admin", () => {
-    expect(
-      ehAdminPlataformaCodenes({
-        ...sessaoBase,
-        identificador: "outro@codenes.com.br",
-        email: "outro@codenes.com.br",
+        papel: "administrador",
       }),
     ).toBe(false);
   });
