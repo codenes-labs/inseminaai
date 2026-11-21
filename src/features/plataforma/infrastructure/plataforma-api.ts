@@ -10,6 +10,8 @@ export type CadastroPlataforma = {
   ativa: boolean;
   createdAt: string;
   protegido?: boolean;
+  emailLogin?: string;
+  emailsBusca?: string;
 };
 
 export async function listarCadastrosPlataformaApi(): Promise<CadastroPlataforma[]> {

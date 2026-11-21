@@ -6,10 +6,19 @@
 
 ## Layout
 
-| Área | Conteúdo |
+| Rota | Conteúdo |
 | --- | --- |
-| Principal | Formulário **novo cadastro** (rota índice) ou **detalhe** do cliente selecionado (`/admin/cadastros/:id`) |
-| Lateral (desktop) | Lista de cadastros existentes; clique abre o detalhe na área principal (sem seletor extra) |
+| `/admin/cadastros` (índice) | **Somente listagem** — sem item pré-selecionado e sem formulário |
+| `/admin/cadastros/novo` | Formulário de **novo cadastro** (acessível pelo botão Novo) |
+| `/admin/cadastros/:id` | **Detalhe** do cliente escolhido na lista |
+
+### Listagem principal — ordenação, grid e busca
+
+- **Ordenação:** cadastros seed **admin** e **demo** fixos no topo (favoritos), com ícone de estrela; demais em ordem alfabética por nome (`pt-BR`).
+- **Exibição:** **lista numerada** (`<ol>`) na área principal — cada item mostra número, estrela (favoritos), nome, tipo, e-mail e status; **10** itens por página com Anterior/Próxima quando houver mais de uma página.
+- **Busca:** campo com lupa; filtra por nome do cadastro ou e-mail de qualquer acesso (sem acentos, substring).
+- **Domínio:** `listagem-cadastros-plataforma.ts` (ordenação, filtro, divisão grid/paginação).
+- **API:** listagem inclui `emailLogin` e `emailsBusca` para pesquisa.
 
 ## Novo cadastro (índice)
 
@@ -49,6 +58,7 @@ Demais rotas já existentes (GET listagem, GET/PATCH/DELETE cadastro, CRUD membr
 
 - [x] Formulário novo com tipo, gerar senha e criar autônomo ou empresa.
 - [x] Lista lateral sempre visível; item selecionado destacado.
+- [x] Favoritos no topo com estrela; grid 10 + tabela paginada; busca por nome/e-mail.
 - [x] Detalhe com editar, ativar/inativar, excluir e gestão de acessos conforme tipo.
 - [x] Testes de domínio de provisionamento com `tipo`.
 - [x] Persistência via `semContextoPlataforma` + migration `20251121140000_plataforma_cadastros_rls.sql`.

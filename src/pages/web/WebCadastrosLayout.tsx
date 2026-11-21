@@ -5,10 +5,11 @@ import {
   listarCadastrosPlataformaApi,
   type CadastroPlataforma,
 } from "../../features/plataforma/infrastructure/plataforma-api";
-import { WebCadastrosListaLateral } from "./WebCadastrosListaLateral";
 import { WebShell } from "./WebShell";
 
 export type WebCadastrosLayoutContext = {
+  lista: CadastroPlataforma[];
+  erroLista: string;
   recarregarListaCadastros: () => Promise<void>;
 };
 
@@ -33,12 +34,13 @@ export function WebCadastrosLayout() {
 
   return (
     <WebShell titulo="Cadastros na plataforma">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(240px,280px)]">
-        <div>
-          <Outlet context={{ recarregarListaCadastros: carregar }} />
-        </div>
-        <WebCadastrosListaLateral lista={lista} erro={erroLista} />
-      </div>
+      <Outlet
+        context={{
+          lista,
+          erroLista,
+          recarregarListaCadastros: carregar,
+        }}
+      />
     </WebShell>
   );
 }

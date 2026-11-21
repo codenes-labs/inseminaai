@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { Building2, Wand2 } from "lucide-react";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { ArrowLeft, Building2, Wand2 } from "lucide-react";
 import type { Papel } from "../../lib/auth-types";
 import { Botao, Cartao, cx, inputClass } from "../../components/ui";
 import {
@@ -289,6 +289,13 @@ export function WebCadastroDetalhe() {
 
   return (
     <>
+      <Link
+        to="/admin/cadastros"
+        className="press mb-4 inline-flex items-center gap-2 text-sm font-semibold text-primary"
+      >
+        <ArrowLeft className="size-4" />
+        Voltar à lista
+      </Link>
       <div className="mb-6 flex gap-3">
         <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
           <Building2 className="size-7" strokeWidth={1.75} />

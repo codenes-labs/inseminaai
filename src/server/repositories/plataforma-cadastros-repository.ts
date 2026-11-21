@@ -10,6 +10,8 @@ export type CadastroPlataformaLista = {
   plano: string;
   ativa: boolean;
   createdAt: string;
+  emailLogin: string;
+  emailsBusca: string;
 };
 
 export async function obterCadastroPlataforma(
@@ -41,6 +43,8 @@ export async function obterCadastroPlataforma(
       plano: linha.plano,
       ativa: linha.ativa,
       createdAt: linha.created_at.toISOString(),
+      emailLogin: "",
+      emailsBusca: "",
     };
   });
 }
@@ -82,10 +86,25 @@ export async function listarCadastrosPlataforma(
       plano: string;
       ativa: boolean;
       created_at: Date;
+      email_login: string | null;
+      emails_busca: string | null;
     }>(
-      `select id, nome, tipo, plano, ativa, created_at
-       from public.cadastros
-       order by created_at desc`,
+      `select c.id, c.nome, c.tipo, c.plano, c.ativa, c.created_at,
+              (
+                select u.email
+                from public.membros_cadastro m
+                join public.users u on u.id = m.user_id
+                where m.cadastro_id = c.id
+                order by (m.papel = 'administrador') desc, u.email
+                limit 1
+              ) as email_login,
+              (
+                select string_agg(u.email, ' ' order by u.email)
+                from public.membros_cadastro m
+                join public.users u on u.id = m.user_id
+                where m.cadastro_id = c.id
+              ) as emails_busca
+       from public.cadastros c`,
     );
     return resultado.rows.map((linha) => ({
       id: linha.id,
@@ -94,6 +113,8 @@ export async function listarCadastrosPlataforma(
       plano: linha.plano,
       ativa: linha.ativa,
       createdAt: linha.created_at.toISOString(),
+      emailLogin: linha.email_login ?? "",
+      emailsBusca: linha.emails_busca ?? "",
     }));
   });
 }
