@@ -9,6 +9,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Logo, cx } from "./ui";
+import { ehAdminPlataformaCodenes } from "../domain/auth/admin-plataforma-codenes";
+import { desativarModoAppPlataforma, plataformaEmModoApp } from "../domain/auth/plataforma-modo-app";
 import { lerSessao, sair } from "../lib/auth";
 
 function ItemNav({
@@ -66,6 +68,15 @@ export function LayoutDesktopProdutor({ children }: { children: ReactNode }) {
           <Plus className="size-5" />
           Nova inseminação
         </Link>
+        {ehAdminPlataformaCodenes(sessao) && plataformaEmModoApp() ? (
+          <Link
+            to="/admin/cadastros"
+            className="press mt-3 block rounded-lg border border-border px-3 py-2 text-center text-xs font-semibold text-primary"
+            onClick={() => desativarModoAppPlataforma()}
+          >
+            Administrativo — clientes
+          </Link>
+        ) : null}
         <button
           type="button"
           className="press mt-3 px-2 text-left text-xs font-semibold text-muted-foreground hover:text-foreground"

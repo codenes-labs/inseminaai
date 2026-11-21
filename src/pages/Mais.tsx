@@ -1,6 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronRight, Settings } from "lucide-react";
 import { AppShell, Botao, Cartao } from "../components/ui";
+import { ehAdminPlataformaCodenes } from "../domain/auth/admin-plataforma-codenes";
+import {
+  desativarModoAppPlataforma,
+  plataformaEmModoApp,
+} from "../domain/auth/plataforma-modo-app";
 import { lerSessao, sair } from "../lib/auth";
 
 const linksCadastrosAuxiliares = [
@@ -55,6 +60,21 @@ export function Mais() {
           <p className="text-lg font-semibold">{sessao?.nome ?? "—"}</p>
           <p className="text-sm text-muted-foreground">{sessao?.identificador}</p>
         </Cartao>
+        {ehAdminPlataformaCodenes(sessao) && plataformaEmModoApp() ? (
+          <Cartao className="divide-y divide-border p-0">
+            <p className="px-4 pb-2 pt-4 text-sm font-semibold text-muted-foreground">
+              Administrativo
+            </p>
+            <Link
+              to="/admin/cadastros"
+              className="press flex min-h-12 items-center justify-between px-4 text-foreground"
+              onClick={() => desativarModoAppPlataforma()}
+            >
+              <span className="font-medium">Clientes na plataforma</span>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </Link>
+          </Cartao>
+        ) : null}
         {sessao?.papel === "administrador" && !sessao.plataformaAdmin ? (
           <Cartao className="divide-y divide-border p-0">
             <p className="px-4 pb-2 pt-4 text-sm font-semibold text-muted-foreground">

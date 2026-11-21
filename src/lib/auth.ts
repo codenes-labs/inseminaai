@@ -1,3 +1,4 @@
+import { desativarModoAppPlataforma } from "../domain/auth/plataforma-modo-app";
 import { apiSignIn, apiSignOut } from "./auth-api";
 import { MENSAGEM_LOGIN_INVALIDO } from "./auth-types";
 import {
@@ -21,6 +22,7 @@ export {
 export { lerSessao };
 
 export function sair() {
+  desativarModoAppPlataforma();
   limparSessao();
   void apiSignOut();
 }

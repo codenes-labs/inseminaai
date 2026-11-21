@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { ativarModoAppPlataforma } from "../../domain/auth/plataforma-modo-app";
 import { Logo } from "../../components/ui";
 import { lerSessao, sair } from "../../lib/auth";
 
@@ -18,9 +19,18 @@ export function WebShell({
           <Logo />
           <nav className="flex items-center gap-4 text-sm font-medium">
             {sessao?.plataformaAdmin ? (
-              <Link to="/admin/cadastros" className="text-primary">
-                Cadastros
-              </Link>
+              <>
+                <Link to="/admin/cadastros" className="text-primary">
+                  Cadastros
+                </Link>
+                <Link
+                  to="/inicio"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => ativarModoAppPlataforma()}
+                >
+                  App mobile
+                </Link>
+              </>
             ) : null}
             <button
               type="button"
