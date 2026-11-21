@@ -9,6 +9,7 @@ type TurnstileApi = {
       "expired-callback"?: () => void;
     },
   ) => string;
+  remove?: (widgetId: string) => void;
 };
 
 declare global {
@@ -28,33 +29,37 @@ type Props = {
 export function TurnstileLogin({ siteKey, onToken }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const onTokenRef = useRef(onToken);
+  onTokenRef.current = onToken;
 
   useEffect(() => {
-    onToken("");
     const mount = () => {
       if (!containerRef.current || !window.turnstile) return;
       if (widgetIdRef.current) return;
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
-        callback: (token) => onToken(token),
-        "expired-callback": () => onToken(""),
+        callback: (token) => onTokenRef.current(token),
+        "expired-callback": () => onTokenRef.current(""),
       });
     };
     const existing = document.querySelector(`script[src^="${SCRIPT_SRC.split("?")[0]}"]`);
     if (existing) {
       mount();
-      return;
+    } else {
+      const script = document.createElement("script");
+      script.src = SCRIPT_SRC;
+      script.async = true;
+      script.onload = mount;
+      document.body.appendChild(script);
     }
-    const script = document.createElement("script");
-    script.src = SCRIPT_SRC;
-    script.async = true;
-    script.onload = mount;
-    document.body.appendChild(script);
     return () => {
-      onToken("");
+      const id = widgetIdRef.current;
+      if (id != null && window.turnstile?.remove) {
+        window.turnstile.remove(id);
+      }
       widgetIdRef.current = null;
     };
-  }, [siteKey, onToken]);
+  }, [siteKey]);
 
   return <div ref={containerRef} className="flex min-h-[65px] justify-center" />;
 }

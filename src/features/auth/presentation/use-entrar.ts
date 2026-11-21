@@ -46,6 +46,12 @@ export function useEntrar(modo: ModoEntrada = "app") {
       );
       if (!resultado.ok) {
         setErro(resultado.erro);
+        if (
+          resultado.erro.toLowerCase().includes("captcha") &&
+          !resultado.erro.toLowerCase().includes("antes de entrar")
+        ) {
+          setTurnstileToken("");
+        }
         return;
       }
       const sessao = lerSessao();
