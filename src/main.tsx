@@ -6,7 +6,7 @@ import { ThemeProvider } from "./components/theme";
 import "./index.css";
 
 if ("serviceWorker" in navigator) {
-  void navigator.serviceWorker.register("/sw.js").catch(() => {
+  void navigator.serviceWorker.register("/sw.js?v=5").catch(() => {
     /* ambiente sem HTTPS ou SW indisponível */
   });
 }

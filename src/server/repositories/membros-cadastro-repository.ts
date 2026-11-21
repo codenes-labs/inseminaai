@@ -75,7 +75,7 @@ export async function criarMembroNoCadastro(
 ): Promise<{ userId: string }> {
   const nome = input.nome.trim();
   const email = input.email.trim().toLowerCase();
-  const hash = hashSenha(input.senha);
+  const hash = hashSenha(input.senha.trim());
 
   try {
     return await comContextoCadastro(databaseUrl, cadastroId, opcoes, async (cliente) => {
@@ -193,7 +193,7 @@ export async function atualizarMembroNoCadastro(
       if (input.senha !== undefined && input.senha !== "") {
         await cliente.query(`update public.users set password_hash = $2 where id = $1`, [
           userIdAlvo,
-          hashSenha(input.senha),
+          hashSenha(input.senha.trim()),
         ]);
       }
       if (input.papel !== undefined) {

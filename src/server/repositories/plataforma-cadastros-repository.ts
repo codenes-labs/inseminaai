@@ -156,7 +156,7 @@ export async function criarCadastroAutonomoNoBanco(
   const nomeCadastro = input.nomeCadastro.trim();
   const nomeUsuario = input.nomeUsuario.trim();
   const email = input.email.trim().toLowerCase();
-  const hash = hashSenha(input.senha);
+  const hash = hashSenha(input.senha.trim());
 
   try {
     return await semContextoPlataforma(databaseUrl, async (cliente) => {

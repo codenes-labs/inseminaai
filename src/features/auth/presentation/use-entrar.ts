@@ -46,8 +46,8 @@ export function useEntrar(modo: ModoEntrada = "app") {
     setCarregando(true);
     try {
       const resultado = await entrarComSenha(
-        identificador,
-        senha,
+        identificador.trim(),
+        senha.trim(),
         turnstileToken || undefined,
       );
       if (!resultado.ok) {

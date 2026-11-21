@@ -71,8 +71,8 @@ export async function handleAuthRequest(
         { status: 400 },
       );
     }
-    const email = body.email?.trim() ?? "";
-    const password = body.password ?? "";
+    const email = body.email?.trim().toLowerCase() ?? "";
+    const password = body.password?.trim() ?? "";
     if (!email || !password) {
       return Response.json(
         { error: MENSAGEM_CREDENCIAIS_INVALIDAS },
@@ -93,12 +93,22 @@ export async function handleAuthRequest(
         return Response.json({ error: "Captcha inválido." }, { status: 403 });
       }
     }
-    const usuario = await autenticarCredenciais(
-      email,
-      password,
-      context.databaseUrl,
-    );
+    let usuario: Awaited<ReturnType<typeof autenticarCredenciais>>;
+    try {
+      usuario = await autenticarCredenciais(
+        email,
+        password,
+        context.databaseUrl,
+      );
+    } catch (erro) {
+      console.error("[auth] falha no sign-in (banco)", erro);
+      return Response.json(
+        { error: "Serviço temporariamente indisponível. Tente de novo." },
+        { status: 503 },
+      );
+    }
     if (!usuario) {
+      console.error("[auth] credenciais recusadas", { email });
       return Response.json(
         { error: MENSAGEM_CREDENCIAIS_INVALIDAS },
         { status: 401 },
