@@ -146,8 +146,7 @@ O job **Coverage** falhou após `feat(plataforma): proteger cadastros seed e moc
 
 1. **Lint e Coverage em paralelo** — `build` depende de `needs: [lint, test]` (ganho de wall-clock ~2–4 min em PRs).
 2. **Removido o segundo “Sync Worker secrets again”** após o deploy (~1–3 min na `master`).
-3. **Migrations condicionais** (`dorny/paths-filter@v3`): job `db-migrate` só na `master` quando mudam migrations/código de migrate; **não** roda `db:seed` no CI (alinhado a `seed.ts`: seed é dev local).
-4. **Deploy Worker** sem `npm run db:setup` em todo push — só `wrangler deploy` + sync de secrets.
+3. **Deploy na `master`:** `npm run db:migrate` idempotente no job Cloudflare (sem seed); depois secrets + `wrangler deploy`.
 
 ### Ganhos estimados
 

@@ -1,6 +1,5 @@
 name: Deploy
 
-# CI: lint + coverage (paralelos) → build. Deploy na master: migrate só se mudou SQL; depois Worker.
 on:
   push:
     branches: [master]
@@ -11,224 +10,71 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  verify:
+    name: Lint e coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-  test:
-    name: Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Testes com coverage
-        run: npm run test:coverage
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:coverage
 
   build:
     name: Build
-    needs: [lint, test]
+    needs: verify
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Validar Turnstile para o build
-        run: |
-          if [ -z "$TURNSTILE_SITE_KEY" ]; then
-            echo "::error::Secret TURNSTILE_SITE_KEY obrigatório no build (widget no login)"
-            exit 1
-          fi
+      - run: npm ci
+      - run: test -n "$TURNSTILE_SITE_KEY" || (echo "::error::TURNSTILE_SITE_KEY" && exit 1)
         env:
           TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
-
-      - name: Build
-        run: npm run build
+      - run: npm run build
         env:
           VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
-
-      - name: Guardar dist
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
-          if-no-files-found: error
-
-  detect-changes:
-    name: Detectar mudanças de deploy
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    outputs:
-      migrations: ${{ steps.filter.outputs.migrations }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Filtro de caminhos
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            migrations:
-              - '.docker/db/migrations/**'
-              - 'src/server/db/migrate.ts'
-              - 'src/server/db/seed.ts'
-              - 'scripts/db-setup.ts'
-
-  db-migrate:
-    name: Migrations (Neon)
-    needs: detect-changes
-    if: >-
-      github.event_name == 'push' && github.ref == 'refs/heads/master' &&
-      needs.detect-changes.outputs.migrations == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Validar DATABASE_URL
-        run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "::error::Secret DATABASE_URL obrigatório para migrations"
-            exit 1
-          fi
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Aplicar migrations
-        run: npm run db:migrate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
   cloudflare:
     name: Deploy Cloudflare
-    if: >-
-      github.event_name == 'push' && github.ref == 'refs/heads/master' &&
-      needs.build.result == 'success' &&
-      (needs.db-migrate.result == 'success' || needs.db-migrate.result == 'skipped')
-    needs: [build, detect-changes, db-migrate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+      TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Restaurar dist
-        uses: actions/download-artifact@v4
+      - run: npm ci
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
-
-      - name: Aplicar migrations (idempotente)
-        run: npm run db:migrate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Validar secrets do GitHub
-        run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "::error::Secret DATABASE_URL vazio em Settings → Secrets → Actions (aba Secrets, não Variables)"
-            exit 1
-          fi
-          if [ "${#JWT_SECRET}" -lt 32 ]; then
-            echo "::error::Secret JWT_SECRET precisa ter pelo menos 32 caracteres"
-            exit 1
-          fi
-          if [ -z "$TURNSTILE_SECRET_KEY" ]; then
-            echo "::error::Secret TURNSTILE_SECRET_KEY obrigatório em produção (captcha no login)"
-            exit 1
-          fi
-          if [ -z "$TURNSTILE_SITE_KEY" ]; then
-            echo "::error::Secret TURNSTILE_SITE_KEY obrigatório em produção"
-            exit 1
-          fi
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
-          TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
-
-      - name: Sync Worker secrets
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const secrets = {
-            DATABASE_URL: process.env.DATABASE_URL,
-            JWT_SECRET: process.env.JWT_SECRET,
-          };
-          if (process.env.TURNSTILE_SECRET_KEY?.trim()) {
-            secrets.TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY.trim();
-          }
-          if (process.env.TURNSTILE_SITE_KEY?.trim()) {
-            secrets.TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY.trim();
-          }
-          fs.writeFileSync('wrangler-secrets.json', JSON.stringify(secrets));
-          NODE
-          npx wrangler secret bulk wrangler-secrets.json
-          rm -f wrangler-secrets.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
-          TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
-
-      - name: Deploy Worker
-        uses: cloudflare/wrangler-action@v3
+      - run: bash scripts/ci-check-deploy-secrets.sh
+      - run: npm run db:migrate
+      - run: node scripts/ci-wrangler-secrets-json.mjs && npx wrangler secret bulk wrangler-secrets.json && rm -f wrangler-secrets.json
+      - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
