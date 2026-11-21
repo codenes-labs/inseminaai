@@ -1,8 +1,17 @@
+import { validarCriarMembroCadastro } from "../../features/conta/domain/criar-membro-cadastro";
 import { validarProvisionarCadastroAutonomo } from "../../features/plataforma/domain/provisionar-cadastro-autonomo";
 import type { AuthUser } from "../auth/types";
+import type { Papel } from "../auth/types";
 import {
+  atualizarMembroAtivo,
+  criarMembroNoCadastro,
+  listarMembrosDoCadastro,
+} from "../repositories/membros-cadastro-repository";
+import {
+  atualizarCadastroPlataforma,
   criarCadastroAutonomoNoBanco,
   listarCadastrosPlataforma,
+  obterCadastroPlataforma,
 } from "../repositories/plataforma-cadastros-repository";
 
 export async function handlePlataformaRequest(
@@ -48,6 +57,123 @@ export async function handlePlataformaRequest(
       const mensagem =
         erro instanceof Error ? erro.message : "Não foi possível criar o cadastro.";
       return Response.json({ error: mensagem }, { status: 400 });
+    }
+  }
+
+  const cadastroMatch = url.pathname.match(
+    /^\/api\/plataforma\/cadastros\/([^/]+)(.*)$/,
+  );
+  if (cadastroMatch) {
+    const cadastroId = cadastroMatch[1];
+    const sufixo = cadastroMatch[2] ?? "";
+
+    if (sufixo === "" && request.method === "GET") {
+      const cadastro = await obterCadastroPlataforma(context.databaseUrl, cadastroId);
+      if (!cadastro) {
+        return Response.json({ error: "Cadastro não encontrado." }, { status: 404 });
+      }
+      return Response.json({ cadastro });
+    }
+
+    if (sufixo === "" && request.method === "PATCH") {
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return Response.json({ error: "Corpo inválido." }, { status: 400 });
+      }
+      const raw = body as Record<string, unknown>;
+      const tipoRaw = String(raw.tipo ?? "autonomo");
+      const tipo = tipoRaw === "empresa" ? "empresa" : "autonomo";
+      const ativa = raw.ativa !== false;
+      try {
+        const ok = await atualizarCadastroPlataforma(context.databaseUrl, cadastroId, {
+          nome: String(raw.nome ?? ""),
+          tipo,
+          ativa,
+        });
+        if (!ok) {
+          return Response.json({ error: "Cadastro não encontrado." }, { status: 404 });
+        }
+        return Response.json({ ok: true });
+      } catch (erro) {
+        const mensagem =
+          erro instanceof Error ? erro.message : "Não foi possível salvar o cadastro.";
+        return Response.json({ error: mensagem }, { status: 400 });
+      }
+    }
+
+    if (sufixo === "/membros" && request.method === "GET") {
+      const membros = await listarMembrosDoCadastro(context.databaseUrl, cadastroId);
+      return Response.json({ membros });
+    }
+
+    if (sufixo === "/membros" && request.method === "POST") {
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return Response.json({ error: "Corpo inválido." }, { status: 400 });
+      }
+      const raw = body as Record<string, unknown>;
+      const input = {
+        nome: String(raw.nome ?? ""),
+        email: String(raw.email ?? ""),
+        senha: String(raw.senha ?? raw.password ?? ""),
+        papel: String(raw.papel ?? "inseminador") as Papel,
+      };
+      const erroValidacao = validarCriarMembroCadastro(input);
+      if (erroValidacao) {
+        return Response.json({ error: erroValidacao }, { status: 400 });
+      }
+      const existe = await obterCadastroPlataforma(context.databaseUrl, cadastroId);
+      if (!existe) {
+        return Response.json({ error: "Cadastro não encontrado." }, { status: 404 });
+      }
+      try {
+        const criado = await criarMembroNoCadastro(
+          context.databaseUrl,
+          cadastroId,
+          input,
+        );
+        return Response.json({ ok: true, user_id: criado.userId }, { status: 201 });
+      } catch (erro) {
+        const mensagem =
+          erro instanceof Error ? erro.message : "Não foi possível criar o acesso.";
+        return Response.json({ error: mensagem }, { status: 400 });
+      }
+    }
+
+    const membroPatch = sufixo.match(/^\/membros\/([^/]+)$/);
+    if (membroPatch && request.method === "PATCH") {
+      const userIdAlvo = membroPatch[1];
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return Response.json({ error: "Corpo inválido." }, { status: 400 });
+      }
+      const ativo = (body as { ativo?: boolean }).ativo;
+      if (typeof ativo !== "boolean") {
+        return Response.json({ error: "Informe ativo: true ou false." }, { status: 400 });
+      }
+      try {
+        const ok = await atualizarMembroAtivo(
+          context.databaseUrl,
+          cadastroId,
+          userIdAlvo,
+          ativo,
+          context.usuario.id,
+        );
+        if (!ok) {
+          return Response.json({ error: "Acesso não encontrado neste cadastro." }, { status: 404 });
+        }
+        return Response.json({ ok: true });
+      } catch (erro) {
+        const mensagem =
+          erro instanceof Error ? erro.message : "Não foi possível atualizar o acesso.";
+        return Response.json({ error: mensagem }, { status: 400 });
+      }
     }
   }
 

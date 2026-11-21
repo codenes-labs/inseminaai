@@ -1,3 +1,5 @@
+import type { Papel } from "../../../lib/auth-types";
+import type { MembroCadastro } from "../../conta/infrastructure/cadastro-membros-api";
 import { apiFetch } from "../../../lib/api-client";
 
 export type CadastroPlataforma = {
@@ -16,6 +18,79 @@ export async function listarCadastrosPlataformaApi(): Promise<CadastroPlataforma
   }
   const dados = (await response.json()) as { cadastros: CadastroPlataforma[] };
   return dados.cadastros;
+}
+
+export async function obterCadastroPlataformaApi(
+  cadastroId: string,
+): Promise<CadastroPlataforma> {
+  const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}`);
+  if (!response.ok) {
+    throw new Error("Não foi possível carregar o cadastro.");
+  }
+  const dados = (await response.json()) as { cadastro: CadastroPlataforma };
+  return dados.cadastro;
+}
+
+export async function atualizarCadastroPlataformaApi(
+  cadastroId: string,
+  input: { nome: string; tipo: "autonomo" | "empresa"; ativa: boolean },
+): Promise<void> {
+  const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível salvar o cliente.");
+  }
+}
+
+export async function listarMembrosPlataformaCadastroApi(
+  cadastroId: string,
+): Promise<MembroCadastro[]> {
+  const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}/membros`);
+  if (!response.ok) {
+    throw new Error("Não foi possível carregar os acessos.");
+  }
+  const dados = (await response.json()) as {
+    membros: MembroCadastro[];
+  };
+  return dados.membros;
+}
+
+export async function criarMembroPlataformaCadastroApi(
+  cadastroId: string,
+  input: { nome: string; email: string; senha: string; papel: Papel },
+): Promise<void> {
+  const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}/membros`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível criar o acesso.");
+  }
+}
+
+export async function alterarMembroPlataformaAtivoApi(
+  cadastroId: string,
+  userId: string,
+  ativo: boolean,
+): Promise<void> {
+  const response = await apiFetch(
+    `/api/plataforma/cadastros/${cadastroId}/membros/${userId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ativo }),
+    },
+  );
+  if (!response.ok) {
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível atualizar o acesso.");
+  }
 }
 
 export async function criarCadastroAutonomoApi(input: {

@@ -1,5 +1,6 @@
 import { useCallback, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiSignOut } from "../../../lib/auth-api";
 import {
   MENSAGEM_LOGIN_INVALIDO,
   entrarComSenha,
@@ -53,6 +54,7 @@ export function useEntrar(modo: ModoEntrada = "app") {
         !contaPodeEntrarModoPlataforma(sessao.plataformaAdmin)
       ) {
         limparSessao();
+        void apiSignOut();
         setErro("Esta conta não tem acesso à administração da plataforma.");
         return;
       }

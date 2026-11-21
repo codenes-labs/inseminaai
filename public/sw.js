@@ -1,5 +1,5 @@
 /* eslint-env serviceworker */
-const CACHE = "inseminaai-shell-v1";
+const CACHE = "inseminaai-shell-v2";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

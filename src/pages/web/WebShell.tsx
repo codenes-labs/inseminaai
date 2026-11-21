@@ -34,7 +34,9 @@ export function WebShell({
             </button>
           </nav>
         </div>
-        <h1 className="mx-auto mt-4 max-w-5xl text-2xl font-semibold">{titulo}</h1>
+        {titulo ? (
+          <h1 className="mx-auto mt-4 max-w-5xl text-2xl font-semibold">{titulo}</h1>
+        ) : null}
       </header>
       <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
     </div>

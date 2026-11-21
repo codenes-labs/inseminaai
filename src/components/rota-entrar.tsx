@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { lerSessao, sessaoValida } from "../lib/auth";
+import { normalizarRotaLegada } from "../features/auth/domain/normalizar-rota-legada";
 import { resolverDestinoPosLogin } from "../features/auth/domain/resolver-destino-pos-login";
 
 export function RotaEntrar({ children }: { children: ReactNode }) {
@@ -10,13 +11,14 @@ export function RotaEntrar({ children }: { children: ReactNode }) {
     if (sessao?.plataformaAdmin) {
       return <Navigate to="/admin/cadastros" replace />;
     }
-    const de = (location.state as { de?: string } | null)?.de;
-    const destino =
-      de ??
-      resolverDestinoPosLogin(
-        { plataformaAdmin: sessao!.plataformaAdmin, papel: sessao!.papel },
-        "app",
-      );
+    const deBruto = (location.state as { de?: string } | null)?.de;
+    const destino = normalizarRotaLegada(
+      deBruto ??
+        resolverDestinoPosLogin(
+          { plataformaAdmin: sessao!.plataformaAdmin, papel: sessao!.papel },
+          "app",
+        ),
+    );
     return <Navigate to={destino} replace />;
   }
   return children;

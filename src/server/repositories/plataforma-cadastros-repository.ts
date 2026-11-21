@@ -11,6 +11,65 @@ export type CadastroPlataformaLista = {
   createdAt: string;
 };
 
+export async function obterCadastroPlataforma(
+  databaseUrl: string,
+  cadastroId: string,
+): Promise<CadastroPlataformaLista | null> {
+  return semContextoRls(databaseUrl, async (cliente) => {
+    const resultado = await cliente.query<{
+      id: string;
+      nome: string;
+      tipo: string;
+      plano: string;
+      ativa: boolean;
+      created_at: Date;
+    }>(
+      `select id, nome, tipo, plano, ativa, created_at
+       from public.cadastros
+       where id = $1`,
+      [cadastroId],
+    );
+    const linha = resultado.rows[0];
+    if (!linha) {
+      return null;
+    }
+    return {
+      id: linha.id,
+      nome: linha.nome,
+      tipo: linha.tipo,
+      plano: linha.plano,
+      ativa: linha.ativa,
+      createdAt: linha.created_at.toISOString(),
+    };
+  });
+}
+
+export type AtualizarCadastroPlataformaInput = {
+  nome: string;
+  tipo: "autonomo" | "empresa";
+  ativa: boolean;
+};
+
+export async function atualizarCadastroPlataforma(
+  databaseUrl: string,
+  cadastroId: string,
+  input: AtualizarCadastroPlataformaInput,
+): Promise<boolean> {
+  const nome = input.nome.trim();
+  if (nome.length < 2) {
+    throw new Error("Informe o nome do cadastro.");
+  }
+  return semContextoRls(databaseUrl, async (cliente) => {
+    const resultado = await cliente.query(
+      `update public.cadastros
+       set nome = $2, tipo = $3, ativa = $4
+       where id = $1`,
+      [cadastroId, nome, input.tipo, input.ativa],
+    );
+    return (resultado.rowCount ?? 0) > 0;
+  });
+}
+
 export async function listarCadastrosPlataforma(
   databaseUrl: string,
 ): Promise<CadastroPlataformaLista[]> {
