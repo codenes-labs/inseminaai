@@ -23,6 +23,16 @@ describe("resolver destino pós-login (SPEC-22)", () => {
     ).toBe("/admin/cadastros");
   });
 
+  it("modo app plataforma respeita preview do produtor", () => {
+    expect(
+      resolverDestinoPosLogin(
+        { plataformaAdmin: true, papel: "administrador" },
+        "app",
+        { modoAppPlataforma: true },
+      ),
+    ).toBe("/inicio");
+  });
+
   it("modo plataforma exige flag", () => {
     expect(contaPodeEntrarModoPlataforma(false)).toBe(false);
     expect(

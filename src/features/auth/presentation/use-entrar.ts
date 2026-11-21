@@ -8,6 +8,10 @@ import {
   limparSessao,
 } from "../../../lib/auth";
 import {
+  desativarModoAppPlataforma,
+  plataformaEmModoApp,
+} from "../../../domain/auth/plataforma-modo-app";
+import {
   contaPodeEntrarModoPlataforma,
   resolverDestinoPosLogin,
   type ModoEntrada,
@@ -58,11 +62,15 @@ export function useEntrar(modo: ModoEntrada = "app") {
         setErro("Esta conta não tem acesso à administração da plataforma.");
         return;
       }
+      if (modo === "plataforma") {
+        desativarModoAppPlataforma();
+      }
       const destino = resolverDestinoPosLogin(
         { plataformaAdmin: sessao.plataformaAdmin, papel: sessao.papel },
         modo,
+        { modoAppPlataforma: plataformaEmModoApp() },
       );
-      navigate(destino);
+      navigate(destino, { replace: true });
     } catch {
       setErro(MENSAGEM_LOGIN_INVALIDO);
     } finally {

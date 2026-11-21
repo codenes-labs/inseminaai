@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ehAdminPlataformaCodenes } from "./admin-plataforma-codenes";
+import {
+  ehAdminPlataformaCodenes,
+  mostrarAtalhoCadastrosPlataformaNoApp,
+} from "./admin-plataforma-codenes";
 import type { Session } from "../../lib/auth-types";
 
 const sessaoBase: Session = {
@@ -16,6 +19,15 @@ const sessaoBase: Session = {
 describe("ehAdminPlataformaCodenes", () => {
   it("reconhece admin@codenes.com.br", () => {
     expect(ehAdminPlataformaCodenes(sessaoBase)).toBe(true);
+  });
+
+  it("atalho no app com e-mail codenes mesmo sem flag", () => {
+    expect(
+      mostrarAtalhoCadastrosPlataformaNoApp({
+        ...sessaoBase,
+        plataformaAdmin: false,
+      }),
+    ).toBe(true);
   });
 
   it("nega outro e-mail com plataforma_admin", () => {

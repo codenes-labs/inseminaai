@@ -10,11 +10,13 @@ export type SessaoDestinoInput = {
 export function resolverDestinoPosLogin(
   sessao: SessaoDestinoInput,
   modo: ModoEntrada,
+  opcoes?: { modoAppPlataforma?: boolean },
 ): string {
+  const emModoApp = opcoes?.modoAppPlataforma === true;
   if (modo === "plataforma") {
     return sessao.plataformaAdmin ? "/admin/cadastros" : "/entrar";
   }
-  if (sessao.plataformaAdmin) {
+  if (sessao.plataformaAdmin && !emModoApp) {
     return "/admin/cadastros";
   }
   return "/inicio";

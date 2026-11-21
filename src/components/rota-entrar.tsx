@@ -18,6 +18,7 @@ export function RotaEntrar({ children }: { children: ReactNode }) {
         resolverDestinoPosLogin(
           { plataformaAdmin: sessao!.plataformaAdmin, papel: sessao!.papel },
           "app",
+          { modoAppPlataforma: plataformaEmModoApp() },
         ),
     );
     return <Navigate to={destino} replace />;
