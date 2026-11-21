@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Botao, Cartao, inputClass } from "../../components/ui";
 import {
   criarCadastroAutonomoApi,
@@ -122,7 +123,12 @@ export function WebCadastros() {
                   key={item.id}
                   className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
                 >
-                  <span className="font-medium">{item.nome}</span>
+                  <Link
+                    to={`/admin/cadastros/${item.id}`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {item.nome}
+                  </Link>
                   <span className="text-muted-foreground">
                     {item.tipo} · {item.plano}
                     {!item.ativa ? " · inativo" : ""}

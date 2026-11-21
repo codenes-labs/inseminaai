@@ -74,6 +74,9 @@ export function PublicSiteFooter() {
         <Link to="/docs" className="font-semibold text-primary">
           Documentação
         </Link>
+        <Link to="/admin/entrar" className="font-semibold text-primary">
+          Administração da plataforma
+        </Link>
       </nav>
     </footer>
   );

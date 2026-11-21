@@ -4,7 +4,7 @@ import { lerSessao, sessaoValida } from "../lib/auth";
 
 export function RotaPlataforma({ children }: { children: ReactElement }) {
   if (!sessaoValida()) {
-    return <Navigate to="/entrar" replace state={{ de: "/web/cadastros" }} />;
+    return <Navigate to="/admin/entrar" replace state={{ de: "/admin/cadastros" }} />;
   }
   const sessao = lerSessao();
   if (!sessao?.plataformaAdmin) {

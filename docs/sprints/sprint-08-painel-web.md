@@ -23,7 +23,7 @@ Mobile: **intocado** (inseminador no curral).
 ### Shell web
 
 - [x] `src/pages/web/`, `WebShell`, rotas `/web/cadastros`.
-- [ ] Guardas: geral vs admin do cadastro.
+- [x] Guardas: geral vs admin do cadastro (SPEC-22).
 
 ### SPEC-21 — Autônomo (prioridade negócio)
 

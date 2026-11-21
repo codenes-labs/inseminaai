@@ -55,6 +55,20 @@ export function Mais() {
           <p className="text-lg font-semibold">{sessao?.nome ?? "—"}</p>
           <p className="text-sm text-muted-foreground">{sessao?.identificador}</p>
         </Cartao>
+        {sessao?.papel === "administrador" && !sessao.plataformaAdmin ? (
+          <Cartao className="divide-y divide-border p-0">
+            <p className="px-4 pb-2 pt-4 text-sm font-semibold text-muted-foreground">
+              Equipe
+            </p>
+            <Link
+              to="/mais/acessos"
+              className="press flex min-h-12 items-center justify-between px-4 text-foreground"
+            >
+              <span className="font-medium">Gestão de logins</span>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </Link>
+          </Cartao>
+        ) : null}
         <GrupoLinks
           titulo="Cadastros auxiliares"
           links={linksCadastrosAuxiliares}

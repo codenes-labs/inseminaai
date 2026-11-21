@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import type { Situacao } from "../data/mock";
 import { textoBuscaCoincide } from "../features/matrizes/domain/busca";
+import { LayoutDesktopProdutor } from "./layout-desktop-produtor";
+import { useLayoutAppDesktop } from "../hooks/use-layout-app";
 
 export function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -463,6 +465,14 @@ export function AppShell({
   children: ReactNode;
   semBarra?: boolean;
 }) {
+  const desktop = useLayoutAppDesktop();
+  if (desktop) {
+    return (
+      <LayoutDesktopProdutor>
+        <main className={semBarra ? "min-h-0" : "pb-8"}>{children}</main>
+      </LayoutDesktopProdutor>
+    );
+  }
   return (
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background">
       <main className={semBarra ? undefined : "pb-28"}>{children}</main>

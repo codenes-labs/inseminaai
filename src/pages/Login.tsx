@@ -10,8 +10,15 @@ import {
 } from "../components/ui";
 import { TurnstileLogin } from "../components/TurnstileLogin";
 import { useEntrar } from "../features/auth/presentation/use-entrar";
+import type { ModoEntrada } from "../features/auth/domain/resolver-destino-pos-login";
 
-export function Login() {
+export function Login({
+  modo = "app",
+  subtitulo = "Registre suas inseminações com segurança",
+}: {
+  modo?: ModoEntrada;
+  subtitulo?: string;
+}) {
   const {
     erro,
     carregando,
@@ -22,7 +29,7 @@ export function Login() {
     onTurnstileToken,
     enviar,
     turnstileSiteKey,
-  } = useEntrar();
+  } = useEntrar(modo);
 
   return (
     <div className="bg-login relative min-h-screen w-full">
@@ -34,9 +41,7 @@ export function Login() {
           <div className="text-3xl">
             <Logo icone={false} />
           </div>
-          <p className="mt-2 text-base text-muted-foreground">
-            Registre suas inseminações com segurança
-          </p>
+          <p className="mt-2 text-base text-muted-foreground">{subtitulo}</p>
           <form className="mt-10 space-y-4" onSubmit={enviar}>
             <Campo rotulo="E-mail" icone={<Mail className="size-5" strokeWidth={1.75} />}>
               <input

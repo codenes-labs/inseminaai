@@ -1,10 +1,20 @@
 import { useCallback, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { MENSAGEM_LOGIN_INVALIDO, entrarComSenha, lerSessao } from "../../../lib/auth";
+import {
+  MENSAGEM_LOGIN_INVALIDO,
+  entrarComSenha,
+  lerSessao,
+  limparSessao,
+} from "../../../lib/auth";
+import {
+  contaPodeEntrarModoPlataforma,
+  resolverDestinoPosLogin,
+  type ModoEntrada,
+} from "../domain/resolver-destino-pos-login";
 
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim() ?? "";
 
-export function useEntrar() {
+export function useEntrar(modo: ModoEntrada = "app") {
   const navigate = useNavigate();
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -34,14 +44,23 @@ export function useEntrar() {
         return;
       }
       const sessao = lerSessao();
-      const desktop = window.matchMedia("(min-width: 1024px)").matches;
-      if (desktop && sessao?.plataformaAdmin) {
-        navigate("/web/cadastros");
-      } else if (desktop && sessao?.papel === "administrador") {
-        navigate("/web/usuarios");
-      } else {
-        navigate("/inicio");
+      if (!sessao) {
+        setErro(MENSAGEM_LOGIN_INVALIDO);
+        return;
       }
+      if (
+        modo === "plataforma" &&
+        !contaPodeEntrarModoPlataforma(sessao.plataformaAdmin)
+      ) {
+        limparSessao();
+        setErro("Esta conta não tem acesso à administração da plataforma.");
+        return;
+      }
+      const destino = resolverDestinoPosLogin(
+        { plataformaAdmin: sessao.plataformaAdmin, papel: sessao.papel },
+        modo,
+      );
+      navigate(destino);
     } catch {
       setErro(MENSAGEM_LOGIN_INVALIDO);
     } finally {
@@ -60,5 +79,6 @@ export function useEntrar() {
     onTurnstileToken,
     enviar,
     turnstileSiteKey,
+    modo,
   };
 }

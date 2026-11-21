@@ -18,22 +18,16 @@ export function WebShell({
           <Logo />
           <nav className="flex items-center gap-4 text-sm font-medium">
             {sessao?.plataformaAdmin ? (
-              <Link to="/web/cadastros" className="text-primary">
+              <Link to="/admin/cadastros" className="text-primary">
                 Cadastros
               </Link>
             ) : null}
-            <Link to="/web/usuarios" className="text-primary">
-              Usuários
-            </Link>
-            <Link to="/inicio" className="text-muted-foreground hover:text-foreground">
-              App mobile
-            </Link>
             <button
               type="button"
               className="press text-muted-foreground hover:text-foreground"
               onClick={() => {
                 sair();
-                window.location.href = "/entrar";
+                window.location.href = "/admin/entrar";
               }}
             >
               Sair

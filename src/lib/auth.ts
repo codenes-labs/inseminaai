@@ -10,7 +10,13 @@ import {
 } from "./auth-session";
 
 export type { Session } from "./auth-types";
-export { MENSAGEM_LOGIN_INVALIDO, obterCadastroId, sessaoValida, tocarSessao };
+export {
+  MENSAGEM_LOGIN_INVALIDO,
+  limparSessao,
+  obterCadastroId,
+  sessaoValida,
+  tocarSessao,
+};
 
 export { lerSessao };
 

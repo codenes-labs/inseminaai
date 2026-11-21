@@ -1,15 +1,20 @@
 import { FormEvent, useEffect, useState } from "react";
 import type { Papel } from "../../lib/auth-types";
 import { lerSessao } from "../../lib/auth";
-import { Botao, Cartao, cx, inputClass } from "../../components/ui";
+import {
+  AppShell,
+  Botao,
+  CabecalhoVoltar,
+  Cartao,
+  cx,
+  inputClass,
+} from "../../components/ui";
 import {
   alterarMembroAtivoApi,
   criarMembroCadastroApi,
   listarMembrosCadastroApi,
   type MembroCadastro,
 } from "../../features/conta/infrastructure/cadastro-membros-api";
-import { WebShell } from "./WebShell";
-
 const PAPEIS: Papel[] = ["inseminador", "administrador"];
 
 export function WebUsuarios() {
@@ -69,8 +74,9 @@ export function WebUsuarios() {
   }
 
   return (
-    <WebShell titulo="Usuários do cadastro">
-      <div className="grid gap-8 lg:grid-cols-2">
+    <AppShell semBarra>
+      <CabecalhoVoltar titulo="Gestão de acessos" voltar="/mais" />
+      <div className="grid gap-8 px-4 py-4 lg:grid-cols-2">
         <Cartao className="p-5">
           <h2 className="text-lg font-semibold">Novo acesso</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -168,6 +174,6 @@ export function WebUsuarios() {
           </ul>
         </Cartao>
       </div>
-    </WebShell>
+    </AppShell>
   );
 }
