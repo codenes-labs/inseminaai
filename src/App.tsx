@@ -6,6 +6,7 @@ import { RotaEntrar } from "./components/rota-entrar";
 import { RotaPlataforma } from "./components/rota-plataforma";
 import { RotaAcessosCadastro } from "./components/rota-web-admin";
 import { RotaProtegida } from "./components/rota-protegida";
+import { RedirecionarAdminRaiz } from "./components/redirecionar-admin-raiz";
 import { RedirecionarWebLegado } from "./components/redirecionar-web-legado";
 import { Diagnostico } from "./pages/Diagnostico";
 import { Inicio } from "./pages/Inicio";
@@ -51,6 +52,7 @@ export function App() {
             </RotaEntrar>
           }
         />
+        <Route path="/admin" element={<RedirecionarAdminRaiz />} />
         <Route
           path="/admin/entrar"
           element={
