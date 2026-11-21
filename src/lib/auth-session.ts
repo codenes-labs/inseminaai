@@ -1,3 +1,4 @@
+import { limparEstadoDemoMock, reiniciarEstadoDemoMock } from "../features/demo/domain/demo-mock-estado";
 import type { Session, SessionUser } from "./auth-types";
 import { IDLE_MS, STORAGE_KEY } from "./auth-types";
 
@@ -78,6 +79,11 @@ export function gravarSessaoApi(
 ) {
   const sessao = paraSession(token, user, expiresAt);
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessao));
+  if (user.demo) {
+    reiniciarEstadoDemoMock();
+  } else {
+    limparEstadoDemoMock();
+  }
   return sessao;
 }
 
@@ -99,4 +105,5 @@ export function obterCadastroId(): string | null {
 
 export function limparSessao() {
   sessionStorage.removeItem(STORAGE_KEY);
+  limparEstadoDemoMock();
 }

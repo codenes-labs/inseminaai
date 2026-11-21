@@ -123,7 +123,11 @@ export async function handlePlataformaRequest(
       } catch (erro) {
         const mensagem =
           erro instanceof Error ? erro.message : "Não foi possível salvar o cadastro.";
-        return Response.json({ error: mensagem }, { status: 400 });
+        const status =
+          mensagem.includes("não pode ser inativado") || mensagem.includes("sistema")
+            ? 403
+            : 400;
+        return Response.json({ error: mensagem }, { status });
       }
     }
 

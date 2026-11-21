@@ -12,3 +12,30 @@ export function cadastroProtegidoSistema(cadastroId: string): boolean {
 export function usuarioProtegidoSistema(userId: string): boolean {
   return userId === USER_ADMIN_ID || userId === USER_DEMO_ID;
 }
+
+/** Seed administrador: não inativa nem exclui. */
+export function cadastroBloqueiaInativacao(cadastroId: string): boolean {
+  return cadastroId === CADASTRO_ADMIN_ID;
+}
+
+/** Seed admin e demo: não exclui (demo pode inativar). */
+export function cadastroBloqueiaExclusao(cadastroId: string): boolean {
+  return cadastroProtegidoSistema(cadastroId);
+}
+
+export function mensagemBloqueioInativacao(cadastroId: string): string {
+  if (cadastroId === CADASTRO_ADMIN_ID) {
+    return "O cadastro administrador do sistema não pode ser inativado.";
+  }
+  return "Este cadastro não pode ser inativado.";
+}
+
+export function mensagemBloqueioExclusao(cadastroId: string): string {
+  if (cadastroId === CADASTRO_ADMIN_ID) {
+    return "O cadastro administrador do sistema não pode ser excluído.";
+  }
+  if (cadastroId === CADASTRO_DEMO_ID) {
+    return "O cadastro demo do sistema não pode ser excluído.";
+  }
+  return "Este cadastro é do sistema e não pode ser excluído.";
+}

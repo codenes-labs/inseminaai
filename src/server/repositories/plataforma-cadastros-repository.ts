@@ -1,4 +1,9 @@
-import { cadastroProtegidoSistema } from "../../features/plataforma/domain/cadastros-sistema";
+import {
+  cadastroBloqueiaExclusao,
+  cadastroBloqueiaInativacao,
+  mensagemBloqueioExclusao,
+  mensagemBloqueioInativacao,
+} from "../../features/plataforma/domain/cadastros-sistema";
 import type { ProvisionarCadastroAutonomoInput } from "../../features/plataforma/domain/provisionar-cadastro-autonomo";
 import { semContextoPlataforma } from "../db/context";
 import { hashSenha } from "../db/password";
@@ -64,6 +69,9 @@ export async function atualizarCadastroPlataforma(
   if (nome.length < 2) {
     throw new Error("Informe o nome do cadastro.");
   }
+  if (cadastroBloqueiaInativacao(cadastroId) && !input.ativa) {
+    throw new Error(mensagemBloqueioInativacao(cadastroId));
+  }
   return semContextoPlataforma(databaseUrl, async (cliente) => {
     const resultado = await cliente.query(
       `update public.cadastros
@@ -123,8 +131,8 @@ export async function excluirCadastroPlataforma(
   databaseUrl: string,
   cadastroId: string,
 ): Promise<void> {
-  if (cadastroProtegidoSistema(cadastroId)) {
-    throw new Error("Este cadastro é do sistema e não pode ser excluído.");
+  if (cadastroBloqueiaExclusao(cadastroId)) {
+    throw new Error(mensagemBloqueioExclusao(cadastroId));
   }
   return semContextoPlataforma(databaseUrl, async (cliente) => {
     const resultado = await cliente.query(

@@ -9,7 +9,10 @@ import {
 } from "../../features/conta/domain/gerar-senha";
 import type { MembroCadastro } from "../../features/conta/infrastructure/cadastro-membros-api";
 import {
-  cadastroProtegidoSistema,
+  CADASTRO_ADMIN_ID,
+  CADASTRO_DEMO_ID,
+  cadastroBloqueiaExclusao,
+  cadastroBloqueiaInativacao,
   usuarioProtegidoSistema,
 } from "../../features/plataforma/domain/cadastros-sistema";
 import { cadastroPermiteMultiplosAcessos } from "../../features/plataforma/domain/tipo-cadastro-plataforma";
@@ -31,7 +34,8 @@ export function WebCadastroDetalhe() {
   const { cadastroId } = useParams<{ cadastroId: string }>();
   const { recarregarListaCadastros } =
     useOutletContext<WebCadastrosLayoutContext>();
-  const [protegido, setProtegido] = useState(false);
+  const [bloqueiaExcluir, setBloqueiaExcluir] = useState(false);
+  const [bloqueiaInativar, setBloqueiaInativar] = useState(false);
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<"autonomo" | "empresa">("autonomo");
   const [ativa, setAtiva] = useState(true);
@@ -72,7 +76,8 @@ export function WebCadastroDetalhe() {
       setNome(dados.nome);
       setTipo(dados.tipo === "empresa" ? "empresa" : "autonomo");
       setAtiva(dados.ativa);
-      setProtegido(cadastroProtegidoSistema(dados.id));
+      setBloqueiaExcluir(cadastroBloqueiaExclusao(dados.id));
+      setBloqueiaInativar(cadastroBloqueiaInativacao(dados.id));
     } catch {
       setErroCadastro("Não foi possível carregar o cadastro.");
     } finally {
@@ -268,7 +273,7 @@ export function WebCadastroDetalhe() {
   }
 
   async function excluirCliente() {
-    if (!cadastroId || protegido) {
+    if (!cadastroId || bloqueiaExcluir) {
       return;
     }
     if (
@@ -365,7 +370,7 @@ export function WebCadastroDetalhe() {
                 <Botao type="submit" disabled={salvandoCadastro}>
                   {salvandoCadastro ? "Salvando…" : "Salvar alterações"}
                 </Botao>
-                {ativa ? (
+                {ativa && !bloqueiaInativar ? (
                   <Botao
                     type="button"
                     variante="suave"
@@ -374,7 +379,8 @@ export function WebCadastroDetalhe() {
                   >
                     Inativar cliente
                   </Botao>
-                ) : (
+                ) : null}
+                {!ativa ? (
                   <Botao
                     type="button"
                     variante="suave"
@@ -383,8 +389,8 @@ export function WebCadastroDetalhe() {
                   >
                     Reativar cliente
                   </Botao>
-                )}
-                {!protegido ? (
+                ) : null}
+                {!bloqueiaExcluir ? (
                   <Botao
                     type="button"
                     variante="suave"
@@ -394,7 +400,11 @@ export function WebCadastroDetalhe() {
                   </Botao>
                 ) : (
                   <p className="self-center text-xs text-muted-foreground">
-                    Cadastro do sistema — não pode ser excluído.
+                    {cadastroId === CADASTRO_ADMIN_ID
+                      ? "Cadastro administrador — não pode ser excluído nem inativado."
+                      : cadastroId === CADASTRO_DEMO_ID
+                        ? "Cadastro demo — pode inativar, mas não excluir."
+                        : "Cadastro do sistema — não pode ser excluído."}
                   </p>
                 )}
               </div>
