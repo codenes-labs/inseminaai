@@ -146,17 +146,22 @@ O job **Coverage** falhou após `feat(plataforma): proteger cadastros seed e moc
 
 1. **Lint e Coverage em paralelo** — `build` depende de `needs: [lint, test]` (ganho de wall-clock ~2–4 min em PRs).
 2. **Removido o segundo “Sync Worker secrets again”** após o deploy (~1–3 min na `master`).
+3. **Migrations condicionais** (`dorny/paths-filter@v3`): job `db-migrate` só na `master` quando mudam migrations/código de migrate; **não** roda `db:seed` no CI (alinhado a `seed.ts`: seed é dev local).
+4. **Deploy Worker** sem `npm run db:setup` em todo push — só `wrangler deploy` + sync de secrets.
 
 ### Ganhos estimados
 
 - **Pull request (sem deploy):** ~3–5 min mais rápido.
-- **Push na `master`:** ~4–8 min mais rápido no sync; o tempo total ainda dominado por **db:setup + deploy Cloudflare** (ordem de 15–20 min se Neon estiver lento).
+- **Push na `master` sem migration:** ~5–15 min a menos (sem round-trip Neon + seed).
+- **Push com migration nova:** tempo semelhante ao antigo só na etapa `db-migrate`.
 
-### Melhorias futuras (não implementadas)
+### Referência In House Bank
 
-- Job único `verify` (lint + test:coverage) com um só `npm ci`.
-- Migrations em job agendado ou só quando mudar `.docker/db/migrations/`.
-- `paths-ignore` para pular deploy em commits só de docs.
+O repositório IHB **não está montado neste ambiente** (procurei pastas irmãs e URLs públicas `codenes/*`). Pela documentação interna (`docs/planejamento-contexto-inicial.md`):
+
+- **`developer.yml`** em branches + **`deploy.yml`** na `master`.
+- Mesmo modelo **Worker + Neon**; schema já provisionado; migrations **fora** do caminho crítico de cada deploy de app.
+- CI “rápido” (~1 min) típico em commits **só de app** (lint/test/build/deploy Worker), sem migrar banco nem re-seedar produção.
 
 ---
 

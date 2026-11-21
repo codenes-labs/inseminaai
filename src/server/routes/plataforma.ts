@@ -36,8 +36,24 @@ export async function handlePlataformaRequest(
   }
 
   if (url.pathname === "/api/plataforma/cadastros" && request.method === "GET") {
-    const lista = await listarCadastrosPlataforma(context.databaseUrl);
-    return Response.json({ cadastros: lista });
+    try {
+      const lista = await listarCadastrosPlataforma(context.databaseUrl);
+      return Response.json({ cadastros: lista });
+    } catch (erro) {
+      console.error("[plataforma] falha ao listar cadastros", erro);
+      const mensagem =
+        erro instanceof Error ? erro.message : "Não foi possível listar os cadastros.";
+      const schema =
+        /column|role|relation|does not exist|inseminaai_app/i.test(mensagem);
+      return Response.json(
+        {
+          error: schema
+            ? "Banco de produção desatualizado. Aplique as migrations (npm run db:migrate) no Neon."
+            : "Não foi possível listar os cadastros.",
+        },
+        { status: schema ? 503 : 500 },
+      );
+    }
   }
 
   if (url.pathname === "/api/plataforma/cadastros" && request.method === "POST") {
