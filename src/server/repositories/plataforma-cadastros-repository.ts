@@ -1,5 +1,6 @@
+import { cadastroProtegidoSistema } from "../../features/plataforma/domain/cadastros-sistema";
 import type { ProvisionarCadastroAutonomoInput } from "../../features/plataforma/domain/provisionar-cadastro-autonomo";
-import { semContextoRls } from "../db/context";
+import { semContextoPlataforma } from "../db/context";
 import { hashSenha } from "../db/password";
 
 export type CadastroPlataformaLista = {
@@ -15,7 +16,7 @@ export async function obterCadastroPlataforma(
   databaseUrl: string,
   cadastroId: string,
 ): Promise<CadastroPlataformaLista | null> {
-  return semContextoRls(databaseUrl, async (cliente) => {
+  return semContextoPlataforma(databaseUrl, async (cliente) => {
     const resultado = await cliente.query<{
       id: string;
       nome: string;
@@ -59,7 +60,7 @@ export async function atualizarCadastroPlataforma(
   if (nome.length < 2) {
     throw new Error("Informe o nome do cadastro.");
   }
-  return semContextoRls(databaseUrl, async (cliente) => {
+  return semContextoPlataforma(databaseUrl, async (cliente) => {
     const resultado = await cliente.query(
       `update public.cadastros
        set nome = $2, tipo = $3, ativa = $4
@@ -73,7 +74,7 @@ export async function atualizarCadastroPlataforma(
 export async function listarCadastrosPlataforma(
   databaseUrl: string,
 ): Promise<CadastroPlataformaLista[]> {
-  return semContextoRls(databaseUrl, async (cliente) => {
+  return semContextoPlataforma(databaseUrl, async (cliente) => {
     const resultado = await cliente.query<{
       id: string;
       nome: string;
@@ -97,6 +98,24 @@ export async function listarCadastrosPlataforma(
   });
 }
 
+export async function excluirCadastroPlataforma(
+  databaseUrl: string,
+  cadastroId: string,
+): Promise<void> {
+  if (cadastroProtegidoSistema(cadastroId)) {
+    throw new Error("Este cadastro é do sistema e não pode ser excluído.");
+  }
+  return semContextoPlataforma(databaseUrl, async (cliente) => {
+    const resultado = await cliente.query(
+      `delete from public.cadastros where id = $1`,
+      [cadastroId],
+    );
+    if ((resultado.rowCount ?? 0) === 0) {
+      throw new Error("Cadastro não encontrado.");
+    }
+  });
+}
+
 export async function criarCadastroAutonomoNoBanco(
   databaseUrl: string,
   input: ProvisionarCadastroAutonomoInput,
@@ -106,14 +125,13 @@ export async function criarCadastroAutonomoNoBanco(
   const email = input.email.trim().toLowerCase();
   const hash = hashSenha(input.senha);
 
-  return semContextoRls(databaseUrl, async (cliente) => {
-    await cliente.query("BEGIN");
-    try {
+  try {
+    return await semContextoPlataforma(databaseUrl, async (cliente) => {
       const cadastro = await cliente.query<{ id: string }>(
         `insert into public.cadastros (nome, tipo, plano, ativa)
-         values ($1, 'autonomo', 'gratuito', true)
+         values ($1, $2, 'gratuito', true)
          returning id`,
-        [nomeCadastro],
+        [nomeCadastro, input.tipo ?? "autonomo"],
       );
       const cadastroId = cadastro.rows[0]?.id;
       if (!cadastroId) {
@@ -137,15 +155,13 @@ export async function criarCadastroAutonomoNoBanco(
         [cadastroId, userId],
       );
 
-      await cliente.query("COMMIT");
       return { cadastroId, userId };
-    } catch (erro: unknown) {
-      await cliente.query("ROLLBACK");
-      const pg = erro as { code?: string };
-      if (pg.code === "23505") {
-        throw new Error("Não foi possível criar o acesso. Verifique se o e-mail já está em uso.");
-      }
-      throw erro;
+    });
+  } catch (erro: unknown) {
+    const pg = erro as { code?: string };
+    if (pg.code === "23505") {
+      throw new Error("Não foi possível criar o acesso. Verifique se o e-mail já está em uso.");
     }
-  });
+    throw erro;
+  }
 }

@@ -24,6 +24,30 @@ describe("provisionar cadastro autônomo (SPEC-21)", () => {
     ).not.toBeNull();
   });
 
+  it("aceita tipo empresa", () => {
+    expect(
+      validarProvisionarCadastroAutonomo({
+        nomeCadastro: "Fazenda Sol",
+        nomeUsuario: "Ana",
+        email: "ana@fazenda.com",
+        senha: "senha1234",
+        tipo: "empresa",
+      }),
+    ).toBeNull();
+  });
+
+  it("rejeita tipo inválido", () => {
+    expect(
+      validarProvisionarCadastroAutonomo({
+        nomeCadastro: "X",
+        nomeUsuario: "Y",
+        email: "a@b.co",
+        senha: "senha1234",
+        tipo: "pf" as "autonomo",
+      }),
+    ).not.toBeNull();
+  });
+
   it("rejeita senha curta", () => {
     expect(
       validarProvisionarCadastroAutonomo({

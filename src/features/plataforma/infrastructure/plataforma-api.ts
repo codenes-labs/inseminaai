@@ -9,6 +9,7 @@ export type CadastroPlataforma = {
   plano: string;
   ativa: boolean;
   createdAt: string;
+  protegido?: boolean;
 };
 
 export async function listarCadastrosPlataformaApi(): Promise<CadastroPlataforma[]> {
@@ -74,17 +75,23 @@ export async function criarMembroPlataformaCadastroApi(
   }
 }
 
-export async function alterarMembroPlataformaAtivoApi(
+export async function atualizarMembroPlataformaCadastroApi(
   cadastroId: string,
   userId: string,
-  ativo: boolean,
+  input: {
+    nome?: string;
+    email?: string;
+    papel?: Papel;
+    ativo?: boolean;
+    senha?: string;
+  },
 ): Promise<void> {
   const response = await apiFetch(
     `/api/plataforma/cadastros/${cadastroId}/membros/${userId}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ativo }),
+      body: JSON.stringify(input),
     },
   );
   if (!response.ok) {
@@ -93,12 +100,45 @@ export async function alterarMembroPlataformaAtivoApi(
   }
 }
 
-export async function criarCadastroAutonomoApi(input: {
+export async function excluirMembroPlataformaCadastroApi(
+  cadastroId: string,
+  userId: string,
+): Promise<void> {
+  const response = await apiFetch(
+    `/api/plataforma/cadastros/${cadastroId}/membros/${userId}`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) {
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível excluir o acesso.");
+  }
+}
+
+export async function excluirCadastroPlataformaApi(cadastroId: string): Promise<void> {
+  const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível excluir o cliente.");
+  }
+}
+
+export async function alterarMembroPlataformaAtivoApi(
+  cadastroId: string,
+  userId: string,
+  ativo: boolean,
+): Promise<void> {
+  await atualizarMembroPlataformaCadastroApi(cadastroId, userId, { ativo });
+}
+
+export async function criarCadastroPlataformaApi(input: {
   nomeCadastro: string;
   nomeUsuario: string;
   email: string;
   senha: string;
-}): Promise<void> {
+  tipo: "autonomo" | "empresa";
+}): Promise<{ cadastroId: string }> {
   const response = await apiFetch("/api/plataforma/cadastros", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -107,10 +147,16 @@ export async function criarCadastroAutonomoApi(input: {
       nome_usuario: input.nomeUsuario,
       email: input.email,
       senha: input.senha,
+      tipo: input.tipo,
     }),
   });
   if (!response.ok) {
     const dados = (await response.json().catch(() => ({}))) as { error?: string };
     throw new Error(dados.error ?? "Não foi possível criar o cadastro.");
   }
+  const dados = (await response.json()) as { cadastroId?: string };
+  if (!dados.cadastroId) {
+    throw new Error("Cadastro criado sem identificador.");
+  }
+  return { cadastroId: dados.cadastroId };
 }

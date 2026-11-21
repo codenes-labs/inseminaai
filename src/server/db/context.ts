@@ -5,6 +5,7 @@ import { getPool } from "./pool";
 export type DbCliente = pg.PoolClient;
 
 export const APP_DB_ROLE = "inseminaai_app";
+export const APP_PLATAFORMA_SETTING = "app.plataforma_admin";
 
 async function ativarRoleApp(cliente: DbCliente) {
   await cliente.query(`set local role ${APP_DB_ROLE}`);
@@ -23,6 +24,30 @@ export async function comCadastroId<T>(
       `select set_config($1, $2, true)`,
       [APP_CADASTRO_SETTING, cadastroId],
     );
+    const resultado = await executar(cliente);
+    await cliente.query("commit");
+    return resultado;
+  } catch (erro) {
+    await cliente.query("rollback");
+    throw erro;
+  } finally {
+    cliente.release();
+  }
+}
+
+/** Operações do admin da plataforma (cadastros globais, sem tenant). */
+export async function semContextoPlataforma<T>(
+  databaseUrl: string,
+  executar: (cliente: DbCliente) => Promise<T>,
+): Promise<T> {
+  const cliente = await getPool(databaseUrl).connect();
+  try {
+    await cliente.query("begin");
+    await ativarRoleApp(cliente);
+    await cliente.query(`select set_config($1, $2, true)`, [
+      APP_PLATAFORMA_SETTING,
+      "true",
+    ]);
     const resultado = await executar(cliente);
     await cliente.query("commit");
     return resultado;

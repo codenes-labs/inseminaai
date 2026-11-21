@@ -29,6 +29,7 @@ import { PrivacyPage } from "./pages/public/PrivacidadePage";
 import { TermsPage } from "./pages/public/TermosPage";
 import { WebCadastroDetalhe } from "./pages/web/WebCadastroDetalhe";
 import { WebCadastros } from "./pages/web/WebCadastros";
+import { WebCadastrosLayout } from "./pages/web/WebCadastrosLayout";
 import { WebUsuarios } from "./pages/web/WebUsuarios";
 
 function comProtecao(element: ReactElement) {
@@ -64,18 +65,13 @@ export function App() {
           path="/admin/cadastros"
           element={
             <RotaPlataforma>
-              <WebCadastros />
+              <WebCadastrosLayout />
             </RotaPlataforma>
           }
-        />
-        <Route
-          path="/admin/cadastros/:cadastroId"
-          element={
-            <RotaPlataforma>
-              <WebCadastroDetalhe />
-            </RotaPlataforma>
-          }
-        />
+        >
+          <Route index element={<WebCadastros />} />
+          <Route path=":cadastroId" element={<WebCadastroDetalhe />} />
+        </Route>
         <Route
           path="/mais/acessos"
           element={
