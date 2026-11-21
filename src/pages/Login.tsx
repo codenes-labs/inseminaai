@@ -43,12 +43,18 @@ export function Login({
           </div>
           <p className="mt-2 text-base text-muted-foreground">{subtitulo}</p>
           {modo === "plataforma" ? (
-            <p className="mt-4 text-sm text-muted-foreground">
-              Conta de cliente ou inseminador?{" "}
-              <Link to="/entrar" className="font-semibold text-brand">
-                Entrar no aplicativo
-              </Link>
-            </p>
+            <div className="mt-4 space-y-2 rounded-xl border border-brand/30 bg-brand-soft/60 p-4 text-sm text-foreground">
+              <p className="font-semibold text-primary">
+                Só a equipe Codenes entra aqui
+              </p>
+              <p className="text-muted-foreground">
+                Cliente ou inseminador criado no painel usa{" "}
+                <Link to="/entrar" className="font-semibold text-brand">
+                  /entrar
+                </Link>{" "}
+                (e-mail e senha definidos na criação do cadastro).
+              </p>
+            </div>
           ) : null}
           <form className="mt-10 space-y-4" onSubmit={enviar}>
             <Campo rotulo="E-mail" icone={<Mail className="size-5" strokeWidth={1.75} />}>
@@ -88,7 +94,9 @@ export function Login({
               {carregando ? "Entrando…" : "Entrar"}
             </Botao>
             <p className="pt-2 text-center text-sm text-muted-foreground">
-              Novos acessos são liberados pelo administrador.
+              {modo === "plataforma"
+                ? "Acesso da plataforma: admin@codenes.com.br"
+                : "Novos acessos são liberados pelo administrador."}
             </p>
           </form>
           <p className="mt-6 text-center text-sm">
