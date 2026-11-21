@@ -12,6 +12,11 @@ const SQL_CATALOGO_ADMIN = join(
   ".docker/db/seeds/admin_dev_catalog.sql",
 );
 
+/**
+ * Seed idempotente para dev local: cria contas/cadastros fixos se faltarem e
+ * não sobrescreve nomes (cadastros `ON CONFLICT DO NOTHING`; users só redefinem senha).
+ * Em produção o seed não roda — alterações feitas no painel persistem no Postgres.
+ */
 export async function aplicarSeedDev(databaseUrl: string): Promise<void> {
   await semContextoRls(databaseUrl, async (cliente) => {
     await cliente.query(
@@ -29,10 +34,7 @@ export async function aplicarSeedDev(databaseUrl: string): Promise<void> {
          ($1, 'admin@codenes.com.br', $3, 'Vitor Almeida', false, true),
          ($2, 'teste@teste.com', $4, 'Conta demo', true, false)
        on conflict (email) do update
-         set password_hash = excluded.password_hash,
-             nome = excluded.nome,
-             demo = excluded.demo,
-             plataforma_admin = excluded.plataforma_admin`,
+         set password_hash = excluded.password_hash`,
       [
         USER_ADMIN_ID,
         USER_DEMO_ID,
