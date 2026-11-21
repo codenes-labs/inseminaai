@@ -24,6 +24,7 @@ import {
   excluirMembroPlataformaCadastroApi,
   listarMembrosPlataformaCadastroApi,
   obterCadastroPlataformaApi,
+  type CadastroPlataforma,
 } from "../../features/plataforma/infrastructure/plataforma-api";
 import type { WebCadastrosLayoutContext } from "./WebCadastrosLayout";
 
@@ -32,7 +33,7 @@ const PAPEIS: Papel[] = ["inseminador", "administrador"];
 export function WebCadastroDetalhe() {
   const navigate = useNavigate();
   const { cadastroId } = useParams<{ cadastroId: string }>();
-  const { recarregarListaCadastros } =
+  const { lista, recarregarListaCadastros } =
     useOutletContext<WebCadastrosLayoutContext>();
   const [bloqueiaExcluir, setBloqueiaExcluir] = useState(false);
   const [bloqueiaInativar, setBloqueiaInativar] = useState(false);
@@ -63,6 +64,14 @@ export function WebCadastroDetalhe() {
 
   const variosAcessos = cadastroPermiteMultiplosAcessos(tipo);
 
+  const aplicarCadastroNaTela = useCallback((dados: CadastroPlataforma) => {
+    setNome(dados.nome);
+    setTipo(dados.tipo === "empresa" ? "empresa" : "autonomo");
+    setAtiva(dados.ativa);
+    setBloqueiaExcluir(cadastroBloqueiaExclusao(dados.id));
+    setBloqueiaInativar(cadastroBloqueiaInativacao(dados.id));
+  }, []);
+
   const carregarCadastro = useCallback(async () => {
     if (!cadastroId) {
       setErroCadastro("Cadastro inválido.");
@@ -71,19 +80,25 @@ export function WebCadastroDetalhe() {
     }
     setCarregandoCadastro(true);
     setErroCadastro("");
+    const daLista = lista.find((item) => item.id === cadastroId);
+    if (daLista) {
+      aplicarCadastroNaTela(daLista);
+    }
     try {
       const dados = await obterCadastroPlataformaApi(cadastroId);
-      setNome(dados.nome);
-      setTipo(dados.tipo === "empresa" ? "empresa" : "autonomo");
-      setAtiva(dados.ativa);
-      setBloqueiaExcluir(cadastroBloqueiaExclusao(dados.id));
-      setBloqueiaInativar(cadastroBloqueiaInativacao(dados.id));
-    } catch {
-      setErroCadastro("Não foi possível carregar o cadastro.");
+      aplicarCadastroNaTela(dados);
+    } catch (caught) {
+      if (!daLista) {
+        setErroCadastro(
+          caught instanceof Error && caught.message.trim()
+            ? caught.message
+            : "Não foi possível carregar o cadastro.",
+        );
+      }
     } finally {
       setCarregandoCadastro(false);
     }
-  }, [cadastroId]);
+  }, [aplicarCadastroNaTela, cadastroId, lista]);
 
   const carregarAcessos = useCallback(async () => {
     if (!cadastroId) {

@@ -50,8 +50,8 @@ export function WebCadastrosNovo() {
       });
       setSucesso(
         tipo === "empresa"
-          ? "Empresa criada. Adicione mais acessos ao abrir o cadastro."
-          : "Autônomo criado. O usuário já pode entrar em /entrar.",
+          ? `Empresa criada. Cada acesso entra em /entrar (não em /admin/entrar).`
+          : `Autônomo criado. O login ${email.trim().toLowerCase()} entra em /entrar com a senha definida aqui.`,
       );
       await recarregarListaCadastros();
       navigate(`/admin/cadastros/${cadastroId}`);

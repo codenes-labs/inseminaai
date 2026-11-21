@@ -27,3 +27,7 @@ export function resolverDestinoPosLogin(
 export function contaPodeEntrarModoPlataforma(identificador: string): boolean {
   return emailEhAdminPlataformaCodenes(identificador);
 }
+
+/** Cliente novo costuma abrir /admin/entrar por engano — orientar para /entrar. */
+export const MENSAGEM_LOGIN_CLIENTE_NA_PLATAFORMA =
+  "Este login é só para a administração da plataforma Codenes. Clientes e inseminadores entram em /entrar com o e-mail e a senha definidos na criação do cadastro.";

@@ -96,11 +96,30 @@ export async function handlePlataformaRequest(
     const sufixo = cadastroMatch[2] ?? "";
 
     if (sufixo === "" && request.method === "GET") {
-      const cadastro = await obterCadastroPlataforma(context.databaseUrl, cadastroId);
-      if (!cadastro) {
-        return Response.json({ error: "Cadastro não encontrado." }, { status: 404 });
+      try {
+        const cadastro = await obterCadastroPlataforma(
+          context.databaseUrl,
+          cadastroId,
+        );
+        if (!cadastro) {
+          return Response.json({ error: "Cadastro não encontrado." }, { status: 404 });
+        }
+        return Response.json({ cadastro });
+      } catch (erro) {
+        console.error("[plataforma] falha ao obter cadastro", erro);
+        const mensagem =
+          erro instanceof Error ? erro.message : "Não foi possível carregar o cadastro.";
+        const schema =
+          /column|role|relation|does not exist|inseminaai_app/i.test(mensagem);
+        return Response.json(
+          {
+            error: schema
+              ? "Banco de produção desatualizado. Aplique as migrations (npm run db:migrate) no Neon."
+              : "Não foi possível carregar o cadastro.",
+          },
+          { status: schema ? 503 : 500 },
+        );
       }
-      return Response.json({ cadastro });
     }
 
     if (sufixo === "" && request.method === "DELETE") {

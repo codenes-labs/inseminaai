@@ -12,6 +12,7 @@ import {
   plataformaEmModoApp,
 } from "../../../domain/auth/plataforma-modo-app";
 import {
+  MENSAGEM_LOGIN_CLIENTE_NA_PLATAFORMA,
   contaPodeEntrarModoPlataforma,
   resolverDestinoPosLogin,
   type ModoEntrada,
@@ -33,6 +34,11 @@ export function useEntrar(modo: ModoEntrada = "app") {
   async function enviar(e: FormEvent) {
     e.preventDefault();
     setErro("");
+    const emailNormalizado = identificador.trim().toLowerCase();
+    if (modo === "plataforma" && !contaPodeEntrarModoPlataforma(emailNormalizado)) {
+      setErro(MENSAGEM_LOGIN_CLIENTE_NA_PLATAFORMA);
+      return;
+    }
     if (turnstileSiteKey && !turnstileToken) {
       setErro("Confirme o captcha antes de entrar.");
       return;

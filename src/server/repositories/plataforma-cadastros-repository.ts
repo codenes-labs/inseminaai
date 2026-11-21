@@ -19,38 +19,75 @@ export type CadastroPlataformaLista = {
   emailsBusca: string;
 };
 
+type LinhaCadastroPlataformaDb = {
+  id: string;
+  nome: string;
+  tipo: string;
+  plano: string;
+  ativa: boolean;
+  created_at: Date | string;
+  email_login: string | null;
+  emails_busca: string | null;
+};
+
+function instantePostgresParaIso(valor: Date | string): string {
+  if (valor instanceof Date) {
+    return valor.toISOString();
+  }
+  const parseado = new Date(valor);
+  if (!Number.isNaN(parseado.getTime())) {
+    return parseado.toISOString();
+  }
+  return String(valor);
+}
+
+function mapLinhaCadastroPlataforma(
+  linha: LinhaCadastroPlataformaDb,
+): CadastroPlataformaLista {
+  return {
+    id: linha.id,
+    nome: linha.nome,
+    tipo: linha.tipo,
+    plano: linha.plano,
+    ativa: linha.ativa,
+    createdAt: instantePostgresParaIso(linha.created_at),
+    emailLogin: linha.email_login ?? "",
+    emailsBusca: linha.emails_busca ?? "",
+  };
+}
+
+const SQL_SELECT_CADASTROS_PLATAFORMA = `select c.id, c.nome, c.tipo, c.plano, c.ativa, c.created_at,
+              (
+                select u.email
+                from public.membros_cadastro m
+                join public.users u on u.id = m.user_id
+                where m.cadastro_id = c.id
+                order by (m.papel = 'administrador') desc, u.email
+                limit 1
+              ) as email_login,
+              (
+                select string_agg(u.email, ' ' order by u.email)
+                from public.membros_cadastro m
+                join public.users u on u.id = m.user_id
+                where m.cadastro_id = c.id
+              ) as emails_busca
+       from public.cadastros c`;
+
 export async function obterCadastroPlataforma(
   databaseUrl: string,
   cadastroId: string,
 ): Promise<CadastroPlataformaLista | null> {
   return semContextoPlataforma(databaseUrl, async (cliente) => {
-    const resultado = await cliente.query<{
-      id: string;
-      nome: string;
-      tipo: string;
-      plano: string;
-      ativa: boolean;
-      created_at: Date;
-    }>(
-      `select id, nome, tipo, plano, ativa, created_at
-       from public.cadastros
-       where id = $1`,
+    const resultado = await cliente.query<LinhaCadastroPlataformaDb>(
+      `${SQL_SELECT_CADASTROS_PLATAFORMA}
+       where c.id = $1`,
       [cadastroId],
     );
     const linha = resultado.rows[0];
     if (!linha) {
       return null;
     }
-    return {
-      id: linha.id,
-      nome: linha.nome,
-      tipo: linha.tipo,
-      plano: linha.plano,
-      ativa: linha.ativa,
-      createdAt: linha.created_at.toISOString(),
-      emailLogin: "",
-      emailsBusca: "",
-    };
+    return mapLinhaCadastroPlataforma(linha);
   });
 }
 
@@ -87,43 +124,10 @@ export async function listarCadastrosPlataforma(
   databaseUrl: string,
 ): Promise<CadastroPlataformaLista[]> {
   return semContextoPlataforma(databaseUrl, async (cliente) => {
-    const resultado = await cliente.query<{
-      id: string;
-      nome: string;
-      tipo: string;
-      plano: string;
-      ativa: boolean;
-      created_at: Date;
-      email_login: string | null;
-      emails_busca: string | null;
-    }>(
-      `select c.id, c.nome, c.tipo, c.plano, c.ativa, c.created_at,
-              (
-                select u.email
-                from public.membros_cadastro m
-                join public.users u on u.id = m.user_id
-                where m.cadastro_id = c.id
-                order by (m.papel = 'administrador') desc, u.email
-                limit 1
-              ) as email_login,
-              (
-                select string_agg(u.email, ' ' order by u.email)
-                from public.membros_cadastro m
-                join public.users u on u.id = m.user_id
-                where m.cadastro_id = c.id
-              ) as emails_busca
-       from public.cadastros c`,
+    const resultado = await cliente.query<LinhaCadastroPlataformaDb>(
+      SQL_SELECT_CADASTROS_PLATAFORMA,
     );
-    return resultado.rows.map((linha) => ({
-      id: linha.id,
-      nome: linha.nome,
-      tipo: linha.tipo,
-      plano: linha.plano,
-      ativa: linha.ativa,
-      createdAt: linha.created_at.toISOString(),
-      emailLogin: linha.email_login ?? "",
-      emailsBusca: linha.emails_busca ?? "",
-    }));
+    return resultado.rows.map(mapLinhaCadastroPlataforma);
   });
 }
 

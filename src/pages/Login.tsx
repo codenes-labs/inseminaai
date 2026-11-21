@@ -42,6 +42,14 @@ export function Login({
             <Logo icone={false} />
           </div>
           <p className="mt-2 text-base text-muted-foreground">{subtitulo}</p>
+          {modo === "plataforma" ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Conta de cliente ou inseminador?{" "}
+              <Link to="/entrar" className="font-semibold text-brand">
+                Entrar no aplicativo
+              </Link>
+            </p>
+          ) : null}
           <form className="mt-10 space-y-4" onSubmit={enviar}>
             <Campo rotulo="E-mail" icone={<Mail className="size-5" strokeWidth={1.75} />}>
               <input

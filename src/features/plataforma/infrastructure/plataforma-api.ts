@@ -29,7 +29,8 @@ export async function obterCadastroPlataformaApi(
 ): Promise<CadastroPlataforma> {
   const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}`);
   if (!response.ok) {
-    throw new Error("Não foi possível carregar o cadastro.");
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível carregar o cadastro.");
   }
   const dados = (await response.json()) as { cadastro: CadastroPlataforma };
   return dados.cadastro;
