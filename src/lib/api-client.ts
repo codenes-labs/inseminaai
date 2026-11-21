@@ -1,5 +1,6 @@
 import { responderDemoMock } from "../features/demo/infrastructure/demo-mock-resposta";
 import { lerSessao } from "./auth";
+import { redirecionarLoginAposSessaoInvalida } from "./sessao-expirada";
 
 export async function apiFetch(
   caminho: string,
@@ -21,5 +22,14 @@ export async function apiFetch(
   if (sessao?.token) {
     headers.set("authorization", `Bearer ${sessao.token}`);
   }
-  return fetch(caminho, { ...init, headers });
+  const response = await fetch(caminho, { ...init, headers });
+  if (
+    response.status === 401 &&
+    caminho.startsWith("/api/") &&
+    caminho !== "/api/auth/sign-in" &&
+    sessao?.token
+  ) {
+    redirecionarLoginAposSessaoInvalida(caminho);
+  }
+  return response;
 }

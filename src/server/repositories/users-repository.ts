@@ -12,18 +12,6 @@ export type UsuarioAutenticado = {
   plataformaAdmin: boolean;
 };
 
-type LinhaLogin = {
-  id: string;
-  email: string;
-  password_hash: string;
-  nome: string;
-  demo: boolean;
-  plataforma_admin: boolean;
-  cadastro_id: string;
-  cadastro_ativa: boolean;
-  papel: string;
-};
-
 export async function autenticarNoBanco(
   databaseUrl: string,
   email: string,
@@ -144,32 +132,54 @@ export async function usuarioPorIdNoBanco(
   userId: string,
 ): Promise<UsuarioAutenticado | null> {
   return semContextoRls(databaseUrl, async (cliente) => {
-    const resultado = await cliente.query<LinhaLogin>(
-      `select u.id, u.email, u.password_hash, u.nome, u.demo, u.plataforma_admin,
-              m.cadastro_id, m.papel, c.ativa as cadastro_ativa
-       from public.users u
-       inner join public.membros_cadastro m on m.user_id = u.id
-       inner join public.cadastros c on c.id = m.cadastro_id
-       where u.id = $1 and u.ativo = true
+    const usuario = await cliente.query<{
+      id: string;
+      email: string;
+      nome: string;
+      demo: boolean;
+      plataforma_admin: boolean;
+      ativo: boolean;
+    }>(
+      `select id, email, nome, demo, plataforma_admin, ativo
+       from public.users
+       where id = $1
        limit 1`,
       [userId],
     );
-    const linha = resultado.rows[0];
-    if (!linha) return null;
-    if (!linha.cadastro_ativa) {
+    const linhaUsuario = usuario.rows[0];
+    if (!linhaUsuario?.ativo) {
       return null;
     }
-    if (linha.papel !== "administrador" && linha.papel !== "inseminador") {
+    const membro = await cliente.query<{
+      cadastro_id: string;
+      papel: string;
+      cadastro_ativa: boolean;
+    }>(
+      `select m.cadastro_id, m.papel, c.ativa as cadastro_ativa
+       from public.membros_cadastro m
+       inner join public.cadastros c on c.id = m.cadastro_id
+       where m.user_id = $1
+       limit 1`,
+      [userId],
+    );
+    const linhaMembro = membro.rows[0];
+    if (!linhaMembro?.cadastro_ativa) {
+      return null;
+    }
+    if (
+      linhaMembro.papel !== "administrador" &&
+      linhaMembro.papel !== "inseminador"
+    ) {
       return null;
     }
     return {
-      id: linha.id,
-      email: linha.email,
-      nome: linha.nome,
-      cadastroId: linha.cadastro_id,
-      papel: linha.papel,
-      demo: linha.demo,
-      plataformaAdmin: linha.plataforma_admin,
+      id: linhaUsuario.id,
+      email: linhaUsuario.email,
+      nome: linhaUsuario.nome,
+      cadastroId: linhaMembro.cadastro_id,
+      papel: linhaMembro.papel as Papel,
+      demo: linhaUsuario.demo,
+      plataformaAdmin: linhaUsuario.plataforma_admin,
     };
   });
 }

@@ -167,10 +167,26 @@ export async function handlePlataformaRequest(
     }
 
     if (sufixo === "/membros" && request.method === "GET") {
-      const membros = await listarMembrosDoCadastro(context.databaseUrl, cadastroId, {
-        plataforma: true,
-      });
-      return Response.json({ membros });
+      try {
+        const membros = await listarMembrosDoCadastro(context.databaseUrl, cadastroId, {
+          plataforma: true,
+        });
+        return Response.json({ membros });
+      } catch (erro) {
+        console.error("[plataforma] falha ao listar membros", erro);
+        const mensagem =
+          erro instanceof Error ? erro.message : "Não foi possível carregar os acessos.";
+        const schema =
+          /column|role|relation|does not exist|inseminaai_app/i.test(mensagem);
+        return Response.json(
+          {
+            error: schema
+              ? "Banco de produção desatualizado. Aplique as migrations (npm run db:migrate) no Neon."
+              : "Não foi possível carregar os acessos.",
+          },
+          { status: schema ? 503 : 500 },
+        );
+      }
     }
 
     if (sufixo === "/membros" && request.method === "POST") {

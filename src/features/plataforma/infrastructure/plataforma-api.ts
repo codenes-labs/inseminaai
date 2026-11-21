@@ -56,7 +56,8 @@ export async function listarMembrosPlataformaCadastroApi(
 ): Promise<MembroCadastro[]> {
   const response = await apiFetch(`/api/plataforma/cadastros/${cadastroId}/membros`);
   if (!response.ok) {
-    throw new Error("Não foi possível carregar os acessos.");
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível carregar os acessos.");
   }
   const dados = (await response.json()) as {
     membros: MembroCadastro[];

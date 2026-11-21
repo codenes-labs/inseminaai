@@ -128,15 +128,23 @@ export async function handleAuthRequest(
     if (!token) {
       return Response.json({ error: "Não autorizado." }, { status: 401 });
     }
-    const usuario = await usuarioDoToken(token, secret, context.databaseUrl);
-    if (!usuario) {
-      return Response.json({ error: "Não autorizado." }, { status: 401 });
+    try {
+      const usuario = await usuarioDoToken(token, secret, context.databaseUrl);
+      if (!usuario) {
+        return Response.json({ error: "Não autorizado." }, { status: 401 });
+      }
+      const claims = verificarToken(token, secret);
+      return Response.json({
+        user: respostaUsuario(usuario),
+        expires_at: claims?.exp ?? 0,
+      });
+    } catch (erro) {
+      console.error("[auth] falha na sessão", erro);
+      return Response.json(
+        { error: "Serviço temporariamente indisponível." },
+        { status: 503 },
+      );
     }
-    const claims = verificarToken(token, secret);
-    return Response.json({
-      user: respostaUsuario(usuario),
-      expires_at: claims?.exp ?? 0,
-    });
   }
 
   if (url.pathname === "/api/auth/sign-out" && request.method === "POST") {
