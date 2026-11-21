@@ -6,6 +6,8 @@ import {
   cadastroBloqueiaExclusao,
   cadastroBloqueiaInativacao,
   cadastroProtegidoSistema,
+  mensagemBloqueioExclusao,
+  mensagemBloqueioInativacao,
   usuarioProtegidoSistema,
 } from "./cadastros-sistema";
 
@@ -33,5 +35,13 @@ describe("cadastros do sistema", () => {
   it("protege usuários seed", () => {
     expect(usuarioProtegidoSistema(USER_ADMIN_ID)).toBe(true);
     expect(usuarioProtegidoSistema("outro")).toBe(false);
+  });
+
+  it("mensagens de bloqueio são específicas por cadastro", () => {
+    expect(mensagemBloqueioInativacao(CADASTRO_ADMIN_ID)).toContain("administrador");
+    expect(mensagemBloqueioInativacao(OUTRO)).toContain("não pode ser inativado");
+    expect(mensagemBloqueioExclusao(CADASTRO_ADMIN_ID)).toContain("administrador");
+    expect(mensagemBloqueioExclusao(CADASTRO_DEMO_ID)).toContain("demo");
+    expect(mensagemBloqueioExclusao(OUTRO)).toContain("sistema");
   });
 });
