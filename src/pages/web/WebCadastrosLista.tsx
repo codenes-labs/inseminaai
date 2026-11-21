@@ -94,7 +94,8 @@ function LinhaCadastroNumerada({
 
 export function WebCadastrosLista() {
   const navigate = useNavigate();
-  const { lista, erroLista } = useOutletContext<WebCadastrosLayoutContext>();
+  const { lista, erroLista, recarregarListaCadastros } =
+    useOutletContext<WebCadastrosLayoutContext>();
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(1);
 
@@ -171,11 +172,14 @@ export function WebCadastrosLista() {
         </button>
       </div>
 
-      {erroLista ? (
-        <p className="text-sm text-status-vazia">{erroLista}</p>
-      ) : null}
-
-      {listaTratada.length === 0 ? (
+      {erroLista && lista.length === 0 ? (
+        <Cartao className="space-y-3 p-6 text-center">
+          <p className="text-sm font-medium text-status-vazia">{erroLista}</p>
+          <Botao type="button" variante="suave" onClick={() => void recarregarListaCadastros()}>
+            Tentar de novo
+          </Botao>
+        </Cartao>
+      ) : listaTratada.length === 0 ? (
         <Cartao className="p-8 text-center text-muted-foreground">
           {busca.trim() ? "Nenhum cadastro nesta busca." : "Nenhum cadastro ainda."}
         </Cartao>

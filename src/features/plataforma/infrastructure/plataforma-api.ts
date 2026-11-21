@@ -17,7 +17,8 @@ export type CadastroPlataforma = {
 export async function listarCadastrosPlataformaApi(): Promise<CadastroPlataforma[]> {
   const response = await apiFetch("/api/plataforma/cadastros");
   if (!response.ok) {
-    throw new Error("Não foi possível carregar os cadastros.");
+    const dados = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(dados.error ?? "Não foi possível carregar os cadastros.");
   }
   const dados = (await response.json()) as { cadastros: CadastroPlataforma[] };
   return dados.cadastros;

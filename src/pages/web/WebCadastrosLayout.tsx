@@ -18,13 +18,24 @@ export function WebCadastrosLayout() {
   const [erroLista, setErroLista] = useState("");
 
   const carregar = useCallback(async () => {
-    try {
-      const dados = await listarCadastrosPlataformaApi();
-      setLista(dados);
-      setErroLista("");
-    } catch {
-      setErroLista("Não foi possível carregar a lista.");
+    let mensagem = "Não foi possível carregar a lista.";
+    for (let tentativa = 0; tentativa < 2; tentativa++) {
+      try {
+        const dados = await listarCadastrosPlataformaApi();
+        setLista(dados);
+        setErroLista("");
+        return;
+      } catch (erro) {
+        if (erro instanceof Error && erro.message.trim()) {
+          mensagem = erro.message;
+        }
+        if (tentativa === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+      }
     }
+    setLista([]);
+    setErroLista(mensagem);
   }, []);
 
   useEffect(() => {
